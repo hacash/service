@@ -115,16 +115,12 @@ func (api *DeprecatedApiService) txStatus(params map[string]string) map[string]s
 	store := state.BlockStore()
 
 	// 从交易池中读取
-
-	//tx, ok2 := txpool2.GetGlobalInstanceMemTxPool().FindTxByHash(txhash)
-
-	/*
-		if ok2 && tx != nil {
-			// 交易正在交易池内
-			result["status"] = "txpool" // 表示正在交易池
-			return result
-		}
-	*/
+	ok2 := api.txpool.CheckTxExistByHash(txhash)
+	if ok2 {
+		// 交易正在交易池内
+		result["status"] = "txpool" // 表示正在交易池
+		return result
+	}
 
 	//miner := miner.GetGlobalInstanceHacashMiner()
 
