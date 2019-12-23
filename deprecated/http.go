@@ -136,32 +136,10 @@ func (api *DeprecatedApiService) dealHome(response http.ResponseWriter, request 
 			diamonds,
 		))
 	}
-	/*
-		// 矿池信息
-		if len(config.Config.MiningPool.StatisticsDir) > 0 {
-			minerpool := miner2.GetGlobalInstanceMiningPool()
-			responseStrAry = append(responseStrAry, fmt.Sprintf("miner pool connected client: %d", minerpool.StateData.ClientCount))
-		}
-	*/
 
-	/*
-		// 节点连接信息
-		//p2pserver := p2p.GetGlobalInstanceP2PServer()
-		nodeinfo := p2pserver.GetServer().NodeInfo()
-		p2pobj := p2p.GetGlobalInstanceProtocolManager()
-		peers := p2pobj.GetPeers().PeersWithoutTx([]byte{0})
-		bestpeername := ""
-		for _, pr := range peers {
-			bestpeername += pr.Name() + ", "
-		}
-		responseStrAry = append(responseStrAry, fmt.Sprintf(
-			"p2p peer name: %s, enode: %s, connected: %d, connect peers: %s",
-			nodeinfo.Name,
-			nodeinfo.Enode,
-			len(peers),
-			strings.TrimRight(bestpeername, ", "),
-		))
-	*/
+	if api.backend != nil {
+		responseStrAry = append(responseStrAry, api.backend.AllPeersDescribe())
+	}
 
 	// Write
 	responseStrAry = append(responseStrAry, "")

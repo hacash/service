@@ -156,13 +156,20 @@ func (api *DeprecatedApiService) txStatus(params map[string]string) map[string]s
 
 	lastest, e4 := state.ReadLastestBlockHeadAndMeta()
 	if e4 != nil {
-		result["err"] = e3.Error()
+		result["err"] = e4.Error()
+		return result
+	}
+
+	// 查询区块hash
+	tarblkhash, e5 := state.BlockStore().ReadBlockHashByHeight(blkhei)
+	if e5 != nil {
+		result["err"] = e5.Error()
 		return result
 	}
 
 	confirm_height := lastest.GetHeight() - blkhei
 	result["confirm_height"] = strconv.Itoa(int(confirm_height)) // 确认区块数
 	result["block_height"] = strconv.FormatUint(blkhei, 10)      // 所属区块高度
-	result["block_hash"] = hex.EncodeToString([]byte{})          // 所属区块hash
+	result["block_hash"] = tarblkhash.ToHex()                    // 所属区块hash
 	return result
 }

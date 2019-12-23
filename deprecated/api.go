@@ -32,6 +32,8 @@ func NewDeprecatedApiServiceConfig(inicnf *sys.Inicnf) *DeprecatedApiServiceConf
 type DeprecatedApiService struct {
 	config *DeprecatedApiServiceConfig
 
+	backend interfaces.Backend
+
 	blockchain interfaces.BlockChain
 
 	txpool interfaces.TxPool
@@ -65,4 +67,8 @@ func (api *DeprecatedApiService) SetBlockChain(blockchain interfaces.BlockChain)
 
 func (api *DeprecatedApiService) SetTxPool(txpool interfaces.TxPool) {
 	api.txpool = txpool
+}
+
+func (api *DeprecatedApiService) SetBackend(backend interfaces.Backend) {
+	api.backend = backend
 }
