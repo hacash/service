@@ -15,10 +15,6 @@ func (api *DeprecatedApiService) getDiamond(params map[string]string) map[string
 		result["err"] = "params name must."
 		return result
 	}
-	if len(dmstr) != 6 {
-		result["fail"] = "name format error."
-		return result
-	}
 
 	state := api.blockchain.State()
 	blockstore := state.BlockStore()
@@ -27,22 +23,27 @@ func (api *DeprecatedApiService) getDiamond(params map[string]string) map[string
 	if dmnum, e := strconv.Atoi(dmstr); e == nil {
 		store, _ = blockstore.ReadDiamondByNumber(uint32(dmnum))
 	} else {
+		if len(dmstr) != 6 {
+			result["fail"] = "name format error."
+			return result
+		}
 		store, _ = blockstore.ReadDiamond(fields.Bytes6(dmstr))
 	}
 	if store == nil {
 		result["fail"] = "not find."
 		return result
 	}
+	dmstr = string(store.Diamond)
 	// get current belong
 	sto2 := state.Diamond(fields.Bytes6(dmstr))
-	if sto2 == nil {
-		result["fail"] = "not find."
-		return result
+	if sto2 != nil {
+		result["address"] = sto2.Address.ToReadable()
+	} else {
+		result["address"] = store.MinerAddress.ToReadable()
 	}
 	// ok
 	result["block_height"] = strconv.FormatUint(uint64(store.ContainBlockHeight), 10)
 	result["number"] = strconv.Itoa(int(store.Number))
 	result["miner_address"] = store.MinerAddress.ToReadable()
-	result["address"] = sto2.Address.ToReadable()
 	return result
 }
