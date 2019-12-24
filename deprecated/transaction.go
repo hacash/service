@@ -57,6 +57,13 @@ func (api *DeprecatedApiService) getTransactionIntro(params map[string]string) m
 				acc.Address.ToReadable(),
 				acc.Amount.ToFinString(),
 			)
+		} else if kind == 4 {
+			acc := act.(*actions2.Action_4_DiamondCreate)
+			actstr += fmt.Sprintf(`,"number":"%s","name":"%s","address":"%s"`,
+				acc.Address.ToReadable(),
+				acc.Diamond,
+				acc.Address.ToReadable(),
+			)
 		}
 		actstr += "}"
 		actions_ary = append(actions_ary, actstr)
