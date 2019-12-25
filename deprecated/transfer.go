@@ -115,7 +115,7 @@ func (api *DeprecatedApiService) txStatus(params map[string]string) map[string]s
 	store := state.BlockStore()
 
 	// 从交易池中读取
-	ok2 := api.txpool.CheckTxExistByHash(txhash)
+	_, ok2 := api.txpool.CheckTxExistByHash(txhash)
 	if ok2 {
 		// 交易正在交易池内
 		result["status"] = "txpool" // 表示正在交易池

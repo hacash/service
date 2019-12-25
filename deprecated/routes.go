@@ -12,13 +12,15 @@ var (
 )
 
 func (api *DeprecatedApiService) initRoutes() {
-	queryRoutes["balance"] = api.getBalance      // 查询余额
-	queryRoutes["diamond"] = api.getDiamond      // 查询钻石
-	queryRoutes["channel"] = api.getChannel      // 查询通道
-	queryRoutes["passwd"] = newAccountByPassword // 通过密码创建账户
-	queryRoutes["newacc"] = newAccount           // 随机创建账户
-	queryRoutes["createtx"] = api.transferSimple // 创建普通转账交易
-	queryRoutes["txconfirm"] = api.txStatus      // 查询交易确认状态
+	queryRoutes["balance"] = api.getBalance                 // 查询余额
+	queryRoutes["diamond"] = api.getDiamond                 // 查询钻石
+	queryRoutes["diamondcreate"] = api.showDiamondCreateTxs // 显示钻石创建交易
+	queryRoutes["channel"] = api.getChannel                 // 查询通道
+	queryRoutes["passwd"] = newAccountByPassword            // 通过密码创建账户
+	queryRoutes["newacc"] = newAccount                      // 随机创建账户
+	queryRoutes["createtx"] = api.transferSimple            // 创建普通转账交易
+	queryRoutes["quotefee"] = api.quoteFee                  // 修改交易池内的交易手续费
+	queryRoutes["txconfirm"] = api.txStatus                 // 查询交易确认状态
 
 	queryRoutes["blocks"] = api.getBlockAbstractList  // 查询区块信息
 	queryRoutes["lastblock"] = api.getLastBlockHeight // 查询最新区块高度

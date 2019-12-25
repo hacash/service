@@ -1,12 +1,41 @@
 package rpc
 
 import (
+	"fmt"
+	"github.com/hacash/core/actions"
 	"github.com/hacash/core/fields"
 	"github.com/hacash/core/stores"
 	"strconv"
+	"strings"
 )
 
 //////////////////////////////////////////////////////////////
+
+func (api *DeprecatedApiService) showDiamondCreateTxs(params map[string]string) map[string]string {
+	result := make(map[string]string)
+
+	txs := api.txpool.GetDiamondCreateTxs()
+
+	jsondata := []string{}
+	for i, tx := range txs {
+		for _, act := range tx.GetActions() {
+			if dcact, ok := act.(*actions.Action_4_DiamondCreate); ok {
+				fee := tx.GetFee()
+				jsondata = append(jsondata, fmt.Sprintf(`"%d","%s","%s","%s","%s","%s"`, i+1, tx.Hash().ToHex(), tx.GetAddress().ToReadable(),
+					dcact.Diamond, dcact.Address.ToReadable(), fee.ToFinString()))
+				break
+			}
+		}
+	}
+	perhei := 0
+	lastest, _ := api.backend.BlockChain().State().ReadLastestBlockHeadAndMeta()
+	if lastest != nil {
+		perhei = (int(lastest.GetHeight()) + 5) / 5 * 5
+	}
+
+	result["jsondata"] = `{"period":"` + strconv.Itoa(perhei) + `","datas":[[` + strings.Join(jsondata, "],[") + `]]}`
+	return result
+}
 
 func (api *DeprecatedApiService) getDiamond(params map[string]string) map[string]string {
 	result := make(map[string]string)

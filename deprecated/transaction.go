@@ -3,11 +3,86 @@ package rpc
 import (
 	"encoding/hex"
 	"fmt"
-	actions2 "github.com/hacash/core/actions"
+	"github.com/hacash/core/account"
+	"github.com/hacash/core/actions"
 	"github.com/hacash/core/fields"
 	"github.com/hacash/core/transactions"
 	"strings"
 )
+
+// 修改交易池内的手续费报价
+func (api *DeprecatedApiService) quoteFee(params map[string]string) map[string]string {
+
+	result := make(map[string]string)
+	trsid, ok1 := params["txhash"]
+	if !ok1 {
+		result["err"] = "Param txhash must."
+		return result
+	}
+	var trshx []byte
+	if txhx, e := hex.DecodeString(trsid); e == nil && len(txhx) == 32 {
+		trshx = txhx
+	} else {
+		result["err"] = "Transaction hash error."
+		return result
+	}
+	// 查询交易
+	tx, ok := api.txpool.CheckTxExistByHash(trshx)
+	if !ok {
+		result["err"] = "Not find transaction in txpool."
+		return result
+	}
+	// fee
+	feestr, ok2 := params["fee"]
+	if !ok2 {
+		result["err"] = "Param fee must."
+		return result
+	}
+	feeamt, e2 := fields.NewAmountFromFinString(feestr)
+	if e2 != nil {
+		result["err"] = "Param fee format error."
+		return result
+	}
+	// change fee
+	tx.SetFee(feeamt)
+	// password
+	password_or_privatekey, ok3 := params["password"]
+	if !ok3 {
+		result["err"] = "param password must."
+		return result
+	}
+	var acc *account.Account = nil
+	privatekey, e2 := hex.DecodeString(password_or_privatekey)
+	if len(password_or_privatekey) == 64 && e2 == nil {
+		acc, e2 = account.GetAccountByPriviteKey(privatekey)
+		if e2 != nil {
+			result["err"] = "Privite Key Error"
+			return result
+		}
+	} else {
+		acc = account.CreateAccountByPassword(password_or_privatekey)
+	}
+	// check
+	if fields.Address(acc.Address).Equal(tx.GetAddress()) != true {
+		result["err"] = "Tx fee address password error."
+		return result
+	}
+	// 私钥
+	allPrivateKeyBytes := make(map[string][]byte, 1)
+	allPrivateKeyBytes[string(acc.Address)] = acc.PrivateKey
+	// do sign
+	tx.FillNeedSigns(allPrivateKeyBytes, nil)
+	// add to pool
+	err4 := api.txpool.AddTx(tx)
+	if err4 != nil {
+		result["err"] = err4.Error()
+		return result
+	}
+	// ok
+	result["status"] = "ok"
+	return result
+
+}
 
 // 通过 hx 获取交易简介
 func (api *DeprecatedApiService) getTransactionIntro(params map[string]string) map[string]string {
@@ -45,20 +120,20 @@ func (api *DeprecatedApiService) getTransactionIntro(params map[string]string) m
 	}
 
 	// 解析 actions
-	var actions = trsres.GetActions()
+	var allactions = trsres.GetActions()
 	var actions_ary []string
 	var actions_strings = ""
-	for _, act := range actions {
+	for _, act := range allactions {
 		var kind = act.Kind()
 		actstr := fmt.Sprintf(`{"k":%d`, kind)
 		if kind == 1 {
-			acc := act.(*actions2.Action_1_SimpleTransfer)
+			acc := act.(*actions.Action_1_SimpleTransfer)
 			actstr += fmt.Sprintf(`,"to":"%s","amount":"%s"`,
 				acc.Address.ToReadable(),
 				acc.Amount.ToFinString(),
 			)
 		} else if kind == 4 {
-			acc := act.(*actions2.Action_4_DiamondCreate)
+			acc := act.(*actions.Action_4_DiamondCreate)
 			actstr += fmt.Sprintf(`,"number":"%s","name":"%s","address":"%s"`,
 				acc.Address.ToReadable(),
 				acc.Diamond,
@@ -80,7 +155,7 @@ func (api *DeprecatedApiService) getTransactionIntro(params map[string]string) m
 		txaddr.ToReadable(), // 主地址
 		txfee.ToFinString(),
 		trsres.GetTimestamp(),
-		len(actions),
+		len(allactions),
 		actions_strings,
 	)
 
