@@ -71,6 +71,10 @@ func (api *DeprecatedApiService) getDiamond(params map[string]string) map[string
 		result["address"] = store.MinerAddress.ToReadable()
 	}
 	// ok
+	result["name"] = dmstr
+	result["current_block_hash"] = store.ContainBlockHash.ToHex()
+	result["prev_block_hash"] = store.PrevContainBlockHash.ToHex()
+	result["block_height"] = strconv.FormatUint(uint64(store.ContainBlockHeight), 10)
 	result["block_height"] = strconv.FormatUint(uint64(store.ContainBlockHeight), 10)
 	result["number"] = strconv.Itoa(int(store.Number))
 	result["miner_address"] = store.MinerAddress.ToReadable()
