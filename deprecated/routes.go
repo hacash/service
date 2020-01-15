@@ -15,6 +15,7 @@ func (api *DeprecatedApiService) initRoutes() {
 	queryRoutes["balance"] = api.getBalance                 // 查询余额
 	queryRoutes["diamond"] = api.getDiamond                 // 查询钻石
 	queryRoutes["diamondcreate"] = api.showDiamondCreateTxs // 显示钻石创建交易
+	queryRoutes["transferdiamonds"] = api.transferDiamondMultiple // 钻石批量转账
 	queryRoutes["channel"] = api.getChannel                 // 查询通道
 	queryRoutes["passwd"] = newAccountByPassword            // 通过密码创建账户
 	queryRoutes["newacc"] = newAccount                      // 随机创建账户

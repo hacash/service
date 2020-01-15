@@ -5,6 +5,7 @@ import (
 	"github.com/hacash/core/actions"
 	"github.com/hacash/core/fields"
 	"github.com/hacash/core/stores"
+	"github.com/hacash/core/transactions"
 	"strconv"
 	"strings"
 )
@@ -79,4 +80,95 @@ func (api *DeprecatedApiService) getDiamond(params map[string]string) map[string
 	result["number"] = strconv.Itoa(int(store.Number))
 	result["miner_address"] = store.MinerAddress.ToReadable()
 	return result
+}
+
+func (api *DeprecatedApiService) transferDiamondMultiple(params map[string]string) map[string]string {
+
+	result := make(map[string]string)
+
+	feeAcc, err := api.readPasswordOrPriviteKeyParamBeAccount(params, "fee_password")
+	if err != nil {
+		result["err"] = err.Error()
+		return result
+	}
+
+	diamondAcc, err2 := api.readPasswordOrPriviteKeyParamBeAccount(params, "diamond_password")
+	if err2 != nil {
+		result["err"] = err2.Error()
+		return result
+	}
+
+	toAddress, err0 := fields.CheckReadableAddress(params["to_address"])
+	if err0 != nil {
+		result["err"] = err0.Error()
+		return result
+	}
+
+	diamondstr, ok := params["diamonds"]
+	if !ok {
+		result["err"] = "param diamonds must"
+		return result
+	}
+	diamonds := strings.Split(diamondstr, ",")
+	if len(diamonds) > 200 {
+		result["err"] = "too many diamond values"
+		return result
+	}
+
+	// create tx
+	tx, err3 := transactions.NewEmptyTransaction_2_Simple(feeAcc.Address)
+	if err3 != nil {
+		result["err"] = err3.Error()
+		return result
+	}
+	feeBase := fields.NewAmountSmall(1, 244)
+	feeAmount := feeBase.Copy()
+
+	diamond_action := &actions.Action_6_OutfeeQuantityDiamondTransfer{}
+	diamond_action.FromAddress = diamondAcc.Address
+	diamond_action.ToAddress = *toAddress
+	diamond_action.DiamondCount = fields.VarInt1(len(diamonds))
+	diamond_action.Diamonds = make([]fields.Bytes6, len(diamonds))
+
+	// append diamond action
+	for i, v := range diamonds {
+		if len(v) != 6 {
+			result["err"] = v + " is not diamond value"
+			return result
+		}
+		diamond_action.Diamonds[i] = fields.Bytes6(v)
+		feeAmount, _ = feeAmount.Add( feeBase )
+	}
+
+	err4 := tx.AppendAction( diamond_action )
+	if err4 != nil {
+		result["err"] = err4.Error()
+		return result
+	}
+
+	tx.Fee = *feeAmount
+
+	// do sign
+	allPrivateKeyBytes := make(map[string][]byte)
+	allPrivateKeyBytes[string(feeAcc.Address)] = feeAcc.PrivateKey
+	allPrivateKeyBytes[string(diamondAcc.Address)] = diamondAcc.PrivateKey
+	//fmt.Println(allPrivateKeyBytes)
+
+	e9 := tx.FillNeedSigns(allPrivateKeyBytes, nil)
+	if e9 != nil {
+		result["err"] = e9.Error()
+		return result
+	}
+
+	// add to the tx pool
+	err6 := api.txpool.AddTx( tx )
+	if err6 != nil {
+		result["err"] = err6.Error()
+		return result
+	}
+
+	// ok
+	result["status"] = "ok"
+	return result
+
 }
