@@ -22,6 +22,7 @@ func (api *DeprecatedApiService) initRoutes() {
 	queryRoutes["createtx"] = api.transferSimple            // 创建普通转账交易
 	queryRoutes["quotefee"] = api.quoteFee                  // 修改交易池内的交易手续费
 	queryRoutes["txconfirm"] = api.txStatus                 // 查询交易确认状态
+	queryRoutes["powpower"] = api.powPower                  // 实时算力大小
 
 	queryRoutes["blocks"] = api.getBlockAbstractList  // 查询区块信息
 	queryRoutes["lastblock"] = api.getLastBlockHeight // 查询最新区块高度

@@ -75,6 +75,13 @@ func (api *DeprecatedApiService) dealHome(response http.ResponseWriter, request 
 		diamondNumber,
 	))
 
+	// powpower
+	powpowerres := api.powPower(nil)
+	if _, ok := powpowerres["err"]; !ok {
+		responseStrAry = append(responseStrAry, fmt.Sprintf("real time pow power: %s", powpowerres["show"]))
+	}
+
+	//
 	cost288_90miao := api.getMiao(lastest, prev288_90height, mint_num288dj*90)
 	cost288_30miao := api.getMiao(lastest, prev288_30height, mint_num288dj*30)
 	cost288_7miao := api.getMiao(lastest, prev288_7height, mint_num288dj*7)
