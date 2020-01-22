@@ -18,7 +18,7 @@ func (api *DeprecatedApiService) powPower(params map[string]string) map[string]s
 	curheight := lastest.GetHeight()
 	mint_num288dj := uint64(mint.AdjustTargetDifficultyNumberOfBlocks / 4)
 	prev288height := curheight - uint64(mint_num288dj)
-	headbytes, err2 := api.blockchain.State().BlockStore().ReadBlockHeadBytesByHeight( mint_num288dj )
+	headbytes, err2 := api.blockchain.State().BlockStore().ReadBlockHeadBytesByHeight( prev288height )
 	if err2 != nil {
 		result["err"] = err2.Error()
 		return result
@@ -29,6 +29,7 @@ func (api *DeprecatedApiService) powPower(params map[string]string) map[string]s
 		return result
 	}
 	cost288sec := lastest.GetTimestamp() - blk.GetTimestamp()
+	cost288sec = cost288sec / mint_num288dj
 	if cost288sec == 0 {
 		cost288sec = 1
 	}
