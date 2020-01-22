@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"github.com/hacash/core/blocks"
 	"github.com/hacash/mint"
 	"github.com/hacash/mint/difficulty"
 	"math/big"
@@ -15,9 +16,19 @@ func (api *DeprecatedApiService) powPower(params map[string]string) map[string]s
 		return result
 	}
 	curheight := lastest.GetHeight()
-	mint_num288dj := uint64(mint.AdjustTargetDifficultyNumberOfBlocks / 1)
+	mint_num288dj := uint64(mint.AdjustTargetDifficultyNumberOfBlocks / 4)
 	prev288height := curheight - uint64(mint_num288dj)
-	cost288sec := api.getMiao(lastest, prev288height, mint_num288dj)
+	headbytes, err2 := api.blockchain.State().BlockStore().ReadBlockHeadBytesByHeight( mint_num288dj )
+	if err2 != nil {
+		result["err"] = err2.Error()
+		return result
+	}
+	blk, _, err3 := blocks.ParseBlockHead(headbytes, 0)
+	if err3 != nil {
+		result["err"] = err3.Error()
+		return result
+	}
+	cost288sec := lastest.GetTimestamp() - blk.GetTimestamp()
 	if cost288sec == 0 {
 		cost288sec = 1
 	}
