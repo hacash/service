@@ -26,7 +26,7 @@ func (api *DeprecatedApiService) powPower(params map[string]string) map[string]s
 	powbitshash := difficulty.DifficultyUint32ToHash( lastest.GetDifficulty() )
 	powbitsbig := difficulty.CalculateHashWorth( powbitshash )
 	powervalue := new(big.Int).Mul( powbitsbig, big.NewInt( int64(mint_num288dj) ) )
-	powervalue =  new(big.Int).Div( powbitsbig, big.NewInt( int64(cost288sec) ) )
+	powervalue =  new(big.Int).Div( powervalue, big.NewInt( int64(cost288sec) ) )
 	//fmt.Println( mint_num288dj, cost288sec, powbitsbig.String(), powervalue.String() )
 	// return
 	result["power"] = powervalue.String()
