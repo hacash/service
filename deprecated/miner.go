@@ -15,8 +15,8 @@ func (api *DeprecatedApiService) powPower(params map[string]string) map[string]s
 		return result
 	}
 	curheight := lastest.GetHeight()
-	mint_num288dj := uint64(mint.AdjustTargetDifficultyNumberOfBlocks / 4)
-	prev288height := uint64(curheight) - mint_num288dj
+	mint_num288dj := uint64(mint.AdjustTargetDifficultyNumberOfBlocks / 1)
+	prev288height := curheight - uint64(mint_num288dj)
 	cost288sec := api.getMiao(lastest, prev288height, mint_num288dj)
 	if cost288sec == 0 {
 		cost288sec = 1
@@ -25,8 +25,7 @@ func (api *DeprecatedApiService) powPower(params map[string]string) map[string]s
 	// cost time
 	powbitshash := difficulty.DifficultyUint32ToHash( lastest.GetDifficulty() )
 	powbitsbig := difficulty.CalculateHashWorth( powbitshash )
-	powervalue := new(big.Int).Mul( powbitsbig, big.NewInt( int64(mint_num288dj) ) )
-	powervalue =  new(big.Int).Div( powervalue, big.NewInt( int64(cost288sec) ) )
+	powervalue := new(big.Int).Div( powbitsbig, big.NewInt( int64(cost288sec) ) )
 	//fmt.Println( mint_num288dj, cost288sec, powbitsbig.String(), powervalue.String() )
 	// return
 	result["power"] = powervalue.String()
