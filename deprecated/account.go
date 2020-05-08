@@ -17,6 +17,7 @@ func newAccountByPassword(params map[string]string) map[string]string {
 	acc := account.CreateAccountByPassword(passstr)
 
 	result["address"] = string(acc.AddressReadable)
+	result["public_key"] = hex.EncodeToString(acc.PublicKey)
 	result["private_key"] = hex.EncodeToString(acc.PrivateKey)
 
 	return result
@@ -30,6 +31,7 @@ func newAccount(params map[string]string) map[string]string {
 	acc := account.CreateNewAccount()
 
 	result["address"] = string(acc.AddressReadable)
+	result["public_key"] = hex.EncodeToString(acc.PublicKey)
 	result["private_key"] = hex.EncodeToString(acc.PrivateKey)
 
 	return result
