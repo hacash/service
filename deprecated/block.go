@@ -31,7 +31,7 @@ func (api *DeprecatedApiService) getBlockIntro(params map[string]string) map[str
 	var blockhx = []byte{}
 	var blockbytes = []byte{}
 	if blkhei, err := strconv.ParseUint(blkid, 10, 0); err == nil {
-		_, blockbytes, err = store.ReadBlockBytesByHeight(blkhei, 0)
+		blockhx, blockbytes, err = store.ReadBlockBytesByHeight(blkhei, 0)
 		if err != nil {
 			result["err"] = err.Error()
 			return result
