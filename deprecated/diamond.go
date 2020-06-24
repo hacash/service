@@ -1,11 +1,13 @@
 package rpc
 
 import (
+	"encoding/hex"
 	"fmt"
 	"github.com/hacash/core/actions"
 	"github.com/hacash/core/fields"
 	"github.com/hacash/core/stores"
 	"github.com/hacash/core/transactions"
+	"github.com/hacash/x16rs"
 	"strconv"
 	"strings"
 )
@@ -72,9 +74,11 @@ func (api *DeprecatedApiService) getDiamond(params map[string]string) map[string
 		result["address"] = store.MinerAddress.ToReadable()
 	}
 	// ok
+	source_hash, _ := x16rs.Diamond(uint32(store.Number), store.PrevContainBlockHash, store.Nonce, store.MinerAddress)
 	result["name"] = dmstr
 	result["current_block_hash"] = store.ContainBlockHash.ToHex()
 	result["prev_block_hash"] = store.PrevContainBlockHash.ToHex()
+	result["source_hash"] = hex.EncodeToString(source_hash)
 	result["block_height"] = strconv.FormatUint(uint64(store.ContainBlockHeight), 10)
 	result["block_height"] = strconv.FormatUint(uint64(store.ContainBlockHeight), 10)
 	result["number"] = strconv.Itoa(int(store.Number))
@@ -137,10 +141,10 @@ func (api *DeprecatedApiService) transferDiamondMultiple(params map[string]strin
 			return result
 		}
 		diamond_action.Diamonds[i] = fields.Bytes6(v)
-		feeAmount, _ = feeAmount.Add( feeBase )
+		feeAmount, _ = feeAmount.Add(feeBase)
 	}
 
-	err4 := tx.AppendAction( diamond_action )
+	err4 := tx.AppendAction(diamond_action)
 	if err4 != nil {
 		result["err"] = err4.Error()
 		return result
@@ -161,7 +165,7 @@ func (api *DeprecatedApiService) transferDiamondMultiple(params map[string]strin
 	}
 
 	// add to the tx pool
-	err6 := api.txpool.AddTx( tx )
+	err6 := api.txpool.AddTx(tx)
 	if err6 != nil {
 		result["err"] = err6.Error()
 		return result
