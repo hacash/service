@@ -36,7 +36,7 @@ func (api *DeprecatedApiService) initRoutes() {
 func routeQueryRequest(action string, params map[string]string, w http.ResponseWriter, r *http.Request) {
 	if ctrl, ok := queryRoutes[action]; ok {
 		resobj := ctrl(params)
-		w.Header().Set("Content-Type", "text/json")
+		w.Header().Set("Content-Type", "text/json;charset=utf-8")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		if jsondata, ok := resobj["jsondata"]; ok {
 			w.Write([]byte(jsondata)) // 自定义的 jsondata 数据

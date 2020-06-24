@@ -132,6 +132,20 @@ func (api *DeprecatedApiService) getTransactionIntro(params map[string]string) m
 				acc.Address.ToReadable(),
 				acc.Amount.ToFinString(),
 			)
+		} else if kind == 2 {
+			acc := act.(*actions.Action_2_OpenPaymentChannel)
+			actstr += fmt.Sprintf(`,"channel_id":"%s","left_addr":"%s","left_amt":"%s","right_addr":"%s","right_amt":"%s"`,
+				acc.ChannelId,
+				acc.LeftAddress.ToReadable(),
+				acc.LeftAmount.ToFinString(),
+				acc.RightAddress.ToReadable(),
+				acc.RightAmount.ToFinString(),
+			)
+		} else if kind == 3 {
+			acc := act.(*actions.Action_3_ClosePaymentChannel)
+			actstr += fmt.Sprintf(`,"channel_id":"%s"`,
+				acc.ChannelId,
+			)
 		} else if kind == 4 {
 			acc := act.(*actions.Action_4_DiamondCreate)
 			actstr += fmt.Sprintf(`,"number":"%s","name":"%s","address":"%s"`,
