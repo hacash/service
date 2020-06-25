@@ -54,7 +54,7 @@ func (api *DeprecatedApiService) getAllTransferLogByBlockHeight(params map[strin
 	allTransferLogs := make([]string, 0, 4)
 	transactions := tarblock.GetTransactions()
 	for _, v := range transactions {
-		if 1 == v.Type() { // coinbase
+		if 0 == v.Type() { // coinbase
 			continue
 		}
 		from := fields.Address(v.GetAddress())
