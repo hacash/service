@@ -1,13 +1,11 @@
 package rpc
 
 import (
-	"encoding/hex"
 	"fmt"
 	"github.com/hacash/core/actions"
 	"github.com/hacash/core/fields"
 	"github.com/hacash/core/stores"
 	"github.com/hacash/core/transactions"
-	"github.com/hacash/x16rs"
 	"strconv"
 	"strings"
 )
@@ -74,15 +72,16 @@ func (api *DeprecatedApiService) getDiamond(params map[string]string) map[string
 		result["address"] = store.MinerAddress.ToReadable()
 	}
 	// ok
-	source_hash, _ := x16rs.Diamond(uint32(store.Number), store.PrevContainBlockHash, store.Nonce, store.MinerAddress)
+	//source_hash, _ := x16rs.Diamond(uint32(store.Number), store.PrevContainBlockHash, store.Nonce, store.MinerAddress, store.GetRealCustomMessage())
 	result["name"] = dmstr
 	result["current_block_hash"] = store.ContainBlockHash.ToHex()
 	result["prev_block_hash"] = store.PrevContainBlockHash.ToHex()
-	result["source_hash"] = hex.EncodeToString(source_hash)
+	//result["source_hash"] = hex.EncodeToString(source_hash)
 	result["block_height"] = strconv.FormatUint(uint64(store.ContainBlockHeight), 10)
 	result["block_height"] = strconv.FormatUint(uint64(store.ContainBlockHeight), 10)
 	result["number"] = strconv.Itoa(int(store.Number))
 	result["miner_address"] = store.MinerAddress.ToReadable()
+	result["custom_message"] = store.CustomMessage.ToHex()
 	return result
 }
 
