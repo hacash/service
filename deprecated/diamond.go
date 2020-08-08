@@ -22,9 +22,17 @@ func (api *DeprecatedApiService) showDiamondCreateTxs(params map[string]string) 
 		for _, act := range tx.GetActions() {
 			if dcact, ok := act.(*actions.Action_4_DiamondCreate); ok {
 				fee := tx.GetFee()
-				jsondata = append(jsondata, fmt.Sprintf(`"%d","%s","%s","%s","%s","%s"`, i+1, tx.Hash().ToHex(), tx.GetAddress().ToReadable(),
-					dcact.Diamond, dcact.Address.ToReadable(), fee.ToFinString()))
+				feeaddramt := api.blockchain.State().Balance(tx.GetAddress())
+				status_code := 0 // ok
+				if feeaddramt == nil || feeaddramt.Amount.LessThan(&fee) {
+					status_code = 1 // 余额不足以支付手续费
+				}
+				jsondata = append(jsondata, fmt.Sprintf(`%d,"%s","%s","%s","%s","%s",%d`, i+1, tx.Hash().ToHex(), tx.GetAddress().ToReadable(),
+					dcact.Diamond, dcact.Address.ToReadable(), fee.ToFinString(), status_code))
 				break
+			}
+			if i >= 100 {
+				break // max show num 100
 			}
 		}
 	}
@@ -33,8 +41,11 @@ func (api *DeprecatedApiService) showDiamondCreateTxs(params map[string]string) 
 	if lastest != nil {
 		perhei = (int(lastest.GetHeight()) + 5) / 5 * 5
 	}
-
-	result["jsondata"] = `{"period":"` + strconv.Itoa(perhei) + `","datas":[[` + strings.Join(jsondata, "],[") + `]]}`
+	liststr := strings.Join(jsondata, "],[")
+	if len(liststr) > 0 {
+		liststr = "[" + liststr + "]"
+	}
+	result["jsondata"] = `{"period":"` + strconv.Itoa(perhei) + `","datas":[` + liststr + `]}`
 	return result
 }
 
