@@ -29,30 +29,30 @@ func (api *DeprecatedApiService) getBalance(params map[string]string) map[string
 		}
 		addrhash, e := fields.CheckReadableAddress(addr)
 		if e != nil {
-			amtstrings += "[format error]|"
+			amtstrings += "[format error],"
 			continue
 		}
 		finditem := state.Balance(*addrhash)
 		if finditem == nil {
-			amtstrings += "ㄜ0:0|"
+			amtstrings += "ㄜ0:0,"
 			continue
 		}
-		amtstrings += finditem.Amount.ToFinString() + "|"
+		amtstrings += strings.Trim(finditem.Amount.ToFinString(), ",") + ","
 		totalamt, _ = totalamt.Add(&finditem.Amount)
 		// satoshi
 		sts := state.Satoshi(*addrhash)
 		if sts != nil {
 			satoshi += uint64(sts.Amount)
-			satoshistrs += strconv.FormatUint(uint64(sts.Amount), 10) + "|"
+			satoshistrs += strconv.FormatUint(uint64(sts.Amount), 10) + ","
 		} else {
-			satoshistrs += "0|"
+			satoshistrs += "0,"
 		}
 	}
 
 	// 0
-	result["amounts"] = strings.TrimRight(amtstrings, "|")
+	result["amounts"] = strings.TrimRight(amtstrings, ",")
 	result["total"] = totalamt.ToFinString()
-	result["satoshis"] = strings.TrimRight(satoshistrs, "|")
+	result["satoshis"] = strings.TrimRight(satoshistrs, ",")
 	result["satoshi"] = strconv.FormatUint(satoshi, 10)
 	return result
 
