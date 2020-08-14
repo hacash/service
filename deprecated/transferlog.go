@@ -62,8 +62,8 @@ func (api *DeprecatedApiService) getAllTransferLogByBlockHeight(params map[strin
 			if 1 == act.Kind() { // 类型为普通转账
 				act_k1 := act.(*actions.Action_1_SimpleTransfer)
 				allTransferLogs = append(allTransferLogs,
-					from.ToReadable()+","+
-						act_k1.Address.ToReadable()+","+
+					from.ToReadable()+"|"+
+						act_k1.Address.ToReadable()+"|"+
 						act_k1.Amount.ToFinString())
 			}
 		}
