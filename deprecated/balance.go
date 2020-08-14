@@ -37,7 +37,7 @@ func (api *DeprecatedApiService) getBalance(params map[string]string) map[string
 			amtstrings += "ㄜ0:0,"
 			continue
 		}
-		amtstrings += strings.Trim(finditem.Amount.ToFinString(), ",") + ","
+		amtstrings += strings.Replace(finditem.Amount.ToFinString(), ",", "", -1) + ","
 		totalamt, _ = totalamt.Add(&finditem.Amount)
 		// satoshi
 		sts := state.Satoshi(*addrhash)
