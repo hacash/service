@@ -43,11 +43,21 @@ func (api *DeprecatedApiService) dealHome(response http.ResponseWriter, request 
 	mint_eachtime := mint.EachBlockRequiredTargetTime
 	mint_eachtime_f := float32(mint_eachtime)
 
+	prev288_365height := uint64(curheight) - (mint_num288dj * 30 * 12)
 	prev288_90height := uint64(curheight) - (mint_num288dj * 30 * 3)
 	prev288_30height := uint64(curheight) - (mint_num288dj * 30)
 	prev288_7height := uint64(curheight) - (mint_num288dj * 7)
 	prev288height := uint64(curheight) / mint_num288dj * mint_num288dj
 	num288 := uint64(curheight) - prev288height
+	if prev288_365height <= 0 {
+		prev288_365height = 1
+	}
+	if prev288_90height <= 0 {
+		prev288_90height = 1
+	}
+	if prev288_30height <= 0 {
+		prev288_30height = 1
+	}
 	if prev288_7height <= 0 {
 		prev288_7height = 1
 	}
@@ -82,13 +92,17 @@ func (api *DeprecatedApiService) dealHome(response http.ResponseWriter, request 
 	}
 
 	//
-	cost288_90miao := api.getMiao(lastest, prev288_90height, mint_num288dj*90)
+	cost288_365miao := api.getMiao(lastest, prev288_365height, mint_num288dj*30*12)
+	cost288_90miao := api.getMiao(lastest, prev288_90height, mint_num288dj*30*3)
 	cost288_30miao := api.getMiao(lastest, prev288_30height, mint_num288dj*30)
 	cost288_7miao := api.getMiao(lastest, prev288_7height, mint_num288dj*7)
 	cost288miao := api.getMiao(lastest, prev288height, num288)
 	// fmt.Println(prev288height, num288, cost288miao)
 	responseStrAry = append(responseStrAry, fmt.Sprintf(
-		"block average time, last quarter: %s ( %ds/%ds = %.2f), month: %s ( %ds/%ds = %.4f), week: %s ( %ds/%ds = %.4f), last from %d+%d: %s ( %ds/%ds = %f)",
+		"block average time, last year: %s ( %ds/%ds = %.2f), last quarter: %s ( %ds/%ds = %.2f), month: %s ( %ds/%ds = %.4f), week: %s ( %ds/%ds = %.4f), last from %d+%d: %s ( %ds/%ds = %f)",
+		time.Unix(int64(cost288_365miao), 0).Format("04:05"),
+		cost288_365miao, mint_eachtime,
+		(float32(cost288_365miao)/mint_eachtime_f),
 		time.Unix(int64(cost288_90miao), 0).Format("04:05"),
 		cost288_90miao, mint_eachtime,
 		(float32(cost288_90miao)/mint_eachtime_f),
