@@ -17,6 +17,7 @@ func (api *DeprecatedApiService) initRoutes() {
 	queryRoutes["diamondcreate"] = api.showDiamondCreateTxs       // 显示钻石创建交易
 	queryRoutes["transferdiamonds"] = api.transferDiamondMultiple // 钻石批量转账
 	queryRoutes["channel"] = api.getChannel                       // 查询通道
+	queryRoutes["lockbls"] = api.getLockBlsInfo                   // 查询线性锁仓
 	queryRoutes["passwd"] = newAccountByPassword                  // 通过密码创建账户
 	queryRoutes["newacc"] = newAccount                            // 随机创建账户
 	queryRoutes["createtx"] = api.transferSimple                  // 创建普通转账交易
@@ -27,7 +28,7 @@ func (api *DeprecatedApiService) initRoutes() {
 	queryRoutes["blocks"] = api.getBlockAbstractList  // 查询区块信息
 	queryRoutes["lastblock"] = api.getLastBlockHeight // 查询最新区块高度
 	queryRoutes["blockintro"] = api.getBlockIntro     // 查询区块简介
-	queryRoutes["trsintro"] = api.getTransactionIntro // 查询区块简介
+	queryRoutes["trsintro"] = api.getTransactionIntro // 查询交易简介
 
 	queryRoutes["getalltransferlogbyblockheight"] = api.getAllTransferLogByBlockHeight // 扫描区块 获取所有转账信息
 
