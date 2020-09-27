@@ -141,7 +141,7 @@ func (api *DeprecatedApiService) transferDiamondMultiple(params map[string]strin
 	diamond_action := &actions.Action_6_OutfeeQuantityDiamondTransfer{}
 	diamond_action.FromAddress = diamondAcc.Address
 	diamond_action.ToAddress = *toAddress
-	diamond_action.DiamondCount = fields.VarInt1(len(diamonds))
+	diamond_action.DiamondCount = fields.VarUint1(len(diamonds))
 	diamond_action.Diamonds = make([]fields.Bytes6, len(diamonds))
 
 	// append diamond action
