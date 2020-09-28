@@ -15,7 +15,7 @@ import (
 func (api *DeprecatedApiService) showDiamondCreateTxs(params map[string]string) map[string]string {
 	result := make(map[string]string)
 
-	txs := api.txpool.GetDiamondCreateTxs()
+	txs := api.txpool.GetDiamondCreateTxs(-1)
 
 	jsondata := []string{}
 	for i, tx := range txs {
