@@ -22,7 +22,7 @@ func NewDeprecatedApiServiceConfig(inicnf *sys.Inicnf) *DeprecatedApiServiceConf
 
 	section := inicnf.Section("service")
 
-	cnf.HttpListenPort = section.Key("deprecated_http_port").MustInt(3338)
+	cnf.HttpListenPort = section.Key("deprecated_http_port").MustInt(0)
 
 	return cnf
 }

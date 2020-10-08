@@ -78,7 +78,7 @@ func (api *DeprecatedApiService) dealHome(response http.ResponseWriter, request 
 	responseStrAry = append(responseStrAry, fmt.Sprintf(
 		"height: %d, tx: %d, hash: %s, difficulty: %d, create_time: %s, diamond number: %d",
 		curheight,
-		lastest.GetTransactionCount()-1,
+		lastest.GetCustomerTransactionCount(),
 		hex.EncodeToString(lastest.Hash()),
 		lastest.GetDifficulty(),
 		time.Unix(int64(lastest.GetTimestamp()), 0).Format("2006/01/02 15:04:05"),

@@ -114,7 +114,7 @@ func (api *DeprecatedApiService) getLastBlockHeight(params map[string]string) ma
 	result["jsondata"] = fmt.Sprintf(
 		`{"height":%d,"txs":%d,"timestamp":%d}`,
 		lastest.GetHeight(),
-		lastest.GetTransactionCount()-1,
+		lastest.GetCustomerTransactionCount(),
 		lastest.GetTimestamp(),
 	)
 	return result
@@ -174,7 +174,7 @@ func (api *DeprecatedApiService) getBlockAbstractList(params map[string]string) 
 		jsondata = append(jsondata, fmt.Sprintf(
 			`{"hash":"%s","txs":%d,"time":%d,"height":%d,"nonce":%d,"bits":%d,"rewards":{"amount":"%s","address":"%s","message":"%s"}}`,
 			hex.EncodeToString(blkhash),
-			blkhead.GetTransactionCount()-1,
+			blkhead.GetCustomerTransactionCount(),
 			blkhead.GetTimestamp(),
 			blkhead.GetHeight(),
 			blkhead.GetNonce(),
