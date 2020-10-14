@@ -28,7 +28,7 @@ func (api *DeprecatedApiService) quoteFee(params map[string]string) map[string]s
 	}
 	// 查询交易
 	tx, ok := api.txpool.CheckTxExistByHash(trshx)
-	if !ok {
+	if !ok || tx == nil {
 		result["err"] = "Not find transaction in txpool."
 		return result
 	}
@@ -43,8 +43,6 @@ func (api *DeprecatedApiService) quoteFee(params map[string]string) map[string]s
 		result["err"] = "Param fee format error."
 		return result
 	}
-	// change fee
-	tx.SetFee(feeamt)
 	// password
 	password_or_privatekey, ok3 := params["password"]
 	if !ok3 {
@@ -67,11 +65,18 @@ func (api *DeprecatedApiService) quoteFee(params map[string]string) map[string]s
 		result["err"] = "Tx fee address password error."
 		return result
 	}
+	// change fee
+	tx = tx.Copy()
+	tx.SetFee(feeamt)
 	// 私钥
 	allPrivateKeyBytes := make(map[string][]byte, 1)
 	allPrivateKeyBytes[string(acc.Address)] = acc.PrivateKey
 	// do sign
-	tx.FillNeedSigns(allPrivateKeyBytes, nil)
+	err3 := tx.FillNeedSigns(allPrivateKeyBytes, nil)
+	if err3 != nil {
+		result["err"] = err3.Error()
+		return result
+	}
 	// add to pool
 	err4 := api.txpool.AddTx(tx)
 	if err4 != nil {
