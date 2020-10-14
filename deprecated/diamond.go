@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"encoding/hex"
 	"fmt"
 	"github.com/hacash/core/actions"
 	"github.com/hacash/core/fields"
@@ -88,6 +89,7 @@ func (api *DeprecatedApiService) getDiamond(params map[string]string) map[string
 	result["current_block_hash"] = store.ContainBlockHash.ToHex()
 	result["prev_block_hash"] = store.PrevContainBlockHash.ToHex()
 	//result["source_hash"] = hex.EncodeToString(source_hash)
+	result["nonce"] = hex.EncodeToString(store.Nonce)
 	result["block_height"] = strconv.FormatUint(uint64(store.ContainBlockHeight), 10)
 	result["block_height"] = strconv.FormatUint(uint64(store.ContainBlockHeight), 10)
 	result["number"] = strconv.Itoa(int(store.Number))
