@@ -134,7 +134,7 @@ func (api *DeprecatedApiService) getTransactionIntro(params map[string]string) m
 		if kind == 1 {
 			acc := act.(*actions.Action_1_SimpleTransfer)
 			actstr += fmt.Sprintf(`,"to":"%s","amount":"%s"`,
-				acc.Address.ToReadable(),
+				acc.ToAddress.ToReadable(),
 				acc.Amount.ToFinString(),
 			)
 		} else if kind == 2 {

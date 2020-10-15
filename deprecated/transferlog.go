@@ -63,7 +63,7 @@ func (api *DeprecatedApiService) getAllTransferLogByBlockHeight(params map[strin
 				act_k1 := act.(*actions.Action_1_SimpleTransfer)
 				allTransferLogs = append(allTransferLogs,
 					from.ToReadable()+"|"+
-						act_k1.Address.ToReadable()+"|"+
+						act_k1.ToAddress.ToReadable()+"|"+
 						act_k1.Amount.ToFinString())
 			}
 		}

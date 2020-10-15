@@ -61,11 +61,7 @@ func (api *RpcService) blockIntro(r *http.Request, w http.ResponseWriter) {
 	var coinbaseitem = map[string]interface{}{}
 	coinbaseitem["address"] = cbtx.GetAddress().ToReadable()
 	rewardAmt := coinbase.BlockCoinBaseReward(blockHeight)
-	if isUnitMei {
-		coinbaseitem["reward"] = rewardAmt.ToMeiString(16)
-	} else {
-		coinbaseitem["reward"] = rewardAmt.ToFinString()
-	}
+	coinbaseitem["reward"] = rewardAmt.ToMeiOrFinString(isUnitMei)
 	data["coinbase"] = coinbaseitem
 
 	// return

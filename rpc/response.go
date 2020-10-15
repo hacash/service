@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -105,6 +106,40 @@ func CheckParamUint64(r *http.Request, key string, defValue uint64) uint64 {
 		}
 	}
 	return value
+}
+
+func CheckParamString(r *http.Request, key string, defValue string) string {
+	if v := r.FormValue(key); len(v) > 0 {
+		return v
+	}
+	return defValue
+}
+
+func CheckParamHex(r *http.Request, key string, defv []byte) []byte {
+	if v := r.FormValue(key); len(v) > 0 {
+		v = strings.TrimLeft(v, "0x")
+		hexdts, e := hex.DecodeString(v)
+		if e != nil {
+			return nil
+		}
+		return hexdts // ok
+	}
+	return defv
+}
+
+func CheckParamHexMustLen(r *http.Request, key string, mustLen int) []byte {
+	if v := r.FormValue(key); len(v) > 0 {
+		v = strings.TrimLeft(v, "0x")
+		if len(v) != mustLen*2 {
+			return nil // len error
+		}
+		hexdts, e := hex.DecodeString(v)
+		if e != nil {
+			return nil
+		}
+		return hexdts // ok
+	}
+	return nil
 }
 
 func CheckParamUint64Must(r *http.Request, w http.ResponseWriter, key string) (uint64, bool) {
