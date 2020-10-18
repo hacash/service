@@ -30,6 +30,26 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 	// 是否以枚为单位
 	isUnitMei := CheckParamBool(r, "unitmei", false)
 
+	// kind = hsd
+	kindStr := strings.ToLower(CheckParamString(r, "kind", ""))
+	actAllKinds := false // 支持全部种类
+	actKindHacash := false
+	actKindSatoshi := false
+	actKindDiamond := false
+	if len(kindStr) == 0 {
+		actAllKinds = true
+	} else {
+		if strings.Contains(kindStr, "h") {
+			actKindHacash = true
+		}
+		if strings.Contains(kindStr, "s") {
+			actKindSatoshi = true
+		}
+		if strings.Contains(kindStr, "d") {
+			actKindDiamond = true
+		}
+	}
+
 	// read tx
 	var tx interfaces.Transaction = nil
 	if height > 0 {
@@ -56,6 +76,10 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 			ResponseError(w, e)
 			return
 		}
+		if txbody == nil || len(txbody) == 0 {
+			ResponseErrorString(w, "tx not find")
+			return
+		}
 		txObj, _, e2 := transactions.ParseTransaction(txbody, 0)
 		if e2 != nil {
 			ResponseError(w, e2)
@@ -68,9 +92,10 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 	}
 
 	// ret data
-	var retdata = ResponseCreateData("txhash", hex.EncodeToString(txhash))
+	var retdata = ResponseCreateData("type", tx.Type())
 	trsActions := tx.GetActions()
 	txfee := tx.GetFee()
+	retdata["hash"] = hex.EncodeToString(txhash)
 	retdata["fee"] = txfee.ToMeiOrFinString(isUnitMei)
 	retdata["address"] = tx.GetAddress().ToReadable()
 	//retdata["action_count"] = len(trsActions)
@@ -80,26 +105,36 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 	// scan tx
 	for i, act := range trsActions {
 		var item = make(map[string]interface{})
-		if tarAct, ok := act.(*actions.Action_1_SimpleTransfer); ok {
+
+		if tarAct, ok := act.(*actions.Action_1_SimpleTransfer); ok && (actAllKinds || actKindHacash) {
+
 			item["to"] = tarAct.ToAddress.ToReadable()
 			item["hacash"] = tarAct.Amount.ToMeiOrFinString(isUnitMei)
 
-		} else if tarAct, ok := act.(*actions.Action_7_SatoshiGenesis); ok {
+		} else if tarAct, ok := act.(*actions.Action_7_SatoshiGenesis); ok && (actAllKinds || actKindSatoshi) {
+
 			item["btctrsno"] = tarAct.TransferNo
 			item["owner"] = tarAct.OriginAddress.ToReadable()
 			item["satoshi"] = tarAct.BitcoinQuantity * 10000 * 10000 // unit: 1BTC = 1w * satoshi
-		} else if tarAct, ok := act.(*actions.Action_8_SimpleSatoshiTransfer); ok {
+
+		} else if tarAct, ok := act.(*actions.Action_8_SimpleSatoshiTransfer); ok && (actAllKinds || actKindSatoshi) {
+
 			item["to"] = tarAct.Address.ToReadable()
 			item["satoshi"] = tarAct.Amount
 
-		} else if tarAct, ok := act.(*actions.Action_4_DiamondCreate); ok {
+		} else if tarAct, ok := act.(*actions.Action_4_DiamondCreate); ok && (actAllKinds || actKindDiamond) {
+
 			item["number"] = tarAct.Number
 			item["miner"] = tarAct.Address.ToReadable()
 			item["diamond"] = string(tarAct.Diamond)
-		} else if tarAct, ok := act.(*actions.Action_5_DiamondTransfer); ok {
+
+		} else if tarAct, ok := act.(*actions.Action_5_DiamondTransfer); ok && (actAllKinds || actKindDiamond) {
+
 			item["to"] = tarAct.Address.ToReadable()
 			item["diamond"] = string(tarAct.Diamond)
-		} else if tarAct, ok := act.(*actions.Action_6_OutfeeQuantityDiamondTransfer); ok {
+
+		} else if tarAct, ok := act.(*actions.Action_6_OutfeeQuantityDiamondTransfer); ok && (actAllKinds || actKindDiamond) {
+
 			item["from"] = tarAct.FromAddress.ToReadable()
 			item["to"] = tarAct.ToAddress.ToReadable()
 			var diamonds = make([]string, tarAct.DiamondCount)
@@ -107,9 +142,11 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 				diamonds[i] = string(v)
 			}
 			item["diamonds"] = strings.Join(diamonds, ",")
+
 		} else {
 			continue
 		}
+
 		// ok
 		item["ai"] = i
 		effectiveActions = append(effectiveActions, item)
