@@ -131,7 +131,7 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 		} else if tarAct, ok := act.(*actions.Action_5_DiamondTransfer); ok && (actAllKinds || actKindDiamond) {
 
 			item["to"] = tarAct.Address.ToReadable()
-			item["diamond"] = string(tarAct.Diamond)
+			item["diamonds"] = string(tarAct.Diamond)
 
 		} else if tarAct, ok := act.(*actions.Action_6_OutfeeQuantityDiamondTransfer); ok && (actAllKinds || actKindDiamond) {
 
