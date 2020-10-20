@@ -25,7 +25,7 @@ func (api *DeprecatedApiService) showDiamondCreateTxs(params map[string]string) 
 				fee := tx.GetFee()
 				feeaddramt := api.blockchain.State().Balance(tx.GetAddress())
 				status_code := 0 // ok
-				if feeaddramt == nil || feeaddramt.Amount.LessThan(&fee) {
+				if feeaddramt == nil || feeaddramt.Amount.LessThan(fee) {
 					status_code = 1 // 余额不足以支付手续费
 				}
 				jsondata = append(jsondata, fmt.Sprintf(`%d,"%s","%s","%s","%s","%s",%d`, i+1, tx.Hash().ToHex(), tx.GetAddress().ToReadable(),
