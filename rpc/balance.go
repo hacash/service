@@ -10,9 +10,9 @@ import (
 func (api *RpcService) balance(r *http.Request, w http.ResponseWriter) {
 
 	// 地址列表
-	addresslistStr := strings.Trim(CheckParamString(r, "addresslist", ""), " ")
+	addresslistStr := strings.Trim(CheckParamString(r, "address_list", ""), " ")
 	if len(addresslistStr) == 0 {
-		ResponseErrorString(w, "param addresslist must give")
+		ResponseErrorString(w, "param address_list must give")
 		return
 	}
 	addresslists := strings.Split(addresslistStr, ",")
@@ -26,11 +26,11 @@ func (api *RpcService) balance(r *http.Request, w http.ResponseWriter) {
 		addresses[i] = addr
 	}
 	if len(addresses) == 0 {
-		ResponseErrorString(w, "param addresslist must give")
+		ResponseErrorString(w, "param address_list must give")
 		return
 	}
 	if len(addresses) > 200 {
-		ResponseErrorString(w, "address bumber cannot over 200")
+		ResponseErrorString(w, "address number cannot over 200")
 		return
 	}
 

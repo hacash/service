@@ -36,15 +36,22 @@ type RpcService struct {
 	backend interfaces.Backend
 	txpool  interfaces.TxPool
 
-	queryRoutes map[string]func(*http.Request, http.ResponseWriter)
+	// routes
+	queryRoutes   map[string]func(*http.Request, http.ResponseWriter)
+	createRoutes  map[string]func(*http.Request, http.ResponseWriter)
+	submitRoutes  map[string]func(*http.Request, http.ResponseWriter)
+	operateRoutes map[string]func(*http.Request, http.ResponseWriter)
 }
 
 func NewRpcService(cnf *RpcConfig) *RpcService {
 	return &RpcService{
-		config:      cnf,
-		backend:     nil,
-		txpool:      nil,
-		queryRoutes: make(map[string]func(*http.Request, http.ResponseWriter)),
+		config:        cnf,
+		backend:       nil,
+		txpool:        nil,
+		queryRoutes:   make(map[string]func(*http.Request, http.ResponseWriter)),
+		createRoutes:  make(map[string]func(*http.Request, http.ResponseWriter)),
+		submitRoutes:  make(map[string]func(*http.Request, http.ResponseWriter)),
+		operateRoutes: make(map[string]func(*http.Request, http.ResponseWriter)),
 	}
 }
 

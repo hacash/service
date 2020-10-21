@@ -2,11 +2,15 @@ package rpc
 
 func (api *RpcService) initRoutes() {
 
-	api.queryRoutes["create_accounts"] = api.createAccounts
-	api.queryRoutes["create_value_transfer_tx"] = api.createValueTransferTx
+	// submit
 
-	api.queryRoutes["balance"] = api.balance
-	api.queryRoutes["diamond"] = api.diamond
+	// create
+	api.createRoutes["accounts"] = api.createAccounts
+	api.createRoutes["value_transfer_tx"] = api.createValueTransferTx
+
+	// query
+	api.queryRoutes["balances"] = api.balance
+	api.queryRoutes["diamonds"] = api.diamond
 
 	api.queryRoutes["last_block_height"] = api.lastBlockHeight
 	api.queryRoutes["block_intro"] = api.blockIntro

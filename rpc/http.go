@@ -16,14 +16,16 @@ func (api *RpcService) RunHttpRpcService(port int) {
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		ResponseData(w, ResponseCreateData("service", "hacash node rpc"))
-	}) // 查询
-	mux.HandleFunc("/query", api.dealQuery) // 查询
-	//mux.HandleFunc("/operate", api.dealOperate) // 写入
-	//mux.HandleFunc("/operate_hex", api.dealOperateHex) // 写入
+	})
 
-	portstr := strconv.Itoa(port)
+	// 路由
+	mux.HandleFunc("/query", api.dealQuery)     // 查询
+	mux.HandleFunc("/create", api.dealCreate)   // 创建
+	mux.HandleFunc("/submit", api.dealSubmit)   // 提交
+	mux.HandleFunc("/operate", api.dealOperate) // 修改
 
 	// 设置监听的端口
+	portstr := strconv.Itoa(port)
 	server := &http.Server{
 		Addr:    ":" + portstr,
 		Handler: mux,

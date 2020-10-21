@@ -112,13 +112,14 @@ func (api *RpcService) createValueTransferTx(r *http.Request, w http.ResponseWri
 	}
 
 	// data
-	data := ResponseCreateData("txhash", hex.EncodeToString(newTrs.HashFresh()))
+	data := ResponseCreateData("hash", newTrs.HashFresh().ToHex())
 	txbody, e10 := newTrs.Serialize()
 	if e10 != nil {
 		ResponseError(w, e10)
 		return
 	}
-	data["txbody"] = hex.EncodeToString(txbody)
+	data["hash_with_fee"] = newTrs.HashWithFeeFresh().ToHex()
+	data["body"] = hex.EncodeToString(txbody)
 	data["timestamp"] = timestamp
 
 	// return
