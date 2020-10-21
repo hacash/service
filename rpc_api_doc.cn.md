@@ -116,7 +116,7 @@ rpc_listen_port = 8083
 
 #### 1.2 创建转账交易 `GET: /create ? action=value_transfer_tx`
 
-本接口用于创建HAC、转移的比特币和区块钻石的转账交易，基本参数如下：
+本接口用于创建HAC、单向转移的比特币和区块钻石的转账交易，基本参数如下：
 
 1. unitmei [bool] 是否采用单位“枚”浮点数形式，去解析传递的数额参数
 2. main_prikey [hex string] 主地址/手续费地址的私钥hex字符串
@@ -125,8 +125,10 @@ rpc_listen_port = 8083
 5. transfer_kind [menu] (hacash, satoshi, diamond) 要创建的交易类型，HAC转账、BTC转账还是区块钻石转账
 
 【注意一】：当只有传递相同的 `timestamp` 时间戳参数，而且保持其它参数始终相同时，则每次创建的交易则具备相同的 hash 值，被视为同一笔交易。
+
 【注意二】：由于 Hacash 系统支持对同一笔交易进行重复签名手续费竞价，所以仅改变 `fee` 字段并不会更改交易的 `hash` 值， 而只会改变其 `hash_with_fee` 值。
 
+【注意三】：手续费 `fee` 字段不能设置得过小，否则将无法被整个系统接受，目前费用最小值为 0.0001 枚（即 ㄜ1:244 ）。请不要设置手续费低于这个值。
 
 ##### 1.2.1 创建HAC普通转账交易
 
@@ -135,5 +137,44 @@ rpc_listen_port = 8083
  - amount [string] 转账数额；单位格式视 `unitmei` 参数而定； 例如 "0.1" 或 "ㄜ1:247"。
  - to_address [string] 对方（收款）账户地址
  
+调用接口示例： [http://rpcapi.hacash.org/create?action=value_transfer_tx&main_prikey=8D969EEF6ECAD3C29A3A629280E686CF0C3F5D5A86AFF3CA12020C923ADC6C92&fee=0.0001&unitmei=true&timestamp=1603284999&transfer_kind=hacash&amount=12.45&to_address=1NLEYVmmUkhAH18WfCUDc5CHnbr7Bv5TaS](http://rpcapi.hacash.org/create?action=value_transfer_tx&main_prikey=8D969EEF6ECAD3C29A3A629280E686CF0C3F5D5A86AFF3CA12020C923ADC6C92&fee=0.0001&unitmei=true&timestamp=1603284999&transfer_kind=hacash&amount=12.45&to_address=1NLEYVmmUkhAH18WfCUDc5CHnbr7Bv5TaS)
 
+返回值如下：
 
+```json
+{
+    // 公共参数
+    ret: 0,
+    // 交易的 hash 值
+    hash: "6066cef4fe51669aec5b5596375dba11dafaf2560c4bd8c0432ac4ea98ff3ad1",
+    // 交易包含 fee 的 hash 值
+    hash_with_fee: "9cbc4821d0d921b429dbe4d6b67d6412aa5cae4b724f1e7dab9f870646cb1bb6",
+    // 交易体、内容 的 hex 值
+    body: "02005f90300700e63c33a796b3032ce6b856f68fccf06608d9ed18f401010001000100e9fdd992667de1734f0ef758bafcd517179e6f1bf60204dd00010231745adae24044ff09c3541537160abb8d5d720275bbaeed0b3d035b1e8b263cb73b724218f13c09c16e7065212128cf0c037ebb9e588754eb073886486d950607d59bef462d2731e15b667c6ff1f0badd6259c6f58d5ca7a5f75856b8cae8e80000",
+    // 交易使用的时间戳
+    timestamp: 1603284999
+}
+```
+
+在生产环境中，请在数据库中保存以上的返回值，以便进行对账，或者在区块链网络延迟时重新提交未被确认的交易。上面的内容并不会泄露你的私钥，而仅仅是签名后的交易数据，请放心储存。
+
+创建BTC转账和区块钻石的转账，调用接口的的返回值与上者相同。
+
+##### 1.2.2 创建单向转移的 Bitcoin 普通转账交易
+
+传递参数 `transfer_kind=satoshi`，且增加参数如下：
+
+ - amount [int] 要支付的比特币数额，单位为“聪”、“satoshi” (0.00000001枚比特币)；例如转账10枚比特币则传递 "1000000000"，转账0.01枚则传递"1000000"；系统不支持低于 1 聪的比特币单位。
+ - to_address [string] 对方（收款）账户地址
+
+例如给某个地址转账一枚比特币，示例接口如：[http://rpcapi.hacash.org/create?action=value_transfer_tx&main_prikey=8D969EEF6ECAD3C29A3A629280E686CF0C3F5D5A86AFF3CA12020C923ADC6C92&fee=0.0001&unitmei=true&timestamp=1603284999&transfer_kind=satoshi&amount=100000000&to_address=1NLEYVmmUkhAH18WfCUDc5CHnbr7Bv5TaS](http://rpcapi.hacash.org/create?action=value_transfer_tx&main_prikey=8D969EEF6ECAD3C29A3A629280E686CF0C3F5D5A86AFF3CA12020C923ADC6C92&fee=0.0001&unitmei=true&timestamp=1603284999&transfer_kind=satoshi&amount=100000000&to_address=1NLEYVmmUkhAH18WfCUDc5CHnbr7Bv5TaS)
+
+##### 1.2.3 创建区块钻石转账交易
+
+传递参数 `transfer_kind=diamond`，且增加参数如下：
+
+ - diamonds [string] 逗号分割的钻石字面值，例如 "EVUNXZ,BVVTSI"，可传一个或多个，最多一次批量转移200枚钻石
+ - diamond_owner_prikey [hex string] 选填，付款（支付钻石、钻石所有者）的账户私钥；如果不传则默认为 `main_prikey`
+ - to_address [string] 对方（收取钻石）账户地址
+
+示例接口调用：[http://rpcapi.hacash.org/create?action=value_transfer_tx&main_prikey=8D969EEF6ECAD3C29A3A629280E686CF0C3F5D5A86AFF3CA12020C923ADC6C92&fee=0.0003&unitmei=true&timestamp=1603284999&transfer_kind=diamond&diamonds=EVUNXZ,BVVTSI&diamond_owner_prikey=EF797C8118F02DFB649607DD5D3F8C7623048C9C063D532CC95C5ED7A898A64F&to_address=1NLEYVmmUkhAH18WfCUDc5CHnbr7Bv5TaS](http://rpcapi.hacash.org/create?action=value_transfer_tx&main_prikey=8D969EEF6ECAD3C29A3A629280E686CF0C3F5D5A86AFF3CA12020C923ADC6C92&fee=0.0003&unitmei=true&timestamp=1603284999&transfer_kind=diamond&diamonds=EVUNXZ,BVVTSI&diamond_owner_prikey=EF797C8118F02DFB649607DD5D3F8C7623048C9C063D532CC95C5ED7A898A64F&to_address=1NLEYVmmUkhAH18WfCUDc5CHnbr7Bv5TaS)

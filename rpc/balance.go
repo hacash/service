@@ -39,6 +39,7 @@ func (api *RpcService) balance(r *http.Request, w http.ResponseWriter) {
 	actAllKinds := false // 支持全部种类
 	actKindHacash := false
 	actKindSatoshi := false
+	actKindDiamond := false
 	if len(kindStr) == 0 {
 		actAllKinds = true
 	} else {
@@ -47,6 +48,9 @@ func (api *RpcService) balance(r *http.Request, w http.ResponseWriter) {
 		}
 		if strings.Contains(kindStr, "s") {
 			actKindSatoshi = true
+		}
+		if strings.Contains(kindStr, "d") {
+			actKindDiamond = true
 		}
 	}
 
@@ -59,20 +63,26 @@ func (api *RpcService) balance(r *http.Request, w http.ResponseWriter) {
 	state := api.backend.BlockChain().State()
 	for i, addr := range addresses {
 		var item = make(map[string]interface{})
+		bls := state.Balance(*addr)
 		if actAllKinds || actKindHacash {
-			bls := state.Balance(*addr)
 			if bls != nil {
-				item["hacash"] = bls.Amount.ToMeiOrFinString(isUnitMei)
+				item["hacash"] = bls.Hacash.ToMeiOrFinString(isUnitMei)
 			} else {
 				item["hacash"] = emptyAmt.ToMeiOrFinString(isUnitMei)
 			}
 		}
 		if actAllKinds || actKindSatoshi {
-			sat := state.Satoshi(*addr)
-			if sat != nil {
-				item["satoshi"] = uint64(sat.Amount)
+			if bls != nil {
+				item["satoshi"] = uint64(bls.Satoshi)
 			} else {
 				item["satoshi"] = 0
+			}
+		}
+		if actAllKinds || actKindDiamond {
+			if bls != nil {
+				item["diamond"] = uint64(bls.Diamond)
+			} else {
+				item["diamond"] = 0
 			}
 		}
 		lists[i] = item

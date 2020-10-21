@@ -35,18 +35,14 @@ func (api *DeprecatedApiService) getBalance(params map[string]string) map[string
 		finditem := state.Balance(*addrhash)
 		if finditem == nil {
 			amtstrings += "ㄜ0:0|"
+			satoshistrs += "0|"
 			continue
 		}
-		amtstrings += finditem.Amount.ToFinString() + "|"
-		totalamt, _ = totalamt.Add(&finditem.Amount)
+		amtstrings += finditem.Hacash.ToFinString() + "|"
+		totalamt, _ = totalamt.Add(&finditem.Hacash)
 		// satoshi
-		sts := state.Satoshi(*addrhash)
-		if sts != nil {
-			satoshi += uint64(sts.Amount)
-			satoshistrs += strconv.FormatUint(uint64(sts.Amount), 10) + "|"
-		} else {
-			satoshistrs += "0|"
-		}
+		satoshi += uint64(finditem.Satoshi)
+		satoshistrs += strconv.FormatUint(uint64(finditem.Satoshi), 10) + "|"
 	}
 
 	// 0
