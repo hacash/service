@@ -36,6 +36,7 @@ rpc_listen_port = 8083
 {
     "list": [
         {
+            "diamond": 1016,
             "hacash": "ㄜ1,474,845:244",
             "satoshi": 0
         }
@@ -98,7 +99,7 @@ rpc_listen_port = 8083
 
 返回值：
 
-```json
+```js
 {
     list: [
         {
@@ -141,7 +142,7 @@ rpc_listen_port = 8083
 
 返回值如下：
 
-```json
+```js
 {
     // 公共参数
     ret: 0,
@@ -178,3 +179,12 @@ rpc_listen_port = 8083
  - to_address [string] 对方（收取钻石）账户地址
 
 示例接口调用：[http://rpcapi.hacash.org/create?action=value_transfer_tx&main_prikey=8D969EEF6ECAD3C29A3A629280E686CF0C3F5D5A86AFF3CA12020C923ADC6C92&fee=0.0003&unitmei=true&timestamp=1603284999&transfer_kind=diamond&diamonds=EVUNXZ,BVVTSI&diamond_owner_prikey=EF797C8118F02DFB649607DD5D3F8C7623048C9C063D532CC95C5ED7A898A64F&to_address=1NLEYVmmUkhAH18WfCUDc5CHnbr7Bv5TaS](http://rpcapi.hacash.org/create?action=value_transfer_tx&main_prikey=8D969EEF6ECAD3C29A3A629280E686CF0C3F5D5A86AFF3CA12020C923ADC6C92&fee=0.0003&unitmei=true&timestamp=1603284999&transfer_kind=diamond&diamonds=EVUNXZ,BVVTSI&diamond_owner_prikey=EF797C8118F02DFB649607DD5D3F8C7623048C9C063D532CC95C5ED7A898A64F&to_address=1NLEYVmmUkhAH18WfCUDc5CHnbr7Bv5TaS)
+
+
+---
+
+## 2. /submit 提交
+
+#### 2.1 提交交易至交易池 `POST: /submit ? action=transaction`
+
+提交一笔交易至全网的内存池内。
