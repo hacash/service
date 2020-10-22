@@ -8,11 +8,24 @@ import (
 	"net/http"
 )
 
-func (api *RpcService) blockIntro(r *http.Request, w http.ResponseWriter) {
+func (api *RpcService) blockIntro(r *http.Request, w http.ResponseWriter, bodybytes []byte) {
 
-	height, ok0 := CheckParamUint64Must(r, w, "height")
-	if !ok0 {
-		return
+	var errread error
+	var blkhash []byte = nil
+	var blkbytes []byte = nil
+
+	height := CheckParamUint64(r, "height", 0)
+	hashStr := CheckParamString(r, "hash", "")
+	if len(hashStr) > 0 {
+		blkhash, errread = hex.DecodeString(hashStr)
+		if errread != nil {
+			ResponseError(w, errread)
+			return
+		}
+		if len(blkhash) != 32 {
+			ResponseErrorString(w, "param <hash> format error")
+			return
+		}
 	}
 
 	// 是否以枚为单位
@@ -21,14 +34,24 @@ func (api *RpcService) blockIntro(r *http.Request, w http.ResponseWriter) {
 	// 区块储存
 	blkstore := api.backend.BlockChain().State().BlockStore()
 
-	// get
+	// get coinbase
 	coinbase_start_pos := uint32(blocks.BlockHeadSize + blocks.BlockMetaSizeV1)
 	readlen := coinbase_start_pos + uint32(1+21+3+16+1) // coinbase len
-	blkhash, blkbytes, e1 := blkstore.ReadBlockBytesByHeight(height, readlen)
-	if e1 != nil {
-		ResponseError(w, e1)
+
+	// 读取数目
+	if len(blkhash) == 32 {
+		blkbytes, errread = blkstore.ReadBlockBytesByHash(blkhash, readlen)
+	} else {
+		blkhash, blkbytes, errread = blkstore.ReadBlockBytesByHeight(height, readlen)
+	}
+
+	// 检查错误
+	if errread != nil {
+		ResponseError(w, errread)
 		return
 	}
+
+	// 解析区块信息
 	block, _, e2 := blocks.ParseExcludeTransactions(blkbytes, 0)
 	if e2 != nil {
 		ResponseError(w, e2)

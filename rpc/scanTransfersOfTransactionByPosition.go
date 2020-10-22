@@ -14,7 +14,7 @@ import (
  * 按位置扫描一笔交易，并且找出里面的“转账操作”
  * 包括HAC、BTC和HACD的产生和转移
  */
-func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w http.ResponseWriter) {
+func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w http.ResponseWriter, bodybytes []byte) {
 
 	height := CheckParamUint64(r, "height", 0) // 区块高度
 	txposi := CheckParamUint64(r, "txposi", 0) // 交易索引位置

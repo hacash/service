@@ -15,7 +15,7 @@ import (
 )
 
 // 创建价值转移交易
-func (api *RpcService) createValueTransferTx(r *http.Request, w http.ResponseWriter) {
+func (api *RpcService) createValueTransferTx(r *http.Request, w http.ResponseWriter, bodybytes []byte) {
 
 	var err error
 

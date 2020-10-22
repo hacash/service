@@ -7,7 +7,7 @@ import (
 )
 
 // 查看账户余额
-func (api *RpcService) balance(r *http.Request, w http.ResponseWriter) {
+func (api *RpcService) balances(r *http.Request, w http.ResponseWriter, bodybytes []byte) {
 
 	// 地址列表
 	addresslistStr := strings.Trim(CheckParamString(r, "address_list", ""), " ")

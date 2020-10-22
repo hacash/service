@@ -7,15 +7,7 @@ import (
 )
 
 // 提交一笔交易
-func (api *RpcService) submitTransaction(r *http.Request, w http.ResponseWriter) {
-
-	txbody := r.PostFormValue("txbody")
-	if len(txbody) == 0 {
-		ResponseErrorString(w, "post data <txbody> must give")
-		return
-	}
-	bodybytes := []byte(txbody)
-	//fmt.Println(len(bodybytes), string(bodybytes))
+func (api *RpcService) submitTransaction(r *http.Request, w http.ResponseWriter, bodybytes []byte) {
 
 	isHexData := CheckParamBool(r, "hexbody", false)
 
@@ -26,6 +18,8 @@ func (api *RpcService) submitTransaction(r *http.Request, w http.ResponseWriter)
 			ResponseError(w, e2)
 			return
 		}
+		//fmt.Println(len(realbodybts))
+		//fmt.Println(string(realbodybts))
 		bodybytes = realbodybts
 	}
 

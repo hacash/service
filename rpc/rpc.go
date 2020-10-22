@@ -37,10 +37,10 @@ type RpcService struct {
 	txpool  interfaces.TxPool
 
 	// routes
-	queryRoutes   map[string]func(*http.Request, http.ResponseWriter)
-	createRoutes  map[string]func(*http.Request, http.ResponseWriter)
-	submitRoutes  map[string]func(*http.Request, http.ResponseWriter)
-	operateRoutes map[string]func(*http.Request, http.ResponseWriter)
+	queryRoutes   map[string]func(*http.Request, http.ResponseWriter, []byte)
+	createRoutes  map[string]func(*http.Request, http.ResponseWriter, []byte)
+	submitRoutes  map[string]func(*http.Request, http.ResponseWriter, []byte)
+	operateRoutes map[string]func(*http.Request, http.ResponseWriter, []byte)
 }
 
 func NewRpcService(cnf *RpcConfig) *RpcService {
@@ -48,10 +48,10 @@ func NewRpcService(cnf *RpcConfig) *RpcService {
 		config:        cnf,
 		backend:       nil,
 		txpool:        nil,
-		queryRoutes:   make(map[string]func(*http.Request, http.ResponseWriter)),
-		createRoutes:  make(map[string]func(*http.Request, http.ResponseWriter)),
-		submitRoutes:  make(map[string]func(*http.Request, http.ResponseWriter)),
-		operateRoutes: make(map[string]func(*http.Request, http.ResponseWriter)),
+		queryRoutes:   make(map[string]func(*http.Request, http.ResponseWriter, []byte)),
+		createRoutes:  make(map[string]func(*http.Request, http.ResponseWriter, []byte)),
+		submitRoutes:  make(map[string]func(*http.Request, http.ResponseWriter, []byte)),
+		operateRoutes: make(map[string]func(*http.Request, http.ResponseWriter, []byte)),
 	}
 }
 

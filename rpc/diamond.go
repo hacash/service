@@ -11,7 +11,7 @@ import (
 )
 
 // 查询钻石
-func (api *RpcService) diamond(r *http.Request, w http.ResponseWriter) {
+func (api *RpcService) diamond(r *http.Request, w http.ResponseWriter, bodybytes []byte) {
 
 	// 钻石 name or number
 	diamondValue := strings.Trim(CheckParamString(r, "name", ""), " ")
