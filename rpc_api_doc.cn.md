@@ -67,7 +67,7 @@ rpc_listen_port = 8083
 | action | string | -    | balances, diamonds, block_intro, accounts ... | 要查询、生成的数据类型，定义接口的功能 |
 | unitmei | bool  | false | true, false, 1, 0 | 是否采用浮点数的“枚”为单位传递或返回数额，否则采用Hacash标准化单位方式。 例如使用“枚”为单位："12.5086"，而标准化单位："ㄜ125086:244" |
 | kind | menu  | - | h, s, d, hs, hd, hsd | 筛选返回的账户、交易信息类型。h: hacash, s: satoshi, d: diamond。用途：比如在扫描区块时只需要返回 HAC 转账内容而忽略其他两者，则传递 `kind=h` 即可。 |
-| posthex | bool  | false | true, false, 1, 0 | `/submit` 在提交数据时，是否使用 hex 字符串的形式。默认为原生 bytes 形式。 |
+| hexbody | bool  | false | true, false, 1, 0 | `/submit` 在提交数据时，是否使用 hex 字符串的形式为 Http Body。默认为原生 bytes 形式。 |
 
 
 ### 返回值、公共字段
@@ -188,3 +188,34 @@ rpc_listen_port = 8083
 #### 2.1 提交交易至交易池 `POST: /submit ? action=transaction`
 
 提交一笔交易至全网的内存池内。
+
+url 参数如下：
+
+ - hexbody [bool] 以 hex 字符串的形式传递 txbody 值；否则以原生 bytes 形式传递
+ 
+post body 参数如下
+
+ - txbody [string / bytes] 交易数据
+ 
+调用后返回值如下
+
+```js
+{
+    ret: 0 // ret = 0 表示返回成功
+}
+```
+
+或者返回错误
+
+```js
+{
+    ret: 1 // ret = 1 表示提交交易错误
+    // 错误消息如下：
+    errmsg: "address 1MzNY1oA3kfgYi75zquj3SRUPYztzXHzK9 balance ㄜ0:0 not enough， need ㄜ1,245:246."
+}
+```
+curl 命令行测试调用示例：
+
+```shell script
+curl "http://127.0.0.1:8083/submit?action=transaction&hexbody=1" -X POST -d "txbody=02005f90300700e63c33a796b3032ce6b856f68fccf06608d9ed18f401010001000100e9fdd992667de1734f0ef758bafcd517179e6f1bf60204dd00010231745adae24044ff09c3541537160abb8d5d720275bbaeed0b3d035b1e8b263cb73b724218f13c09c16e7065212128cf0c037ebb9e588754eb073886486d950607d59bef462d2731e15b667c6ff1f0badd6259c6f58d5ca7a5f75856b8cae8e80000"
+```

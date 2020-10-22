@@ -3,6 +3,7 @@ package rpc
 func (api *RpcService) initRoutes() {
 
 	// submit
+	api.submitRoutes["transaction"] = api.submitTransaction
 
 	// create
 	api.createRoutes["accounts"] = api.createAccounts
