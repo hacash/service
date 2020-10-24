@@ -38,6 +38,8 @@ func (api *RpcService) submitTransaction(r *http.Request, w http.ResponseWriter,
 	}
 
 	// 返回成功
-	ResponseData(w, nil)
+	// return: status = success
+	ResponseData(w, ResponseCreateData("status", "success"))
+
 	return
 }

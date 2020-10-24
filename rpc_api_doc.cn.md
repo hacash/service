@@ -432,7 +432,7 @@ curl "http://rpcapi.hacash.org/submit?action=transaction&hexbody=1" -X POST -d "
         {
         	// 单向转移比特币起始交易，表示有多少枚比特币被转移进了Hacash主网
             ai: 17,
-            btctrsno: 3, // 网Hacash内转移比特币的转账序号
+            btctrsno: 3, // 往Hacash内转移比特币的转账序号
             owner: "17XTDDHWjbUoKZmgFmdTg1m9UHYLuX4JVe", // 比特币所有者地址
             satoshi: 200000000 // 转移的比特币数额，单位：“聪” satoshi， 此数值表示 2 枚比特币
         },
@@ -455,12 +455,55 @@ curl "http://rpcapi.hacash.org/submit?action=transaction&hexbody=1" -X POST -d "
             form: "1PXosXwBwcYTXS7wHq7agMJgYpHqdMYoG5", // 比特币付款地址
             to: "1EM4j8xmxJosAi1N2RS2QL4VMe6x3agb7f" // 比特币收款地址
         }
-
-
-                 
-        
-        
     ]
 }
+```
+
+使用 `scan_value_transfers` 接口注意：
+
+ - 无论转账 HAC、BTC 还是区块钻石，都只能使用 HAC 支付手续费
+ - 转移 BTC 的单位为“聪 satoshi”，  1 BTC = 100000000 satoshi
+ - 通过 `hacash`、`satoshi` 和 `diamonds` 字段，以及 `miner`、`owner` 来判断转账类型
+ - `ai` 字段表示 `action_index` ，是转账在交易内的数组索引位置，而不是类型type
+ - 通过 `from` 和 `to` 两个地址字段的检查，来判断转账的资金流向
+ - Hacash 系统在转账时，支持付款方、收款方或任意不相关第三方来支付交易确认手续费
+ - 一笔交易可包含多种类型、多种数额、多比款项的转账，一笔交易就是一份综合性的支付合约
+ - 在将来有可能增加其他种类的的转账类型
+ 
+ 
+---
+
+## 4. /operate 修改、操作
+
+#### 4.1 提升待确认交易手续费 `GET: /operate ? action=raise_tx_fee`
+
+当一笔交易存在于交易池中还没有被确认时，可以重新签名提升（但不能降低）此笔交易的手续费，以达到加快交易确认或者钻石竞价报价的作用。
+
+传递参数：
+
+ - txhash [string] 要提升手续费的交易的 hash 值
+ - fee [string] 要修改的目标手续费
+ - unitmei [bool] 可选，是否以单位“枚”为手续费 `fee` 字段传递的单位
+ - fee_prikey [string] 手续费地址的私钥
+ 
+示例接口访问： [http://rpcapi.hacash.org/operate?action=raise_tx_fee&fee_prikey=8D969EEF6ECAD3C29A3A629280E686CF0C3F5D5A86AFF3CA12020C923ADC6C92&fee=ㄜ32:247&txhash=ad26a35116664176426f3c08adad147577b9a85999cb89d465becf6a27002c04](http://rpcapi.hacash.org/operate?action=raise_tx_fee&fee_prikey=8D969EEF6ECAD3C29A3A629280E686CF0C3F5D5A86AFF3CA12020C923ADC6C92&fee=ㄜ32:247&txhash=ad26a35116664176426f3c08adad147577b9a85999cb89d465becf6a27002c04)
+
+接口返回示例：
+
+```js
+{
+    ret: 0,
+    status: "success" // 表示提升手续费成功
+}
+```
+
+失败的返回示例：
+
+```js
+{
+    ret: 1,
+    errmsg: "Tx fee address password error: need 18Yt6UbnDKaXaBaMPnBdEHomRYVKwcGgyH but got 1MzNY1oA3kfgYi75zquj3SRUPYztzXHzK9" // 失败原因：手续费地址不一致
+}
+
 ```
  
