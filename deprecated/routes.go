@@ -25,6 +25,8 @@ func (api *DeprecatedApiService) initRoutes() {
 	queryRoutes["txconfirm"] = api.txStatus                       // 查询交易确认状态
 	queryRoutes["powpower"] = api.powPower                        // 实时算力大小
 
+	queryRoutes["hashrate"] = api.hashRate // 当前哈希率
+
 	queryRoutes["blocks"] = api.getBlockAbstractList  // 查询区块信息
 	queryRoutes["lastblock"] = api.getLastBlockHeight // 查询最新区块高度
 	queryRoutes["blockintro"] = api.getBlockIntro     // 查询区块简介
