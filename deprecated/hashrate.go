@@ -4,7 +4,6 @@ import (
 	"github.com/hacash/core/blocks"
 	"github.com/hacash/mint"
 	"github.com/hacash/mint/difficulty"
-	"github.com/hacash/x16rs"
 	"math/big"
 )
 
@@ -16,10 +15,7 @@ func (api *DeprecatedApiService) hashRate(params map[string]string) map[string]s
 		return result
 	}
 	curheight := lastest.GetHeight()
-	repeat := x16rs.HashRepeatForBlockHeight(curheight)
-
-	targetHashWorth := difficulty.CalculateDifficultyWorth(lastest.GetDifficulty())
-	targetHashWorth = new(big.Int).Mul(targetHashWorth, new(big.Int).SetUint64(uint64(repeat)))
+	targetHashWorth := difficulty.CalculateDifficultyWorth(curheight, lastest.GetDifficulty())
 
 	// 当前实时哈希率： 4小时48区块所耗费的时间
 	curCalcBlockNum := int64(48)

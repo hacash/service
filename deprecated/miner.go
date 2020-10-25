@@ -7,7 +7,6 @@ import (
 	"math/big"
 )
 
-
 func (api *DeprecatedApiService) powPower(params map[string]string) map[string]string {
 	result := make(map[string]string)
 	lastest, err1 := api.blockchain.State().ReadLastestBlockHeadAndMeta()
@@ -18,7 +17,7 @@ func (api *DeprecatedApiService) powPower(params map[string]string) map[string]s
 	curheight := lastest.GetHeight()
 	mint_num288dj := uint64(mint.AdjustTargetDifficultyNumberOfBlocks / 4)
 	prev288height := curheight - uint64(mint_num288dj)
-	headbytes, err2 := api.blockchain.State().BlockStore().ReadBlockHeadBytesByHeight( prev288height )
+	headbytes, err2 := api.blockchain.State().BlockStore().ReadBlockHeadBytesByHeight(prev288height)
 	if err2 != nil {
 		result["err"] = err2.Error()
 		return result
@@ -35,12 +34,11 @@ func (api *DeprecatedApiService) powPower(params map[string]string) map[string]s
 	}
 	//fmt.Println(cost288sec)
 	// cost time
-	powbitshash := difficulty.DifficultyUint32ToHash( lastest.GetDifficulty() )
-	powbitsbig := difficulty.CalculateHashWorth( powbitshash )
-	powervalue := new(big.Int).Div( powbitsbig, big.NewInt( int64(cost288sec) ) )
+	powbitsbig := difficulty.CalculateDifficultyWorth(lastest.GetHeight(), lastest.GetDifficulty())
+	powervalue := new(big.Int).Div(powbitsbig, big.NewInt(int64(cost288sec)))
 	//fmt.Println( mint_num288dj, cost288sec, powbitsbig.String(), powervalue.String() )
 	// return
 	result["power"] = powervalue.String()
-	result["show"] = difficulty.ConvertPowPowerToShowFormat( powervalue )
+	result["show"] = difficulty.ConvertPowPowerToShowFormat(powervalue)
 	return result
 }
