@@ -23,6 +23,8 @@ func (api *DeprecatedApiService) getBalance(params map[string]string) map[string
 	totalamt := fields.NewEmptyAmount()
 	satoshi := uint64(0)
 	satoshistrs := ""
+	diamond := uint64(0)
+	diamondstrs := ""
 	for k, addr := range addrs {
 		if k > 20 {
 			break // 一次最多查询20个
@@ -36,13 +38,18 @@ func (api *DeprecatedApiService) getBalance(params map[string]string) map[string
 		if finditem == nil {
 			amtstrings += "ㄜ0:0|"
 			satoshistrs += "0|"
+			diamondstrs += "0|"
 			continue
 		}
+		// hacash
 		amtstrings += finditem.Hacash.ToFinString() + "|"
 		totalamt, _ = totalamt.Add(&finditem.Hacash)
 		// satoshi
 		satoshi += uint64(finditem.Satoshi)
 		satoshistrs += strconv.FormatUint(uint64(finditem.Satoshi), 10) + "|"
+		// diamond
+		diamond += uint64(finditem.Diamond)
+		diamondstrs += strconv.FormatUint(uint64(finditem.Diamond), 10) + "|"
 	}
 
 	// 0
@@ -50,6 +57,8 @@ func (api *DeprecatedApiService) getBalance(params map[string]string) map[string
 	result["total"] = totalamt.ToFinString()
 	result["satoshis"] = strings.TrimRight(satoshistrs, "|")
 	result["satoshi"] = strconv.FormatUint(satoshi, 10)
+	result["diamonds"] = strings.TrimRight(diamondstrs, "|")
+	result["diamond"] = strconv.FormatUint(diamond, 10)
 	return result
 
 }

@@ -18,6 +18,12 @@ func (api *DeprecatedApiService) showDiamondCreateTxs(params map[string]string) 
 
 	txs := api.txpool.GetDiamondCreateTxs(-1)
 
+	var number int = 1
+	diamd, _ := api.backend.BlockChain().State().ReadLastestDiamond()
+	if diamd != nil {
+		number = int(diamd.Number) + 1
+	}
+
 	jsondata := []string{}
 	for i, tx := range txs {
 		for _, act := range tx.GetActions() {
@@ -28,6 +34,7 @@ func (api *DeprecatedApiService) showDiamondCreateTxs(params map[string]string) 
 				if feeaddramt == nil || feeaddramt.Hacash.LessThan(fee) {
 					status_code = 1 // 余额不足以支付手续费
 				}
+				number = int(dcact.Number)
 				jsondata = append(jsondata, fmt.Sprintf(`%d,"%s","%s","%s","%s","%s",%d`, i+1, tx.Hash().ToHex(), tx.GetAddress().ToReadable(),
 					dcact.Diamond, dcact.Address.ToReadable(), fee.ToFinString(), status_code))
 				break
@@ -46,7 +53,7 @@ func (api *DeprecatedApiService) showDiamondCreateTxs(params map[string]string) 
 	if len(liststr) > 0 {
 		liststr = "[" + liststr + "]"
 	}
-	result["jsondata"] = `{"period":"` + strconv.Itoa(perhei) + `","datas":[` + liststr + `]}`
+	result["jsondata"] = `{"period":` + strconv.Itoa(perhei) + `,"number":` + strconv.Itoa(number) + `,"datas":[` + liststr + `]}`
 	return result
 }
 
