@@ -169,6 +169,9 @@ func (api *DeprecatedApiService) getBlockAbstractList(params map[string]string) 
 			if v < 32 || v > 126 {
 				break
 			}
+			if v == 34 { // 处理双引号转换为单引号
+				v = 39
+			}
 			msg += string([]byte{v})
 		}
 		jsondata = append(jsondata, fmt.Sprintf(
