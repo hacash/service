@@ -10,8 +10,13 @@ import (
 	"strings"
 )
 
-func hashRateList(blockstore interfaces.BlockStore, curheight uint64, allHistoryOr30Days bool) ([]string, error) {
+func hashRateList(blockstore interfaces.BlockStore, curheight uint64, allHistoryOr30Days bool, appendItem *big.Int) ([]string, error) {
 	var stepNum = 30
+	// 第一个附加
+	var hsti = 0
+	if appendItem != nil {
+		hsti = 1
+	}
 	if curheight < mint.AdjustTargetDifficultyNumberOfBlocks*uint64(stepNum) {
 		return []string{}, nil
 	}
@@ -19,12 +24,20 @@ func hashRateList(blockstore interfaces.BlockStore, curheight uint64, allHistory
 	// 历史三十天分布目标哈希率
 	var allDivCut = big.NewInt(1)
 	var allMaxRate = big.NewInt(1)
-	var allHistoryRateStrs = make([]string, stepNum)
-	var allHistoryRates = make([]*big.Int, stepNum)
+	var allHistoryRateStrs = make([]string, stepNum+hsti)
+	var allHistoryRates = make([]*big.Int, stepNum+hsti)
 	stepBlkHei := mint.AdjustTargetDifficultyNumberOfBlocks
 	if allHistoryOr30Days {
 		stepBlkHei = curheight/uint64(stepNum) - 1
 	}
+
+	// 第一个附加
+	if appendItem != nil {
+		allMaxRate = appendItem
+		allHistoryRates[0] = appendItem
+	}
+
+	// 读取的
 	for i := 0; i < stepNum; i++ {
 		tarhei := curheight - (stepBlkHei * uint64(i))
 		_, headbytes, err2 := blockstore.ReadBlockBytesByHeight(tarhei, blockHeadMetaSize)
@@ -44,12 +57,14 @@ func hashRateList(blockstore interfaces.BlockStore, curheight uint64, allHistory
 			allMaxRate = targetHashWorth
 			allDivCut = new(big.Int).Div(targetHashWorth, big.NewInt(10000))
 		}
-		allHistoryRates[i] = targetHashWorth
+		allHistoryRates[i+hsti] = targetHashWorth
 	}
+
 	// 截取计算，倒序
 	var idx = 0
-	for i := stepNum - 1; i >= 0; i-- {
+	for i := stepNum + hsti - 1; i >= 0; i-- {
 		rlrt := allHistoryRates[i]
+		//fmt.Println(rlrt)
 		showrate := new(big.Int).Div(rlrt, allDivCut)
 		allHistoryRateStrs[idx] = showrate.String()
 		idx++
@@ -67,14 +82,14 @@ func (api *DeprecatedApiService) hashRateCharts(params map[string]string) map[st
 	curheight := lastest.GetHeight()
 	blockstore := api.blockchain.State().BlockStore()
 
-	allHistory, e1 := hashRateList(blockstore, curheight, true)
+	allHistory, e1 := hashRateList(blockstore, curheight, true, nil)
 	if e1 != nil {
 		result["err"] = e1.Error()
 		return result
 	}
-	days30, e2 := hashRateList(blockstore, curheight, false)
+	days30, e2 := hashRateList(blockstore, curheight, false, nil)
 	if e2 != nil {
-		result["err"] = e1.Error()
+		result["err"] = e2.Error()
 		return result
 	}
 
