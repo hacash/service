@@ -152,6 +152,10 @@ func (api *DeprecatedApiService) getBlockAbstractList(params map[string]string) 
 			result["err"] = e.Error()
 			return result
 		}
+		if blkhash == nil || blkbytes == nil {
+			result["err"] = "block height not find."
+			return result
+		}
 		blkhead, _, e2 := blocks.ParseExcludeTransactions(blkbytes, 0)
 		if e2 != nil {
 			result["err"] = e2.Error()
