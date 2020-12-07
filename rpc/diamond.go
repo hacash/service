@@ -13,6 +13,9 @@ import (
 // 查询钻石
 func (api *RpcService) diamond(r *http.Request, w http.ResponseWriter, bodybytes []byte) {
 
+	// 是否以枚为单位
+	isUnitMei := CheckParamBool(r, "unitmei", false)
+
 	// 钻石 name or number
 	diamondValue := strings.Trim(CheckParamString(r, "name", ""), " ")
 	if len(diamondValue) > 0 {
@@ -55,10 +58,14 @@ func (api *RpcService) diamond(r *http.Request, w http.ResponseWriter, bodybytes
 
 	diamondValue = string(diamondSto.Diamond)
 
+	bidfee := fields.Amount{}
+	bidfee.Parse(diamondSto.ApproxFeeOffer, 0)
+
 	// data
 	retdata := ResponseCreateData("number", diamondSto.Number)
 	retdata["name"] = diamondValue
 	retdata["miner_address"] = diamondSto.MinerAddress.ToReadable()
+	retdata["approx_fee_offer"] = bidfee.ToMeiOrFinString(isUnitMei)
 	retdata["nonce"] = hex.EncodeToString(diamondSto.Nonce)
 	retdata["custom_message"] = hex.EncodeToString(diamondSto.CustomMessage)
 	retdata["contain_block_height"] = diamondSto.ContainBlockHeight

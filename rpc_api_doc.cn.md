@@ -265,6 +265,7 @@ curl "http://rpcapi.hacash.org/submit?action=transaction&hexbody=1" -X POST -d "
 
  - name [string] 钻石字面值，例如： "ZAKXMI"
  - number [int] 钻石标号，例如： "20001"
+ - unitmei [bool] 可选，是否以单位“枚”返回手续费竞价数额字段
  
 示例查询接口一： [http://rpcapi.hacash.org/query?action=diamond&number=20001](http://rpcapi.hacash.org/query?action=diamond&number=20001)
 
@@ -277,6 +278,7 @@ curl "http://rpcapi.hacash.org/submit?action=transaction&hexbody=1" -X POST -d "
     ret: 0, // 公共返回值
     number: 20001, // 钻石编号
     name: "ZAKXMI", // 钻石名称/字面值
+    approx_fee_offer: "ㄜ382:246", // 本颗钻石花费的竞价手续费
     nonce: "00000000c9babb01", // 挖掘的随机数
     contain_block_height: 179610, // 被挖出的区块高度
     contain_block_hash: "0000000010914f286cc035ee35ae0afc6294417adb775dddf25b3bd4aa22524b", // 被挖出的区块hash
