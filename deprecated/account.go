@@ -28,7 +28,7 @@ func newAccount(params map[string]string) map[string]string {
 
 	result := make(map[string]string)
 	// 创建账户
-	acc := account.CreateNewAccount()
+	acc := account.CreateNewRandomAccount()
 
 	result["address"] = string(acc.AddressReadable)
 	result["public_key"] = hex.EncodeToString(acc.PublicKey)

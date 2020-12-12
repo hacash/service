@@ -21,7 +21,7 @@ func (api *RpcService) createAccounts(r *http.Request, w http.ResponseWriter, bo
 	var lists = make([]interface{}, number)
 	for i := 0; i < number; i++ {
 		item := make(map[string]interface{})
-		acc := account.CreateNewAccount()
+		acc := account.CreateNewRandomAccount()
 		item["prikey"] = hex.EncodeToString(acc.PrivateKey)
 		item["pubkey"] = hex.EncodeToString(acc.PublicKey)
 		item["address"] = acc.AddressReadable
