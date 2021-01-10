@@ -19,7 +19,7 @@ rpc_listen_port = 8083
 
 The above configuration `enable = true` means to enable the RPC interface service, `rpc_listen_port = 8083` means that the listening http service port is 8083.  Note that there is a deprecated rpc protocol which was configured on port 3338, and it is possible to configure both at the same time, however this will not be maintained.
 
-Visit `http://127.0.0.1:8083/` to verify operation, if all is good you will see -
+Visit `http://127.0.0.1:8083/` to verify operation, if all is good you will see:
 
 ```json
 {
@@ -37,7 +37,7 @@ Before documenting the detailed specification we can show a few examples, with t
     "list": [
         {
             "diamond": 1016,
-            "hacash": "\u311c1,474,845:244",
+            "hacash": "ㄜ1,474,845:244",
             "satoshi": 0
         }
     ],
@@ -47,9 +47,9 @@ Before documenting the detailed specification we can show a few examples, with t
 
 The Hacash RPC API service adopts a standard http interface, and you can simply use it in a browser, with curl or in an application.
 
-The following document will use the test interface provided by hacash.org as an example, visit [http://rpcapi.hacash.org/query?action=balances&address_list=1AVRuFXNFi3rdMrPH4hdqSgFrEBnWisWaS](http://rpcapi.hacash.org/query?action= balances&address_list=1AVRuFXNFi3rdMrPH4hdqSgFrEBnWisWaS) should return the same interface data content as above.
+The following document will use the test interface provided by hacash.org as an example, visit [http://rpcapi.hacash.org/query?action=balances&address_list=1AVRuFXNFi3rdMrPH4hdqSgFrEBnWisWaS](http://rpcapi.hacash.org/query?action=balances&address_list=1AVRuFXNFi3rdMrPH4hdqSgFrEBnWisWaS) should return the same interface data content as above.
 
-Example Two: [http://rpcapi.hacash.org/query?action=balances&address_list=1AVRuFXNFi3rdMrPH4hdqSgFrEBnWisWaS,1MzNY1oA3kfgYi75zquj3SRUPYztzXHzK9&unitmei=true] (http://rpcapi.hacash.org/query?action=balances&address_list=1AVRuFXNFi3rdMrPH4hdqSgFrEBnWisWaS,1MzNY1oA3kfgYi75zquj3SRUPYztzXHzK9&unitmei=true) represents Query the balances of two addresses at the same time, and the returned balance unit is "mei".
+Example Two: [http://rpcapi.hacash.org/query?action=balances&address_list=1AVRuFXNFi3rdMrPH4hdqSgFrEBnWisWaS,1MzNY1oA3kfgYi75zquj3SRUPYztzXHzK9&unitmei=true](http://rpcapi.hacash.org/query?action=balances&address_list=1AVRuFXNFi3rdMrPH4hdqSgFrEBnWisWaS,1MzNY1oA3kfgYi75zquj3SRUPYztzXHzK9&unitmei=true) represents Query the balances of two addresses at the same time, and the returned balance unit is "mei".
 
 ### Interface format, general parameters
 
@@ -65,7 +65,7 @@ The parameters common to multiple interfaces are introduced as follows:
 | Parameter name | Type | Default value | Example value | Function introduction |
 | ---- | ---- | ---- | ---- | ---- |
 | action | string |-| balances, diamond, block_intro, accounts ... | The type of data to be queried and generated, and the function of the interface is defined |
-| unitmei | bool | false | true, false, 1, 0 | Whether to transfer or return the amount in units of "mei" of floating-point numbers, otherwise, use the Hacash standardized unit method. For example, use "mei" as the unit: "12.5086", and the standardized unit: "\u311c125086:244" |
+| unitmei | bool | false | true, false, 1, 0 | Whether to transfer or return the amount in units of "mei" of floating-point numbers, otherwise, use the Hacash standardized unit method. For example, use "mei" as the unit: "12.5086", and the standardized unit: "ㄜ125086:244" |
 | kind | menu |-| h, s, d, hs, hd, hsd | Filter the returned account and transaction information type. h: hacash, s: satoshi, d: diamond. Purpose: For example, when scanning a block, you only need to return the HAC transfer content and ignore the other two, just pass `kind=h`. |
 | hexbody | bool | false | true, false, 1, 0 | `/submit` Whether to use the hex string form of Http Body when submitting data. The default format is native bytes. |
 
@@ -89,11 +89,11 @@ The following section will introduce the parameter passing and return value deta
 
 ## 1. /create create
 
-#### 1.1 Create an account `GET: /create? Action=accounts`
+#### 1.1 Create an account `GET: /create?action=accounts`
 
 Create accounts in batches at random, and return a list of account information including private keys, public keys, and addresses. Passable parameters:
 
-1. number [int] indicates the number of accounts created in batches, the default is 1, the maximum is 200
+- number [int] indicates the number of accounts created in batches, the default is 1, the maximum is 200
 
 Example interface: [http://rpcapi.hacash.org/create?action=accounts&number=5](http://rpcapi.hacash.org/create?action=accounts&number=5)
 
@@ -115,32 +115,31 @@ return value:
 
 Special note: The system uses a random generation algorithm to create an account. The system does not retain or record the account private key created by this interface. Please make sure to back up and store the created private key, and take security protection.
 
-#### 1.2 Create a transfer transaction `GET: /create? Action=value_transfer_tx`
+#### 1.2 Create a transfer transaction `GET: /create?action=value_transfer_tx`
 
 This interface is used to create HAC, one-way transfer of Bitcoin and block diamond transfer transactions. The basic parameters are as follows:
 
-1. unitmei [bool] Whether to use the unit "mei" floating point number form to analyze the passed amount parameter
-2. main_prikey [hex string] The private key hex string of the main address/handling fee address
-3. fee [string] The fee value to be given for the transaction, such as "0.0001" or "\u311c1:244"
-4. timestamp [int] The timestamp of the transaction; it is optional to pass; if it is not passed, it is automatically set to the current timestamp
-5. transfer_kind [menu] (hacash, satoshi, diamond) The type of transaction to be created, HAC transfer, BTC transfer or block diamond transfer
+- unitmei [bool] Whether to use the unit "mei" floating point number form to analyze the passed amount parameter
+- main_prikey [hex string] The private key hex string of the main address/handling fee address
+- fee [string] The fee value to be given for the transaction, such as "0.0001" or "ㄜ1:244"
+- timestamp [int] The timestamp of the transaction; it is optional to pass; if it is not passed, it is automatically set to the current timestamp
+- transfer_kind [menu] (hacash, satoshi, diamond) The type of transaction to be created, HAC transfer, BTC transfer or block diamond transfer
 
 [Note 1]: When only passing the same `timestamp` timestamp parameter and keeping other parameters always the same, each transaction created will have the same hash value and be regarded as the same transaction.
 
 [Note two]: Since the Hacash system supports repeated signature fee bidding for the same transaction, only changing the `fee` field will not change the transaction's `hash` value, but only its `hash_with_fee` value.
 
-[Note three]: The fee field of `fee` cannot be set too small, otherwise it will not be accepted by the entire system. The current minimum fee is 0.0001 (ie \u311c 1:244). Please do not set the handling fee lower than this value.
+[Note three]: The fee field of `fee` cannot be set too small, otherwise it will not be accepted by the entire system. The current minimum fee is 0.0001 (ie ㄜ 1:244). Please do not set the handling fee lower than this value.
 
 ##### 1.2.1 Create HAC ordinary transfer transaction
 
 Pass the parameter `transfer_kind=hacash`, and add the following parameters:
 
- -amount [string] The transfer amount; the unit format depends on the `unitmei` parameter; for example, "0.1" or "\u311c1:247".
- -to_address [string] Counter (receiving) account address
+ - amount [string] The transfer amount; the unit format depends on the `unitmei` parameter; for example, "0.1" or "ㄜ1:247".
+ - to_address [string] Counter (receiving) account address
 
-```js
-Call Interface Example: [http://rpcapi.hacash.org/create?action=value_transfer_tx&main_prikey=8D969EEF6ECAD3C29A3A629280E686CF0C3F5D5A86AFF3CA12020C923ADC6C92&fee=0.0001&unitmei=true&timestamp=1603284999&transfer_kind=hacash&amount=12.45&to_address=1NLEYVmmUkhAH18WfCUDc5CHnbr7Bv5TaS](http://rpcapi.hacash.org/create? action=value_transfer_tx&main_prikey=8D969EEF6ECAD3C29A3A629280E686CF0C3F5D5A86AFF3CA12020C923ADC6C92&fee=0.0001&unitmei=true&timestamp=1603284999&transfer_kind=hacash&amount=12.45&to_cash&amount=12.45&to_cash&amount=12.45&to_cash&amount=12.45&to_cash&amount=12.45&to_cash&amount=12.45&to_c5
-```
+Call Interface Example: [http://rpcapi.hacash.org/create?action=value_transfer_tx&main_prikey=8D969EEF6ECAD3C29A3A629280E686CF0C3F5D5A86AFF3CA12020C923ADC6C92&fee=0.0001&unitmei=true&timestamp=1603284999&transfer_kind=hacash&amount=12.45&to_address=1NLEYVmmUkhAH18WfCUDc5CHnbr7Bv5TaS](http://rpcapi.hacash.org/create?action=value_transfer_tx&main_prikey=8D969EEF6ECAD3C29A3A629280E686CF0C3F5D5A86AFF3CA12020C923ADC6C92&fee=0.0001&unitmei=true&timestamp=1603284999&transfer_kind=hacash&amount=12.45&to_address=1NLEYVmmUkhAH18WfCUDc5CHnbr7Bv5TaS)
+
 
 The return value is as follows:
 
@@ -153,8 +152,7 @@ The return value is as follows:
     // The transaction contains the hash value of the fee
     hash_with_fee: "9cbc4821d0d921b429dbe4d6b67d6412aa5cae4b724f1e7dab9f870646cb1bb6",
     // The hex value of transaction body and content
-    body: "02005f90300700e63c33a796b3032ce6b
- 856f68fccf06608d9ed18f401010001000100e9fdd992667de1734f0ef758bafcd517179e6f1bf60204dd00010231745adae24044ff09c3541537160abb8d5d720275bbaeed0b3d035b1e8b263cb73b724218f13c09c16e7065212128cf0c037ebb9e588754eb073886486d950607d59bef462d2731e15b667c6ff1f0badd6259c6f58d5ca7a5f75856b8cae8e80000 ",
+    body: "02005f90300700e63c33a796b3032ce6b856f68fccf06608d9ed18f401010001000100e9fdd992667de1734f0ef758bafcd517179e6f1bf60204dd00010231745adae24044ff09c3541537160abb8d5d720275bbaeed0b3d035b1e8b263cb73b724218f13c09c16e7065212128cf0c037ebb9e588754eb073886486d950607d59bef462d2731e15b667c6ff1f0badd6259c6f58d5ca7a5f75856b8cae8e80000 ",
     // timestamp used in the transaction
     timestamp: 1603284999
 }
@@ -164,44 +162,42 @@ In a production environment, please save the above return value in the database 
 
 Create BTC transfer and block diamond transfer, the return value of calling the interface is the same as the above.
 
-##### 1.2.2 Create one-way Bitcoin ordinary transfer transaction
+##### 1.2.2 Create transferred bitcoin ordinary transfer transaction
 
 Pass the parameter `transfer_kind=satoshi`, and add the following parameters:
 
- -amount [int] The amount of bitcoins to be paid, in units of "satoshi" and "satoshi" (0.00000001 bitcoins); for example, transfer 10 bitcoins to transfer "1000000000", transfer 0.01 bitcoins to transfer "1000000"; system Bitcoin units below 1 satoshi are not supported.
- -to_address [string] Counter (receiving) account address
+ - amount [int] The amount of bitcoins to be paid, in units of "satoshi" and "satoshi" (0.00000001 bitcoins); for example, transfer 10 bitcoins to transfer "1000000000", transfer 0.01 bitcoins to transfer "1000000"; system Bitcoin units below 1 satoshi are not supported.
+ - to_address [string] Counter (receiving) account address
 
 For example, to transfer a bit of an address token, the example interfaces such as:
 
-```
-[http://rpcapi.hacash.org/create?action=value_transfer_tx&main_prikey=8D969EEF6ECAD3C29A3A629280E686CF0C3F5D5A86AFF3CA12020C923ADC6C92&fee=0.0001&unitmei=true&timestamp=1603284999&transfer_kind=satoshi&amount=100000000&to_address=1NLEYVmmUkhAH18WfCUDc5CHnbr7Bv5TaS]
-```
+[http://rpcapi.hacash.org/create?action=value_transfer_tx&main_prikey=8D969EEF6ECAD3C29A3A629280E686CF0C3F5D5A86AFF3CA12020C923ADC6C92&fee=0.0001&unitmei=true&timestamp=1603284999&transfer_kind=satoshi&amount=100000000&to_address=1NLEYVmmUkhAH18WfCUDc5CHnbr7Bv5TaS](http://rpcapi.hacash.org/create?action=value_transfer_tx&main_prikey=8D969EEF6ECAD3C29A3A629280E686CF0C3F5D5A86AFF3CA12020C923ADC6C92&fee=0.0001&unitmei=true&timestamp=1603284999&transfer_kind=satoshi&amount=100000000&to_address=1NLEYVmmUkhAH18WfCUDc5CHnbr7Bv5TaS)
 
 ##### 1.2.3 Create block diamond transfer transaction
 
 Pass the parameter `transfer_kind=diamond`, and add the following parameters:
 
- -diamonds [string] The literal value of diamonds separated by commas, such as "EVUNXZ,BVVTSI", one or more can be transferred, and up to 200 diamonds can be transferred in one batch
- -diamond_owner_prikey [hex string] Optional, the account private key of the payment (payment of diamonds, diamond owner); if not passed, the default is `main_prikey`
- -to_address [string] The account address of the other party (receiving diamonds)
+- diamonds [string] The literal value of diamonds separated by commas, such as "EVUNXZ,BVVTSI", one or more can be transferred, and up to 200 diamonds can be transferred in one batch
+- diamond_owner_prikey [hex string] Optional, the account private key of the payment (payment of diamonds, diamond owner); if not passed, the default is `main_prikey`
+- to_address [string] The account address of the other party (receiving diamonds)
 
 Interface call Example:
-```
-[http://rpcapi.hacash.org/create?action=value_transfer_tx&main_prikey=8D969EEF6ECAD3C29A3A629280E686CF0C3F5D5A86AFF3CA12020C923ADC6C92&fee=0.0003&unitmei=true&timestamp=1603284999&transfer_kind=diamond&diamonds=EVUNXZ,BVVTSI&diamond_owner_prikey=EF797C8118F02DFB649607DD5D3F8C7623048C9C063D532CC95C5ED7A898A64F&to_address=1NLEYVmmUkhAH18WfCUDc5CHnbr7Bv5TaS] (http://rpcapi.hacash.org /create?action=value_transfer_tx&main_prikey=8D969EEF6ECAD3C29A3A629280E686CF0C3F5D5A86AFF3CA12020C923ADC6C92&fee=0.0003&unitmei=true&timestamp=1603284999&transfer_kind=diamond&diamonds=EVUNXZ,BVVTSI&diamond_owner_prikey=EF797C8118F02DFB649607DD5D3F8C7623048C9C063D532CC95C5ED7A898A64F&to_address=1NLEYVmmUkhAH18WfCUDc5CHnbr7Bv5TaS)
-```
+
+
+[http://rpcapi.hacash.org/create?action=value_transfer_tx&main_prikey=8D969EEF6ECAD3C29A3A629280E686CF0C3F5D5A86AFF3CA12020C923ADC6C92&fee=0.0003&unitmei=true&timestamp=1603284999&transfer_kind=diamond&diamonds=EVUNXZ,BVVTSI&diamond_owner_prikey=EF797C8118F02DFB649607DD5D3F8C7623048C9C063D532CC95C5ED7A898A64F&to_address=1NLEYVmmUkhAH18WfCUDc5CHnbr7Bv5TaS](http://rpcapi.hacash.org/create?action=value_transfer_tx&main_prikey=8D969EEF6ECAD3C29A3A629280E686CF0C3F5D5A86AFF3CA12020C923ADC6C92&fee=0.0003&unitmei=true&timestamp=1603284999&transfer_kind=diamond&diamonds=EVUNXZ,BVVTSI&diamond_owner_prikey=EF797C8118F02DFB649607DD5D3F8C7623048C9C063D532CC95C5ED7A898A64F&to_address=1NLEYVmmUkhAH18WfCUDc5CHnbr7Bv5TaS)
 
 
 ---
 
 ## 2. /submit Submit
 
-#### 2.1 Submit a transaction to the transaction pool `POST: /submit? Action=transaction`
+#### 2.1 Submit a transaction to the transaction pool `POST: /submit?action=transaction`
 
 Submit a transaction to the memory pool of the entire network.
 
 The url parameters are as follows:
 
- -hexbody [bool] Pass the post body value in the form of hex string; otherwise pass it in the form of native bytes
+- hexbody [bool] Pass the post body value in the form of hex string; otherwise pass it in the form of native bytes
 
 The return value after the call is as follows
 
@@ -217,7 +213,7 @@ Or return an error
 {
     ret: 1 // ret = 1 means submitting a transaction error
     // For example, if the balance is insufficient, the error message is as follows:
-    errmsg: "address 1MzNY1oA3kfgYi75zquj3SRUPYztzXHzK9 balance \u311c0:0 not enough, need \u311c1,245:246."
+    errmsg: "address 1MzNY1oA3kfgYi75zquj3SRUPYztzXHzK9 balance ㄜ0:0 not enough, need ㄜ1,245:246."
 }
 ```
 Example of curl command line test call:
@@ -246,22 +242,20 @@ Handling fee bidding explanation 2: When the transaction is still in the trading
 
 
 
-#### 3.1 Query account balance `GET: /query? Action=balances`
+#### 3.1 Query account balance `GET: /query?action=balances`
 
 Check the HAC, BTC, and diamond balances of one or more accounts at once.
 
 Pass parameters:
 
- -address_list [string] : A comma-separated list of account addresses; up to 200 batch queries
-
- -unitmei [bool] : Whether to return a floating-point number string in units of "mei"; otherwise, it returns a standard unit
- -kind [menu] : Query the type of return; `kind=h` only returns HAC balance, `kind=hs` returns HAC, BTC balance, if you do not pass or pass `hsd`, all types of balances are returned
+- address_list [string] : A comma-separated list of account addresses; up to 200 batch queries
+- unitmei [bool] : Whether to return a floating-point number string in units of "mei"; otherwise, it returns a standard unit
+- kind [menu] : Query the type of return; `kind=h` only returns HAC balance, `kind=hs` returns HAC, BTC balance, if you do not pass or pass `hsd`, all types of balances are returned
 
  Example Interface:
 
- ```
- [http://rpcapi.hacash.org/query?action=balances&unitmei=1&address_list=18Yt6UbnDKaXaBaMPnBdEHomRYVKwcGgyH,1DYY4ZRsWnhjcwwnE3dWgtiqe2mctDS2HF] (http://rpcapi.hacash.org/query?action=balances&unitmei=1&address_list=18Yt6UbnDKaXaBaMPnBdEHomRYVKwcGgyH,1DYY4ZRsWnhjcwwnE3dWgtiqe2mctDS2HF)
-   ```
+ [http://rpcapi.hacash.org/query?action=balances&unitmei=1&address_list=18Yt6UbnDKaXaBaMPnBdEHomRYVKwcGgyH,1DYY4ZRsWnhjcwwnE3dWgtiqe2mctDS2HF](http://rpcapi.hacash.org/query?action=balances&unitmei=1&address_list=18Yt6UbnDKaXaBaMPnBdEHomRYVKwcGgyH,1DYY4ZRsWnhjcwwnE3dWgtiqe2mctDS2HF)
+ 
 
  Example return value:
 
@@ -284,30 +278,158 @@ Pass parameters:
 ```
 Note: The returned balance list corresponds to the position of the passed account list.
 
-#### 3.2 Query block diamond information `GET: /query? Action=diamond`
+#### 3.2 Query block diamond information `GET: /query?action=diamond`
 
 Query detailed information such as the hash of a diamond, the height of the generated block, and the current address, etc.; you can query by diamond literal (name) or label (number).
 
 Pass parameters:
 
- -name [string] Diamond literal value, for example: "ZAKXMI"
- -number [int] Diamond label, for example: "20001"
+- name [string] Diamond literal value, for example: "ZAKXMI"
+- number [int] Diamond label, for example: "20001"
+- unitmei [bool] : Whether to return a floating-point number string in units of "mei"; otherwise, it returns a standard unit
 
-Example query interface 1: ``[http://rpcapi.hacash.org/query?action=diamond&number=20001](http://rpcapi.hacash.org/query?action=diamond&number=20001)``
+Example query interface 1: [http://rpcapi.hacash.org/query?action=diamond&number=20001](http://rpcapi.hacash.org/query?action=diamond&number=20001)
 
-Example query interface 1: ``[http://rpcapi.hacash.org/query?action=diamond&name=ZAKXMI](http://rpcapi.hacash.org/query?action=diamond&name=ZAKXMI)``
+Example query interface 1: [http://rpcapi.hacash.org/query?action=diamond&name=ZAKXMI](http://rpcapi.hacash.org/query?action=diamond&name=ZAKXMI)
 
 The above two interfaces return the same content:
 
 ```js
 {
-    ret: 0, // public return value
+    ret: 0, // general return value
     number: 20001, // Diamond number
-    name: "ZAKXMI", // Diamond name/literal value
-    nonce: "00000000c9babb01", // random number mined
-    contain_block_height: 179610, // The height of the block being mined
-    contain_block_hash: "0000000010914f286cc035ee35ae0afc6294417adb775dddf25b3bd
-    cwwnE3dWgtiqe2mctDS2HF to cover the transaction fee
+    name: "ZAKXMI", // Diamond name / face value
+    approx_fee_offer: "ㄜ382:246", // The bidding fee for this diamond
+    nonce: "00000000c9babb01", // Mining random numbers
+    contain_block_height: 179610, // Height of excavated block
+    contain_block_hash: "0000000010914f286cc035ee35ae0afc6294417adb775dddf25b3bd4aa22524b", // Hash of excavated block
+    custom_message: "7d8367f6e46e9ffee311b9f3a38519d674b52407fd0aa287442715fe2f0c4db0", // Additional message
+    prev_block_hash: "000000000ae89f8a1c93fbffe9baad198fda287f13e39c37294eb7a7b617bd70", // Last block hash containing diamond
+    miner_address: "1KcXiRhMgGcvgxZGLBkLvogKLNKNXfKjEr", // The miner's address
+    current_belong_address: "1KcXiRhMgGcvgxZGLBkLvogKLNKNXfKjEr" // Diamond's current belong address
+}
+
+```
+
+We can see that the above two interface queries are essentially the same diamond.
+
+#### 3.3 Query the latest valid block information `GET: /query?action=last_block`
+
+Query the latest effective block information of the current blockchain.
+
+params:
+
+- info [bool] Whether to return details; otherwise, only height is returned
+
+Request example: [http://rpcapi.hacash.org/query?action=last_block](http://rpcapi.hacash.org/query?action=last_block)
+
+return data： 
+
+```js
+{
+    ret: 0,
+    height: 181719, // Currently, the block height that has been written into the effective blockchain
+    
+    // After passing the info field, more information is returned as follows:
+    hash: "0000000003ba7ed589b5881ea1852276cc7feb9b6a18dc3d9dbdc3d110055bd6",
+    mrkl_root: "5a28df311c7fb707914ff50394484e2079036284e38cbd1eaf811ab8c2ff34b1",
+    prev_hash: "000000000c57ae62d74d7f05de67b949899f6115cac52441b109241d5da2edca",
+    timestamp: 1603341936, // Block creation timestamp
+    transaction_count: 0 // The block contains the number of transactions
+}
+```
+
+#### 3.4 Query the specified block information `GET: /query?action=block_intro`
+
+params:
+
+- height [int] Optional, query block information by specifying height
+- hash [string] Optional, query block information by block hash value
+- unitmei [bool] Optional, whether to return the block reward and other amount fields with unit "Mei"
+ 
+Example interface 1:  [http://rpcapi.hacash.org/query?action=block_intro&height=177255&unitmei=1](http://rpcapi.hacash.org/query?action=block_intro&height=177255&unitmei=1)
+
+Example interface 2: [http://rpcapi.hacash.org/query?action=block_intro&hash=000000001e76b27f70f9a5e5b0f9b9824b416c210548ffad298577ed5378cdcd](http://rpcapi.hacash.org/query?action=block_intro&hash=000000001e76b27f70f9a5e5b0f9b9824b416c210548ffad298577ed5378cdcd)
+ 
+return data：
+
+```js
+{
+    ret: 0,
+    coinbase: {
+        address: "1DYY4ZRsWnhjcwwnE3dWgtiqe2mctDS2HF", // Miner's address
+        reward: "ㄜ1:248" // Reward for this block
+    },
+    height: 177255, // block height
+    hash: "000000001e76b27f70f9a5e5b0f9b9824b416c210548ffad298577ed5378cdcd", // block hash
+    mrkl_root: "d18df37a52c377115f053aca7822c65e5d154dac4ab6e062326dc770b5d1e5ad", // Merkel Root Hash
+    nonce: 3327878209, // Mining random number
+    difficulty: 3717887710, // Target difficulty value
+    prev_hash: "000000001868742351b8ab196444d22c0db2951c522ebc5b9ef057ad70a6556c", // Previous block hash
+    timestamp: 1601931702, // Block creation timestamp
+    transaction_count: 5, // The block contains the number of transactions
+    version: 1 // block version
+}
+```
+
+#### 3.3 Scan every transaction for transfer information `GET: /query?action=scan_value_transfers`
+
+Through the block height to traverse and scan each transaction, get the transfer content inside, to determine the exchange's functions such as charging and withdrawing money.
+
+params:
+
+- height [int] Block height to scan
+- txposi [int] The transaction to be scanned is at the array index position in the block, starting from 0
+- txhash [string] Optional, transaction hash. If the transaction hash is passed, you can directly query the transaction without passing the height and txposi values, which can be used to judge whether the transaction is confirmed or not
+- unitmei [bool] Optional, whether to return floating-point string in units of "Mei"
+- kind [menu] Query the type of return; `kind=h` returns only HAC transfer, `kind=hs` returns HAC and BTC transfer, and returns all types of transfer without transferring or passing `kind=hsd`
+ 
+Examples 1: [http://rpcapi.hacash.org/query?action=scan_value_transfers&unitmei=1&height=180115&txposi=0&kind=hsd](http://rpcapi.hacash.org/query?action=scan_value_transfers&unitmei=1&height=180115&txposi=0&kind=hsd)
+ 
+Examples 2: [http://rpcapi.hacash.org/query?action=scan_value_transfers&txhash=6d678040e5d3d8104de1ea627fde1973ab9d0e036a5fe20913dfdd6192dec266](http://rpcapi.hacash.org/query?action=scan_value_transfers&txhash=6d678040e5d3d8104de1ea627fde1973ab9d0e036a5fe20913dfdd6192dec266)
+ 
+Examples return：
+
+
+ ```js
+{
+    ret: 0,
+    type: 2, // Transaction type
+    hash: "6d678040e5d3d8104de1ea627fde1973ab9d0e036a5fe20913dfdd6192dec266", // Transaction hash
+    // main_adderss
+    address: "1DYY4ZRsWnhjcwwnE3dWgtiqe2mctDS2HF", // Transaction fee address and main address
+    fee: "ㄜ4:244", // Transaction fee
+    timestamp: 1602764644, // Transaction creation timestamp
+    // Examples of scan transfer types are as follows:
+    effective_actions: [
+        {
+            // mean main_adderss: 1DYY4ZRsWnhjcwwnE3dWgtiqe2mctDS2HF to to_Address: 16DL2tFV2PxLx4RsjKLFeFXm7sued4UbPv transfer 15.38 HAC, payment address 1DYY4ZRsWnhjcwwnE3dWgtiqe2mctDS2HF pay the fee: 0.0001 HAC
+            ai: 0, // ai mean action_index, mean action at array index in this transaction is calculated from 0
+            hacash: "ㄜ1538:246", // The hacash field indicates the number of HAC transfers
+            to: "16DL2tFV2PxLx4RsjKLFeFXm7sued4UbPv"
+        },
+        {
+            // mean from_address: 18o6aqFiUDurPqie6zrNwV2pmafWyziZZP to main_adderss: 1DYY4ZRsWnhjcwwnE3dWgtiqe2mctDS2HF transfer 50 HAC, Collection account 1DYY4ZRsWnhjcwwnE3dWgtiqe2mctDS2HF pay the fee.
+            ai: 2,
+            hacash: "ㄜ50:248", // The hacash field indicates the number of HAC transfers
+            from: "18o6aqFiUDurPqie6zrNwV2pmafWyziZZP"
+        },
+        {
+            // mean from_address: 1EM4j8xmxJosAi1N2RS2QL4VMe6x3agb7f to to_adderss: 1CYRSqhB7LgYXShHitxjBPaYcs4VxVWHyn pay 128 HAC ， main_address 1DYY4ZRsWnhjcwwnE3dWgtiqe2mctDS2HF Neither collection nor payment, only pay fee for this transfer.
+            ai: 5,
+            hacash: "ㄜ128:248", // The hacash field indicates the number of HAC transfers
+            from: "1EM4j8xmxJosAi1N2RS2QL4VMe6x3agb7f",
+            to: "1CYRSqhB7LgYXShHitxjBPaYcs4VxVWHyn"
+        },
+        {
+            // Indicates the excavation / creation of the diamond. The miner's address is 18Yt6UbnDKaXaBaMPnBdEHomRYVKwcGgyH , Diamond name is SWBAVY , number is 20094.
+            ai: 6,
+            diamond: "SWBAVY",
+            miner: "18Yt6UbnDKaXaBaMPnBdEHomRYVKwcGgyH",
+            number: 20094
+        },
+        {
+        	// mean main_adderss: 1DYY4ZRsWnhjcwwnE3dWgtiqe2mctDS2HF transfer diamond XMYVEM to to_address: 1CYRSqhB7LgYXShHitxjBPaYcs4VxVWHyn, main_address 1DYY4ZRsWnhjcwwnE3dWgtiqe2mctDS2HF pay the fee.
             ai: 8,
             diamonds: "XMYVEM",
             to: "1CYRSqhB7LgYXShHitxjBPaYcs4VxVWHyn"
@@ -363,32 +485,34 @@ The above two interfaces return the same content:
 
 Use the `scan_value_transfers` interface note:
 
- -Regardless of transferring HAC, BTC or block diamonds, only HAC can be used to pay the handling fee
- -The unit of BTC transfer is "satoshi", 1 BTC = 100000000 satoshi
- -Judge the transfer type through the fields of `hacash`, `satoshi` and `diamonds`, as well as `miner` and `owner`
- -The `ai` field represents `action_index`, which is the array index position of the transfer in the transaction, not the type
- -Judge the direction of fund transfer by checking the two address fields of `from` and `to`
- -The Hacash system supports the payer, receiver or any unrelated third party to pay transaction confirmation fees when transferring funds
- -A transaction can include transfers of multiple types, amounts, and multi-payments. A transaction is a comprehensive payment contract
- -It is possible to add other types of transfer types in the future
+- Regardless of transferring HAC, BTC or block diamonds, only HAC can be used to pay the handling fee
+- The unit of BTC transfer is "satoshi", 1 BTC = 100000000 satoshi
+- Judge the transfer type through the fields of `hacash`, `satoshi` and `diamonds`, as well as `miner` and `owner`
+- The `ai` field represents `action_index`, which is the array index position of the transfer in the transaction, not the type
+- Judge the direction of fund transfer by checking the two address fields of `from` and `to`
+- The Hacash system supports the payer, receiver or any unrelated third party to pay transaction confirmation fees when transferring funds
+- A transaction can include transfers of multiple types, amounts, and multi-payments. A transaction is a comprehensive payment contract
+- It is possible to add other types of transfer types in the future
 
 
 ---
 
 ## 4. /operate Modification, operation
 
-#### 4.1 Increase transaction fee for confirmation `GET: /operate? Action=raise_tx_fee`
+#### 4.1 Increase transaction fee for confirmation `GET: /operate?action=raise_tx_fee`
 
 When a transaction exists in the transaction pool and has not been confirmed, it can be re-signed to increase (but not reduce) the transaction fee, so as to speed up transaction confirmation or diamond bidding.
 
 Pass parameters:
 
- -txhash [string] The hash value of the transaction to increase the fee
- -fee [string] The target fee to be modified
- -unitmei [bool] Optional, whether to use the unit "piece" as the unit passed in the `fee` field
- -fee_prikey [string] The private key of the fee address
+- txhash [string] The hash value of the transaction to increase the fee
+- fee [string] The target fee to be modified
+- unitmei [bool] Optional, whether to use the unit "piece" as the unit passed in the `fee` field
+- fee_prikey [string] The private key of the fee address
 
-Example Access Interface: ``[http://rpcapi.hacash.org/operate?action=raise_tx_fee&fee_prikey=8D969EEF6ECAD3C29A3A629280E686CF0C3F5D5A86AFF3CA12020C923ADC6C92&fee= \u311c 32: 247 & txhash = ad26a35116664176426f3c08adad147577b9a85999cb89d465becf6a27002c04] (http://rpcapi.hacash.org/operate?action=raise_tx_fee&fee_prikey=8D969EEF6ECAD3C29A3A629280E686CF0C3F5D5A86AFF3CA12020C923ADC6C92&fee= \u311c 32:247&txhash=ad26a35116664176426f3c08adad147577b9a85999cb89d465becf6a27002c04)``
+Example Access Interface: 
+
+[http://rpcapi.hacash.org/operate?action=raise_tx_fee&fee_prikey=8D969EEF6ECAD3C29A3A629280E686CF0C3F5D5A86AFF3CA12020C923ADC6C92&fee=ㄜ32:247&txhash=ad26a35116664176426f3c08adad147577b9a85999cb89d465becf6a27002c04](http://rpcapi.hacash.org/operate?action=raise_tx_fee&fee_prikey=8D969EEF6ECAD3C29A3A629280E686CF0C3F5D5A86AFF3CA12020C923ADC6C92&fee=ㄜ32:247&txhash=ad26a35116664176426f3c08adad147577b9a85999cb89d465becf6a27002c04)``
 
 Example of interface return:
 
