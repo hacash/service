@@ -400,6 +400,7 @@ Examples return：
     address: "1DYY4ZRsWnhjcwwnE3dWgtiqe2mctDS2HF", // Transaction fee address and main address
     fee: "ㄜ4:244", // Transaction fee
     timestamp: 1602764644, // Transaction creation timestamp
+    height: 103764, // Block height of Transaction confirm
     // Examples of scan transfer types are as follows:
     effective_actions: [
         {

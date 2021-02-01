@@ -71,7 +71,7 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 		txhash = tx.Hash()
 	} else if txhash != nil {
 		// read tx body from disk
-		_, txbody, e := api.backend.BlockChain().State().BlockStore().ReadTransactionBytesByHash(txhash)
+		blockheight, txbody, e := api.backend.BlockChain().State().BlockStore().ReadTransactionBytesByHash(txhash)
 		if e != nil {
 			ResponseError(w, e)
 			return
@@ -86,6 +86,7 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 			return
 		}
 		tx = txObj
+		height = blockheight
 	} else {
 		ResponseErrorString(w, "params error: height, txposi or txhash must give")
 		return
@@ -98,7 +99,7 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 	retdata["hash"] = hex.EncodeToString(txhash)
 	retdata["fee"] = txfee.ToMeiOrFinString(isUnitMei)
 	retdata["address"] = tx.GetAddress().ToReadable()
-	//retdata["action_count"] = len(trsActions)
+	retdata["height"] = height // block height
 	retdata["timestamp"] = tx.GetTimestamp()
 
 	effectiveActions := make([]interface{}, 0)

@@ -378,6 +378,7 @@ curl "http://rpcapi.hacash.org/submit?action=transaction&hexbody=1" -X POST -d "
     address: "1DYY4ZRsWnhjcwwnE3dWgtiqe2mctDS2HF", // 交易手续费地址、主地址
     fee: "ㄜ4:244", // 交易支付手续费
     timestamp: 1602764644, // 交易创建时间戳
+    height: 103764, // 包含这笔交易的区块高度
     // 扫描转账类型示例如下：
     effective_actions: [
         {
