@@ -117,7 +117,7 @@ func CheckParamString(r *http.Request, key string, defValue string) string {
 
 func CheckParamHex(r *http.Request, key string, defv []byte) []byte {
 	if v := r.FormValue(key); len(v) > 0 {
-		v = strings.TrimLeft(v, "0x")
+		//v = strings.TrimLeft(v, "0x")
 		hexdts, e := hex.DecodeString(v)
 		if e != nil {
 			return nil
