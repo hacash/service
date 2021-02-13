@@ -26,7 +26,7 @@ git clone https://github.com/hacash/${d}.git
 done
 ```
 
-You can move the source and set you own $GOROOT and $GOPATH, however using the existing
+You can move the source and set your own $GOROOT and $GOPATH, however using the existing
 file structure will work first time and update cleanly.
 
 You can also update the git source at any time using the following script -
@@ -88,7 +88,7 @@ cd ~/go/src/github.com/hacash
 go build -ldflags '-w -s' -o poolworker_2021_02_12.exe  miner/run/minerworker/main.go
 
 2. miner
-go build -ldflags '-w -s' -o miner_2021_02_12.exe  miner/run/main.go
+go build -ldflags '-w -s' -o miner_2021_02_12.exe  miner/run/main/main.go
 
 3. cmdwallet
 go build -ldflags '-w -s' -o miner_2021_02_12.exe cmdwallet/run/main/main.go
