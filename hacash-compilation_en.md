@@ -92,7 +92,7 @@ go build -ldflags '-w -s' -o poolworker_2021_02_12.exe  miner/run/minerworker/ma
 go build -ldflags '-w -s' -o miner_2021_02_12.exe  miner/run/main/main.go
 
 3. cmdwallet
-go build -ldflags '-w -s' -o miner_2021_02_12.exe cmdwallet/run/main/main.go
+go build -ldflags '-w -s' -o cmdwallet_2021_02_12.exe cmdwallet/run/main/main.go
 
 ```
 
