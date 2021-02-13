@@ -46,6 +46,7 @@ This step is only necessary if you are compiling on a new architecture (differen
 
 ```bash
 cd x16rs/
+mv libx16rs_hash.a libx16rs_hash.a-x86_64
 export CFLAGS="-Ofast -march=native"
 mkdir build
 cd build
