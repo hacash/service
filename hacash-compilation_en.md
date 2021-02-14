@@ -48,9 +48,8 @@ This step is only necessary if you are compiling on a new architecture (differen
 cd x16rs/
 mv libx16rs_hash.a libx16rs_hash.a-x86_64
 export CFLAGS="-Ofast -march=native"
-mkdir build
-cd build
-cmake ..
+cmake .
+make clean
 make
 ```
 
@@ -96,6 +95,6 @@ go build -ldflags '-w -s' -o cmdwallet_2021_02_12.exe cmdwallet/run/main/main.go
 
 ```
 
-That's it see other documentation under hacash.org for further information on
+That's it :  see other documentation under hacash.org for further information on
 how to run and configure these executables.
 
