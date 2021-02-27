@@ -23,8 +23,8 @@ func (api *RpcService) createValueTransferTx(r *http.Request, w http.ResponseWri
 	isUnitMei := CheckParamBool(r, "unitmei", false)
 
 	// address
-	mainPrikeyStr := strings.TrimLeft(CheckParamString(r, "main_prikey", ""), "0x")
-	mainPrikeyStr = strings.TrimLeft(mainPrikeyStr, "0X")
+	mainPrikeyStr := strings.TrimPrefix(CheckParamString(r, "main_prikey", ""), "0x")
+	mainPrikeyStr = strings.TrimPrefix(mainPrikeyStr, "0X")
 	if len(mainPrikeyStr) == 0 {
 		ResponseErrorString(w, "param main_prikey must give")
 		return
@@ -236,8 +236,8 @@ func appendActionTransferDiamond(r *http.Request, isUnitMei bool, allprikey map[
 
 	var diamondOwnerAccount *account.Account = nil
 	// address
-	diamondOwnerStr := strings.TrimLeft(CheckParamString(r, "diamond_owner_prikey", ""), "0x")
-	diamondOwnerStr = strings.TrimLeft(diamondOwnerStr, "0X")
+	diamondOwnerStr := strings.TrimPrefix(CheckParamString(r, "diamond_owner_prikey", ""), "0x")
+	diamondOwnerStr = strings.TrimPrefix(diamondOwnerStr, "0X")
 	if len(diamondOwnerStr) > 0 {
 		if len(diamondOwnerStr) != 64 {
 			return fmt.Errorf("param main_prikey length error")

@@ -16,8 +16,8 @@ func (api *RpcService) raiseTxFee(r *http.Request, w http.ResponseWriter, bodyby
 	isUnitMei := CheckParamBool(r, "unitmei", false)
 
 	// address
-	feePrikeyStr := strings.TrimLeft(CheckParamString(r, "fee_prikey", ""), "0x")
-	feePrikeyStr = strings.TrimLeft(feePrikeyStr, "0X")
+	feePrikeyStr := strings.TrimPrefix(CheckParamString(r, "fee_prikey", ""), "0x")
+	feePrikeyStr = strings.TrimPrefix(feePrikeyStr, "0X")
 	if len(feePrikeyStr) == 0 {
 		ResponseErrorString(w, "param fee_prikey must give")
 		return
