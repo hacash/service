@@ -376,7 +376,9 @@ curl "http://rpcapi.hacash.org/submit?action=transaction&hexbody=1" -X POST -d "
     hash: "6d678040e5d3d8104de1ea627fde1973ab9d0e036a5fe20913dfdd6192dec266", // 交易哈希
     // main_adderss
     address: "1DYY4ZRsWnhjcwwnE3dWgtiqe2mctDS2HF", // 交易手续费地址、主地址
-    fee: "ㄜ4:244", // 交易支付手续费
+    feepay: "ㄜ4:244", // 交易支付手续费
+    feegot: "ㄜ4:243", // 被挖掘区块的矿工获得交易手续费（剩下部分被销毁了）
+    // 说明：用户付出的手续费 和 矿工获得的手续费可能相同，也可能不同。但获得的一定不会大于付出的。
     timestamp: 1602764644, // 交易创建时间戳
     height: 103764, // 包含这笔交易的区块高度
     // 扫描转账类型示例如下：

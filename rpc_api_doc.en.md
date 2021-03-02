@@ -398,7 +398,9 @@ Examples return：
     hash: "6d678040e5d3d8104de1ea627fde1973ab9d0e036a5fe20913dfdd6192dec266", // Transaction hash
     // main_adderss
     address: "1DYY4ZRsWnhjcwwnE3dWgtiqe2mctDS2HF", // Transaction fee address and main address
-    fee: "ㄜ4:244", // Transaction fee
+    feepay: "ㄜ4:244", // tx fee of user pay
+    feegot: "ㄜ4:243", // tx fee of miner miner real received（the rest be burned）
+    // Note: the tx fee paid by the user may be the same as or different from that obtained by the miner. But what miner get will never be more than what user payed.
     timestamp: 1602764644, // Transaction creation timestamp
     height: 103764, // Block height of Transaction confirm
     // Examples of scan transfer types are as follows:

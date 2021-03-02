@@ -95,9 +95,11 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 	// ret data
 	var retdata = ResponseCreateData("type", tx.Type())
 	trsActions := tx.GetActions()
-	txfee := tx.GetFee()
+	txfeepay := tx.GetFee()
+	txfeegot := tx.GetFeeOfMinerRealReceived()
 	retdata["hash"] = hex.EncodeToString(txhash)
-	retdata["fee"] = txfee.ToMeiOrFinString(isUnitMei)
+	retdata["feepay"] = txfeepay.ToMeiOrFinString(isUnitMei)
+	retdata["feegot"] = txfeegot.ToMeiOrFinString(isUnitMei)
 	retdata["address"] = tx.GetAddress().ToReadable()
 	retdata["height"] = height // block height
 	retdata["timestamp"] = tx.GetTimestamp()

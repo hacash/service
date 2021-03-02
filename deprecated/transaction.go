@@ -186,13 +186,15 @@ func (api *DeprecatedApiService) getTransactionIntro(params map[string]string) m
 	// 交易返回数据
 	txaddr := fields.Address(trsres.GetAddress())
 	var txfee = trsres.GetFee()
+	var txfeeminergot = trsres.GetFeeOfMinerRealReceived()
 	result["jsondata"] = fmt.Sprintf(
-		`{"block":{"height":%d,"timestamp":%d},"type":%d,"address":"%s","fee":"%s","timestamp":%d,"actioncount":%d,"actions":[%s]`,
+		`{"block":{"height":%d,"timestamp":%d},"type":%d,"address":"%s","fee":"%s","feeminergot":"%s","timestamp":%d,"actioncount":%d,"actions":[%s]`,
 		blkhei,
 		trsres.GetTimestamp(),
 		trsres.Type(),
 		txaddr.ToReadable(), // 主地址
 		txfee.ToFinString(),
+		txfeeminergot.ToFinString(),
 		trsres.GetTimestamp(),
 		len(allactions),
 		actions_strings,
