@@ -36,6 +36,8 @@ func (api *DeprecatedApiService) initRoutes() {
 
 	queryRoutes["getalltransferlogbyblockheight"] = api.getAllTransferLogByBlockHeight // 扫描区块 获取所有转账信息
 
+	queryRoutes["totalsupply"] = api.totalSupply // 总供应量
+
 }
 
 func routeQueryRequest(action string, params map[string]string, w http.ResponseWriter, r *http.Request) {
