@@ -497,6 +497,25 @@ Use the `scan_value_transfers` interface note:
 - A transaction can include transfers of multiple types, amounts, and multi-payments. A transaction is a comprehensive payment contract
 - It is possible to add other types of transfer types in the future
 
+#### 3.6 Query total supply `GET: /query ? action=total_supply`
+
+ examples link：[http://rpcapi.hacash.org/query?action=total_supply](http://rpcapi.hacash.org/query?action=total_supply)
+ 
+ examples return data：
+ 
+ ```js
+{
+    ret: 0,
+    diamond: 27538, // The number of diamonds that have been minted successfully
+    miner_reward: 240213, // Block reward HAC accumulation
+    channel_interest: 151.6902713463587, // Channel interest HAC accumulation
+    btcmove_subsidy: 0, // BTC transfer and additional issuance of HAC
+    burning_fee: 0, // tx fee by burning
+    current_circulation: 240364.69027134636, // Current circulation supply
+    located_in_channel: 0, // Real time statistics of HAc located in channel chain
+
+}
+```
 
 ---
 

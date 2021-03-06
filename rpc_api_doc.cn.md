@@ -351,7 +351,7 @@ curl "http://rpcapi.hacash.org/submit?action=transaction&hexbody=1" -X POST -d "
 }
 ```
 
-#### 3.3 扫描每一笔交易获取转账信息 `GET: /query ? action=scan_value_transfers`
+#### 3.5 扫描每一笔交易获取转账信息 `GET: /query ? action=scan_value_transfers`
 
 通过区块高度来遍历扫描每一笔交易，获取里面的转账内容，以确定交易所充币、提币等功能。
 
@@ -476,6 +476,26 @@ curl "http://rpcapi.hacash.org/submit?action=transaction&hexbody=1" -X POST -d "
  - 在将来有可能增加其他种类的的转账类型
  
  
+#### 3.6 查询总供应量 `GET: /query ? action=total_supply`
+
+ 示例接口：[http://rpcapi.hacash.org/query?action=total_supply](http://rpcapi.hacash.org/query?action=total_supply)
+ 
+ 示例返回值：
+ 
+ ```js
+{
+    ret: 0, // 通用返回值
+    diamond: 27538, // 当前已经成功挖掘出的钻石数量
+    miner_reward: 240213, // 区块奖励HAC累计
+    channel_interest: 151.6902713463587, // 通道锁定利息HAC累计
+    btcmove_subsidy: 0, // BTC转移增发HAC已解锁部分累计
+    burning_fee: 0, // 被燃烧销毁的手续费
+    current_circulation: 240364.69027134636, // 当前流通供应量
+    located_in_channel: 0, // 被锁定在通道链内的HAC实时统计
+
+}
+```
+
 ---
 
 ## 4. /operate 修改、操作

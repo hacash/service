@@ -10,6 +10,8 @@ func (api *RpcService) initRoutes() {
 	api.createRoutes["value_transfer_tx"] = api.createValueTransferTx
 
 	// query
+	api.queryRoutes["total_supply"] = api.totalSupply
+
 	api.queryRoutes["balances"] = api.balances
 	api.queryRoutes["diamond"] = api.diamond
 
