@@ -26,7 +26,7 @@ func (api *DeprecatedApiService) totalSupply(params map[string]string) map[strin
 	miner_reward,
 		channel_interest,
 		btcmove_subsidy,
-		burning_fee :=
+		burned_fee :=
 		ttspl.Get(stores.TotalSupplyStoreTypeOfBlockMinerReward),
 		ttspl.Get(stores.TotalSupplyStoreTypeOfChannelInterest),
 		ttspl.Get(stores.TotalSupplyStoreTypeOfBitcoinTransferUnlockSuccessed),
@@ -36,10 +36,10 @@ func (api *DeprecatedApiService) totalSupply(params map[string]string) map[strin
 	result["channel_interest"] = strings.TrimSuffix(fmt.Sprintf("%.4f", channel_interest), ".0000")
 	result["btcmove_subsidy"] = strings.TrimSuffix(fmt.Sprintf("%.4f", btcmove_subsidy), ".0000")
 
-	result["burning_fee"] = strings.TrimSuffix(fmt.Sprintf("%.4f", burning_fee), ".0000")
+	result["burned_fee"] = strings.TrimSuffix(fmt.Sprintf("%.4f", burned_fee), ".0000")
 
 	// 计算
-	result["current_circulation"] = strings.TrimSuffix(fmt.Sprintf("%.4f", miner_reward+channel_interest+btcmove_subsidy-burning_fee), ".0000")
+	result["current_circulation"] = strings.TrimSuffix(fmt.Sprintf("%.4f", miner_reward+channel_interest+btcmove_subsidy-burned_fee), ".0000")
 
 	// 统计
 	// 位于通道链中的HAC

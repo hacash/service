@@ -25,7 +25,7 @@ func (api *RpcService) totalSupply(r *http.Request, w http.ResponseWriter, bodyb
 	miner_reward,
 		channel_interest,
 		btcmove_subsidy,
-		burning_fee :=
+		burned_fee :=
 		ttspl.Get(stores.TotalSupplyStoreTypeOfBlockMinerReward),
 		ttspl.Get(stores.TotalSupplyStoreTypeOfChannelInterest),
 		ttspl.Get(stores.TotalSupplyStoreTypeOfBitcoinTransferUnlockSuccessed),
@@ -35,10 +35,10 @@ func (api *RpcService) totalSupply(r *http.Request, w http.ResponseWriter, bodyb
 	data["channel_interest"] = channel_interest
 	data["btcmove_subsidy"] = btcmove_subsidy
 
-	data["burning_fee"] = burning_fee
+	data["burned_fee"] = burned_fee
 
 	// 计算
-	data["current_circulation"] = miner_reward + channel_interest + btcmove_subsidy - burning_fee
+	data["current_circulation"] = miner_reward + channel_interest + btcmove_subsidy - burned_fee
 
 	// 统计
 	// 位于通道链中的HAC
