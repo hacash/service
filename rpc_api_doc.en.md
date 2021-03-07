@@ -506,7 +506,7 @@ Use the `scan_value_transfers` interface note:
  ```js
 {
     ret: 0,
-    diamond: 27538, // The number of diamonds that have been minted successfully
+    minted_diamond: 27538, // The number of diamonds that have been minted successfully
     miner_reward: 240213, // Block reward HAC accumulation
     channel_interest: 151.6902713463587, // Channel interest HAC accumulation
     btcmove_subsidy: 0, // BTC transfer and additional issuance of HAC

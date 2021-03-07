@@ -19,7 +19,7 @@ func (api *RpcService) totalSupply(r *http.Request, w http.ResponseWriter, bodyb
 	//fmt.Println(ttspl.Serialize())
 
 	// return
-	data := ResponseCreateData("diamond", int(ttspl.Get(stores.TotalSupplyStoreTypeOfDiamond)))
+	data := ResponseCreateData("minted_diamond", int(ttspl.Get(stores.TotalSupplyStoreTypeOfDiamond)))
 
 	// 统计
 	miner_reward,

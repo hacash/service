@@ -485,7 +485,7 @@ curl "http://rpcapi.hacash.org/submit?action=transaction&hexbody=1" -X POST -d "
  ```js
 {
     ret: 0, // 通用返回值
-    diamond: 27538, // 当前已经成功挖掘出的钻石数量
+    minted_diamond: 27538, // 当前已经成功挖掘出的钻石数量
     miner_reward: 240213, // 区块奖励HAC累计
     channel_interest: 151.6902713463587, // 通道锁定利息HAC累计
     btcmove_subsidy: 0, // BTC转移增发HAC已解锁部分累计
