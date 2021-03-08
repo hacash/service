@@ -20,7 +20,8 @@ func (api *DeprecatedApiService) totalSupply(params map[string]string) map[strin
 	//fmt.Println(ttspl.Serialize())
 
 	// return
-	result["minted_diamond"] = fmt.Sprintf("%d", int(ttspl.Get(stores.TotalSupplyStoreTypeOfDiamond)))
+	result["minted_diamond"] = fmt.Sprintf("%d", uint64(ttspl.Get(stores.TotalSupplyStoreTypeOfDiamond)))
+	result["transferred_bitcoin"] = fmt.Sprintf("%d", uint64(ttspl.Get(stores.TotalSupplyStoreTypeOfDiamond)))
 
 	// 统计
 	miner_reward,
