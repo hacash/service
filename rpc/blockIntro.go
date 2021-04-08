@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"encoding/hex"
+	"fmt"
 	"github.com/hacash/core/blocks"
 	"github.com/hacash/core/transactions"
 	"github.com/hacash/mint/coinbase"
@@ -48,6 +49,10 @@ func (api *RpcService) blockIntro(r *http.Request, w http.ResponseWriter, bodyby
 	// 检查错误
 	if errread != nil {
 		ResponseError(w, errread)
+		return
+	}
+	if blkbytes == nil {
+		ResponseError(w, fmt.Errorf("block is not find"))
 		return
 	}
 

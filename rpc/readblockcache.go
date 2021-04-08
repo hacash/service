@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"fmt"
 	"github.com/hacash/core/blocks"
 	"github.com/hacash/core/interfaces"
 	"sync"
@@ -30,8 +31,17 @@ func (api *RpcService) LoadBlockWithCache(height uint64) (interfaces.Block, erro
 			return v, nil // return cache
 		}
 	}
+
 	// load from disk
-	_, blkbody, err := api.backend.BlockChain().State().BlockStore().ReadBlockBytesByHeight(height, 0)
+	state := api.backend.BlockChain().State()
+	last, e1 := state.ReadLastestBlockHeadAndMeta()
+	if e1 != nil {
+		return nil, e1
+	}
+	if height >= last.GetHeight() {
+		return nil, fmt.Errorf("block is not find.")
+	}
+	_, blkbody, err := state.BlockStore().ReadBlockBytesByHeight(height, 0)
 	if err != nil {
 		return nil, err
 	}

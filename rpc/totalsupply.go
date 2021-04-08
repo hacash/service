@@ -1,7 +1,6 @@
 package rpc
 
 import (
-	"fmt"
 	"github.com/hacash/core/stores"
 	"net/http"
 )
@@ -22,7 +21,7 @@ func (api *RpcService) totalSupply(r *http.Request, w http.ResponseWriter, bodyb
 	// return
 	data := ResponseCreateData("minted_diamond", int(ttspl.Get(stores.TotalSupplyStoreTypeOfDiamond)))
 
-	data["transferred_bitcoin"] = fmt.Sprintf("%d", uint64(ttspl.Get(stores.TotalSupplyStoreTypeOfTransferBitcoin)))
+	data["transferred_bitcoin"] = uint64(ttspl.Get(stores.TotalSupplyStoreTypeOfTransferBitcoin))
 
 	// 统计
 	miner_reward,
