@@ -59,9 +59,9 @@ func (api *Ranking) apiHandleFunc(w http.ResponseWriter, r *http.Request) {
 			for i, v := range api.hacash_balance_ranking_100 {
 				percent := 0.0
 				if api.current_circulation > 0 {
-					percent = v.BalanceFloat64() / api.current_circulation * 100
+					percent = v.GetBalance() / api.current_circulation * 100
 				}
-				list[i] = fmt.Sprintf("%s %.4f %.2f", v.Address.ToReadable(), v.BalanceFloat64(), percent)
+				list[i] = fmt.Sprintf("%s %.4f %.2f", v.Address.ToReadable(), v.GetBalance(), percent)
 			}
 			ResponseList(w, list)
 
@@ -71,9 +71,9 @@ func (api *Ranking) apiHandleFunc(w http.ResponseWriter, r *http.Request) {
 			for i, v := range api.diamond_balance_ranking_100 {
 				percent := 0.0
 				if api.minted_diamond > 0 {
-					percent = float64(v.BalanceUint64()) / float64(api.minted_diamond) * 100
+					percent = v.GetBalance() / float64(api.minted_diamond) * 100
 				}
-				list[i] = fmt.Sprintf("%s %d %.2f", v.Address.ToReadable(), v.BalanceUint64(), percent)
+				list[i] = fmt.Sprintf("%s %d %.2f", v.Address.ToReadable(), v.GetBalanceForceUint64(), percent)
 			}
 			ResponseList(w, list)
 
@@ -83,9 +83,9 @@ func (api *Ranking) apiHandleFunc(w http.ResponseWriter, r *http.Request) {
 			for i, v := range api.satoshi_balance_ranking_100 {
 				percent := 0.0
 				if api.minted_diamond > 0 {
-					percent = float64(v.BalanceUint64()) / float64(api.transferred_bitcoin*100000000) * 100
+					percent = v.GetBalance() / float64(api.transferred_bitcoin*100000000) * 100
 				}
-				list[i] = fmt.Sprintf("%s %.4f %.2f", v.Address.ToReadable(), float64(v.BalanceUint64())/100000000, percent)
+				list[i] = fmt.Sprintf("%s %.4f %.2f", v.Address.ToReadable(), v.GetBalance()/100000000, percent)
 			}
 			ResponseList(w, list)
 

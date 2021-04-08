@@ -8,31 +8,38 @@ import (
 )
 
 type BalanceRankingItem struct {
-	Address         fields.Address
-	Balance         fields.VarUint8
-	bls_use_float64 bool
+	Address       fields.Address
+	BlsUseFloat64 fields.VarUint1 // 标记是否是浮点数
+	Balance       fields.VarUint8
 }
 
-func NewBalanceRankingItem(addrstr string, bls uint64) *BalanceRankingItem {
+func NewBalanceRankingItem(addrstr string, isfloat bool) *BalanceRankingItem {
 	addr, _ := fields.CheckReadableAddress(addrstr)
+	isf := uint8(0)
+	if isfloat {
+		isf = 1
+	}
 	return &BalanceRankingItem{
-		Address: *addr,
-		Balance: fields.VarUint8(bls),
+		Address:       *addr,
+		BlsUseFloat64: fields.VarUint1(isf),
+		Balance:       fields.VarUint8(0),
 	}
 }
-func (b *BalanceRankingItem) BalanceUint64() uint64 {
+func (b *BalanceRankingItem) GetBalance() float64 {
+	if b.BlsUseFloat64 == 1 {
+		return math.Float64frombits(uint64(b.Balance))
+	}
+	return float64(b.Balance)
+}
+func (b *BalanceRankingItem) GetBalanceForceUint64() uint64 {
 	return uint64(b.Balance)
 }
-func (b *BalanceRankingItem) BalanceFloat64() float64 {
-	v := math.Float64frombits(uint64(b.Balance))
-	return v
-}
-func (b *BalanceRankingItem) SetBalanceUint64(v uint64) {
-	b.bls_use_float64 = false
+func (b *BalanceRankingItem) SetBalanceByUint64(v uint64) {
+	b.BlsUseFloat64 = fields.VarUint1(0)
 	b.Balance = fields.VarUint8(v)
 }
-func (b *BalanceRankingItem) SetBalanceFloat64(v float64) {
-	b.bls_use_float64 = true
+func (b *BalanceRankingItem) SetBalanceByFloat64(v float64) {
+	b.BlsUseFloat64 = fields.VarUint1(1)
 	uv := math.Float64bits(v)
 	b.Balance = fields.VarUint8(uv)
 }
@@ -41,15 +48,18 @@ func (b *BalanceRankingItem) SetBalanceFloat64(v float64) {
 func ParseBalanceRankingItems(buf []byte) []*BalanceRankingItem {
 	newtable := []*BalanceRankingItem{}
 	blen := len(buf)
-	ist := 21 + 8
+	ist := 21 + 1 + 8
 	for seek := 0; seek < blen; {
 		one := BalanceRankingItem{}
 		if blen < seek+ist {
 			break
 		}
 		one.Address = buf[seek : seek+21]
-		one.Balance = fields.VarUint8(binary.BigEndian.Uint64(buf[seek+21 : seek+21+8]))
-		seek += ist
+		seek += 21
+		one.BlsUseFloat64 = fields.VarUint1(buf[seek])
+		seek += 1
+		one.Balance = fields.VarUint8(binary.BigEndian.Uint64(buf[seek : seek+8]))
+		seek += 8
 		newtable = append(newtable, &one)
 	}
 	return newtable
@@ -60,17 +70,18 @@ func SerializeBalanceRankingItems(table []*BalanceRankingItem) []byte {
 	buf := bytes.NewBuffer(nil)
 	for _, v := range table {
 		b1, _ := v.Address.Serialize()
-		b2, _ := v.Balance.Serialize()
+		b2, _ := v.BlsUseFloat64.Serialize()
+		b3, _ := v.Balance.Serialize()
 		buf.Write(b1)
 		buf.Write(b2)
+		buf.Write(b3)
 	}
 	return buf.Bytes()
 }
 
 // 更新排名表
 func UpdateBalanceRankingTable(table []*BalanceRankingItem, insert *BalanceRankingItem, maxsize int) []*BalanceRankingItem {
-	istvzore := (insert.bls_use_float64 && insert.BalanceFloat64() == 0) ||
-		(!insert.bls_use_float64 && insert.BalanceUint64() == 0)
+	istvzore := insert.GetBalance() == 0
 	tlen := len(table)
 	if tlen == 0 && !istvzore {
 		return []*BalanceRankingItem{insert}
@@ -100,16 +111,10 @@ func UpdateBalanceRankingTable(table []*BalanceRankingItem, insert *BalanceRanki
 	// 插入
 	tlen = len(table)
 	istidx := int(-1)
-	b1 := float64(insert.Balance)
-	if insert.bls_use_float64 {
-		b1 = math.Float64frombits(uint64(insert.Balance))
-	}
+	b1 := insert.GetBalance()
 	for i := tlen - 1; i >= 0; i-- {
 		li := table[i]
-		b2 := float64(li.Balance)
-		if li.bls_use_float64 {
-			b2 = math.Float64frombits(uint64(li.Balance))
-		}
+		b2 := li.GetBalance()
 		if b1 <= b2 {
 			istidx = i
 			break

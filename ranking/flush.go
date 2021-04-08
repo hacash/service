@@ -53,10 +53,12 @@ func (r *Ranking) flushStateToDisk() error {
 				hs, _ := jsonparser.GetString(value, "hacash")
 				h, _ := strconv.ParseFloat(hs, 64)
 				//fmt.Println(alladdrs[k1], d, s, h)
-				item1 := NewBalanceRankingItem(addrs[k1], uint64(d))
-				item2 := NewBalanceRankingItem(addrs[k1], uint64(s))
-				item3 := NewBalanceRankingItem(addrs[k1], 0)
-				item3.SetBalanceFloat64(h)
+				item1 := NewBalanceRankingItem(addrs[k1], false)
+				item1.SetBalanceByUint64(uint64(d))
+				item2 := NewBalanceRankingItem(addrs[k1], false)
+				item2.SetBalanceByUint64(uint64(s))
+				item3 := NewBalanceRankingItem(addrs[k1], true)
+				item2.SetBalanceByFloat64(float64(h))
 				// 更新
 				r.diamond_balance_ranking_100 = UpdateBalanceRankingTable(r.diamond_balance_ranking_100, item1, r.balance_ranking_range)
 				r.satoshi_balance_ranking_100 = UpdateBalanceRankingTable(r.satoshi_balance_ranking_100, item2, r.balance_ranking_range)
@@ -94,15 +96,15 @@ func (r *Ranking) flushStateToDisk() error {
 	fmt.Printf("flush height %d state %d, %d addresses , top max:", r.finish_scan_block_height, tt1, tt2)
 	if len(r.hacash_balance_ranking_100) > 0 {
 		it := r.hacash_balance_ranking_100[0]
-		fmt.Printf(" HAC: %f(%d)", it.BalanceFloat64(), len(r.hacash_balance_ranking_100))
+		fmt.Printf(" HAC: %f(%d)", it.GetBalance(), len(r.hacash_balance_ranking_100))
 	}
 	if len(r.diamond_balance_ranking_100) > 0 {
 		it := r.diamond_balance_ranking_100[0]
-		fmt.Printf(" HACD: %d(%d)", it.BalanceUint64(), len(r.diamond_balance_ranking_100))
+		fmt.Printf(" HACD: %d(%d)", it.GetBalanceForceUint64(), len(r.diamond_balance_ranking_100))
 	}
 	if len(r.satoshi_balance_ranking_100) > 0 {
 		it := r.satoshi_balance_ranking_100[0]
-		fmt.Printf(" SAT: %d(%d)", it.BalanceUint64(), len(r.satoshi_balance_ranking_100))
+		fmt.Printf(" SAT: %d(%d)", it.GetBalanceForceUint64(), len(r.satoshi_balance_ranking_100))
 	}
 	fmt.Printf(".\n")
 
