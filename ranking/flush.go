@@ -91,7 +91,7 @@ func (r *Ranking) flushStateToDisk() error {
 	//r.flushStateToDiskNotifyCh
 
 	// 打印消息
-	fmt.Printf("flush state %d, %d addresses , top max:", tt1, tt2)
+	fmt.Printf("flush height %d state %d, %d addresses , top max:", r.finish_scan_block_height, tt1, tt2)
 	if len(r.hacash_balance_ranking_100) > 0 {
 		it := r.hacash_balance_ranking_100[0]
 		fmt.Printf(" HAC: %f(%d)", it.BalanceFloat64(), len(r.hacash_balance_ranking_100))

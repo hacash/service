@@ -6,7 +6,7 @@ func (r *Ranking) loop() {
 
 	for {
 
-		tickerFlushStateToDisk := time.NewTicker(time.Minute * 30)
+		tickerFlushStateToDisk := time.NewTicker(time.Minute * time.Duration(r.flush_state_timeout_minute))
 		tickerUploadTotalSupply := time.NewTicker(time.Minute * 23)
 
 		select {

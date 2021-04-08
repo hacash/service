@@ -18,10 +18,11 @@ const (
 type Ranking struct {
 
 	// config
-	ldb_dir               string
-	http_api_listen_port  int    // api 接口监听
-	balance_ranking_range int    // 余额排名范围
-	node_rpc_url          string // 节点rpc接口地址： http://127.0.0.1:8083
+	ldb_dir                    string
+	http_api_listen_port       int    // api 接口监听
+	balance_ranking_range      int    // 余额排名范围
+	node_rpc_url               string // 节点rpc接口地址： http://127.0.0.1:8083
+	flush_state_timeout_minute int    // 刷新余额间隔时间(分钟)
 
 	// ptr
 	ldb                      *leveldb.DB
@@ -51,6 +52,7 @@ func NewRanking(cnffile *sys.Inicnf) *Ranking {
 	ldb_dir := section.Key("data_dir").MustString("./hacash_ranking_data")
 	apiport := section.Key("http_api_listen_port").MustInt(3377)
 	rpc_api := section.Key("node_rpc_ip_port").MustString("http://127.0.0.1:8083")
+	flush_time := section.Key("flush_state_timeout_minute").MustInt(30)
 
 	// create
 	rank := &Ranking{
@@ -58,6 +60,7 @@ func NewRanking(cnffile *sys.Inicnf) *Ranking {
 		ldb_dir:              ldb_dir,
 		node_rpc_url:         rpc_api,
 
+		flush_state_timeout_minute:  flush_time,
 		balance_ranking_range:       100, // 持仓排名100
 		finish_scan_block_height:    0,
 		flushStateToDiskNotifyCh:    make(chan bool, 10), // 通知管道

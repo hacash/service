@@ -28,6 +28,7 @@ func (r *Ranking) scanOneBlock() error {
 	if scanHeight%1000 == 0 {
 		fmt.Printf("scan block %d.\n", scanHeight)
 	}
+	// fmt.Println("scanOneBlock:", scanHeight)
 	blkUrl := fmt.Sprintf("/query?action=block_intro&unitmei=1&height=%d", scanHeight)
 	resbts1, e1 := HttpGetBytes(r.node_rpc_url + blkUrl)
 	if e1 != nil {

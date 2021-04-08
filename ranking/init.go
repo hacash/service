@@ -20,6 +20,7 @@ func (r *Ranking) init() error {
 		vb := fields.VarUint5(0)
 		if _, e2 := vb.Parse(v, 0); e2 == nil {
 			r.finish_scan_block_height = uint64(vb)
+			fmt.Printf("[Init] load finish_scan_block_height = %d.\n", vb)
 		}
 	}
 
