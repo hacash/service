@@ -58,7 +58,7 @@ func (r *Ranking) flushStateToDisk() error {
 				item2 := NewBalanceRankingItem(addrs[k1], false)
 				item2.SetBalanceByUint64(uint64(s))
 				item3 := NewBalanceRankingItem(addrs[k1], true)
-				item2.SetBalanceByFloat64(float64(h))
+				item3.SetBalanceByFloat64(float64(h))
 				// 更新
 				r.diamond_balance_ranking_100 = UpdateBalanceRankingTable(r.diamond_balance_ranking_100, item1, r.balance_ranking_range)
 				r.satoshi_balance_ranking_100 = UpdateBalanceRankingTable(r.satoshi_balance_ranking_100, item2, r.balance_ranking_range)
