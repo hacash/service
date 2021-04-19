@@ -34,7 +34,8 @@ func (api *DeprecatedApiService) initRoutes() {
 	queryRoutes["blockintro"] = api.getBlockIntro     // 查询区块简介
 	queryRoutes["trsintro"] = api.getTransactionIntro // 查询交易简介
 
-	queryRoutes["getalltransferlogbyblockheight"] = api.getAllTransferLogByBlockHeight // 扫描区块 获取所有转账信息
+	queryRoutes["getalltransferlogbyblockheight"] = api.getAllTransferLogByBlockHeight       // 扫描区块 获取所有转账信息
+	queryRoutes["getallchannelopenlogbyblockheight"] = api.getAllChannelOpenLogByBlockHeight // 扫描区块 获取所有通道开启信息
 
 	queryRoutes["totalsupply"] = api.totalSupply // 总供应量
 

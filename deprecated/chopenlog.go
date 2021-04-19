@@ -1,15 +1,15 @@
 package rpc
 
 import (
+	"encoding/hex"
 	"github.com/hacash/core/actions"
-	"github.com/hacash/core/fields"
 	rpc "github.com/hacash/service/server"
 	"strconv"
 	"strings"
 )
 
-// 扫描区块 获取所有转账信息
-func (api *DeprecatedApiService) getAllTransferLogByBlockHeight(params map[string]string) map[string]string {
+// 扫描区块 获取所有通道开启交易
+func (api *DeprecatedApiService) getAllChannelOpenLogByBlockHeight(params map[string]string) map[string]string {
 	result := make(map[string]string)
 	block_height_str, ok1 := params["block_height"]
 	if !ok1 {
@@ -51,14 +51,16 @@ func (api *DeprecatedApiService) getAllTransferLogByBlockHeight(params map[strin
 		if 0 == v.Type() { // coinbase
 			continue
 		}
-		from := fields.Address(v.GetAddress())
 		for _, act := range v.GetActions() {
-			if 1 == act.Kind() { // 类型为普通转账
-				act_k1 := act.(*actions.Action_1_SimpleTransfer)
+			if 2 == act.Kind() { // 类型为开启通带
+				act_k2 := act.(*actions.Action_2_OpenPaymentChannel)
+				idhex := hex.EncodeToString(act_k2.ChannelId)
 				allTransferLogs = append(allTransferLogs,
-					from.ToReadable()+"|"+
-						act_k1.ToAddress.ToReadable()+"|"+
-						act_k1.Amount.ToFinString())
+					idhex+"|"+
+						act_k2.LeftAddress.ToReadable()+"|"+
+						act_k2.LeftAmount.ToFinString()+"|"+
+						act_k2.RightAddress.ToReadable()+"|"+
+						act_k2.RightAmount.ToFinString())
 			}
 		}
 	}

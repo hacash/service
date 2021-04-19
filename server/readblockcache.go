@@ -21,7 +21,7 @@ var (
 )
 
 // 加载区块
-func (api *RpcService) LoadBlockWithCache(height uint64) (interfaces.Block, error) {
+func LoadBlockWithCache(state interfaces.ChainState, height uint64) (interfaces.Block, error) {
 	rpcReadBlockCacheMux.Lock()
 	defer rpcReadBlockCacheMux.Unlock()
 
@@ -33,7 +33,6 @@ func (api *RpcService) LoadBlockWithCache(height uint64) (interfaces.Block, erro
 	}
 
 	// load from disk
-	state := api.backend.BlockChain().State()
 	last, e1 := state.ReadLastestBlockHeadAndMeta()
 	if e1 != nil {
 		return nil, e1

@@ -6,6 +6,7 @@ import (
 	"github.com/hacash/core/actions"
 	"github.com/hacash/core/interfaces"
 	"github.com/hacash/core/transactions"
+	rpc "github.com/hacash/service/server"
 	"net/http"
 	"strings"
 )
@@ -53,7 +54,7 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 	// read tx
 	var tx interfaces.Transaction = nil
 	if height > 0 {
-		blockObj, e := api.LoadBlockWithCache(height)
+		blockObj, e := rpc.LoadBlockWithCache(api.backend.BlockChain().State(), height)
 		if e != nil {
 			ResponseError(w, e)
 			return
