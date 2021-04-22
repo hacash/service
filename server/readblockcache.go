@@ -37,7 +37,7 @@ func LoadBlockWithCache(state interfaces.ChainState, height uint64) (interfaces.
 	if e1 != nil {
 		return nil, e1
 	}
-	if height >= last.GetHeight() {
+	if height > last.GetHeight() {
 		return nil, fmt.Errorf("block is not find.")
 	}
 	_, blkbody, err := state.BlockStore().ReadBlockBytesByHeight(height, 0)
