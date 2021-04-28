@@ -37,6 +37,8 @@ func (api *DeprecatedApiService) initRoutes() {
 	queryRoutes["getalltransferlogbyblockheight"] = api.getAllTransferLogByBlockHeight       // 扫描区块 获取所有转账信息
 	queryRoutes["getallchannelopenlogbyblockheight"] = api.getAllChannelOpenLogByBlockHeight // 扫描区块 获取所有通道开启信息
 
+	queryRoutes["btcmovelog"] = api.getBtcMoveLogPageData // 获取比特币转移日志页数据
+
 	queryRoutes["totalsupply"] = api.totalSupply // 总供应量
 
 }
