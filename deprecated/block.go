@@ -75,10 +75,10 @@ func (api *DeprecatedApiService) getBlockIntro(params map[string]string) map[str
 		var blktxhxsary []string
 		var blktxhxsstr = ""
 		var rwdaddr fields.Address // 奖励地址
-		var rwdmsg fields.TrimString16
+		var rwdmsg string
 		for i, trs := range tarblock.GetTransactions() {
 			if i == 0 {
-				rwdmsg = trs.GetMessage()
+				rwdmsg = trs.GetMessage().ValueShow()
 				rwdaddr = trs.GetAddress()
 				blktxhxsary = append(blktxhxsary, "[coinbase]")
 			} else {
@@ -94,7 +94,7 @@ func (api *DeprecatedApiService) getBlockIntro(params map[string]string) map[str
 			tarblock.GetNonce(),
 			tarblock.GetDifficulty(),
 			rwdaddr.ToReadable(),
-			rwdmsg.ValueShow(),
+			rwdmsg,
 			blktxhxsstr,
 		)
 	}
@@ -171,16 +171,7 @@ func (api *DeprecatedApiService) getBlockAbstractList(params map[string]string) 
 			return result
 		}
 		// 返回
-		msg := ""
-		for _, v := range []byte(cbtx.GetMessage()) {
-			if v < 32 || v > 126 {
-				break
-			}
-			if v == 34 { // 处理双引号转换为单引号
-				v = 39
-			}
-			msg += string([]byte{v})
-		}
+		msg := cbtx.GetMessage().ValueShow()
 		jsondata = append(jsondata, fmt.Sprintf(
 			`{"hash":"%s","txs":%d,"time":%d,"height":%d,"nonce":%d,"bits":%d,"rewards":{"amount":"%s","address":"%s","message":"%s"}}`,
 			hex.EncodeToString(blkhash),
