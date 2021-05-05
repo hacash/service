@@ -75,9 +75,11 @@ func (api *DeprecatedApiService) getBlockIntro(params map[string]string) map[str
 		var blktxhxsary []string
 		var blktxhxsstr = ""
 		var rwdaddr fields.Address // 奖励地址
+		var rwdmsg fields.TrimString16
 		for i, trs := range tarblock.GetTransactions() {
 			if i == 0 {
-				rwdaddr = fields.Address(trs.GetAddress())
+				rwdmsg = trs.GetMessage()
+				rwdaddr = trs.GetAddress()
 				blktxhxsary = append(blktxhxsary, "[coinbase]")
 			} else {
 				blktxhxsary = append(blktxhxsary, hex.EncodeToString(trs.Hash()))
@@ -88,10 +90,11 @@ func (api *DeprecatedApiService) getBlockIntro(params map[string]string) map[str
 			blktxhxsstr = `"` + blktxhxsstr + `"`
 		}
 		result["jsondata"] += fmt.Sprintf(
-			`,"nonce":%d,"difficulty":%d,"rwdaddr":"%s","trshxs":[%s]`,
+			`,"nonce":%d,"difficulty":%d,"rwdaddr":"%s","rwdmsg":"%s","trshxs":[%s]`,
 			tarblock.GetNonce(),
 			tarblock.GetDifficulty(),
 			rwdaddr.ToReadable(),
+			rwdmsg.ValueShow(),
 			blktxhxsstr,
 		)
 	}

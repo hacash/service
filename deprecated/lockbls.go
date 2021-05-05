@@ -3,6 +3,7 @@ package rpc
 import (
 	"encoding/hex"
 	"github.com/hacash/core/stores"
+	"math/big"
 	"strconv"
 )
 
@@ -26,7 +27,8 @@ func (api *DeprecatedApiService) getLockBlsInfo(params map[string]string) map[st
 	}
 
 	// 查询
-	lockblsItem := api.blockchain.State().Lockbls(lockbls_key)
+	state := api.blockchain.State()
+	lockblsItem := state.Lockbls(lockbls_key)
 	if lockblsItem == nil {
 		result["err"] = "not find."
 		return result
@@ -44,5 +46,15 @@ func (api *DeprecatedApiService) getLockBlsInfo(params map[string]string) map[st
 	result["balance_amount"] = amt3.ToFinString()
 	amt4, _ := amt1.Sub(amt3)
 	result["released_amount"] = amt4.ToFinString()
+
+	// 是否为单向转移比特币增发
+	if lockbls_key[0] == 0 {
+		trsno := big.NewInt(0).SetBytes(lockbls_key).Uint64()
+		txhx, _ := state.ReadMoveBTCTxHashByNumber(uint32(trsno))
+		if len(txhx) == 32 {
+			result["satoshi_genesis_tx_hash"] = hex.EncodeToString(txhx)
+		}
+	}
+
 	return result
 }

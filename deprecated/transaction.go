@@ -178,6 +178,45 @@ func (api *DeprecatedApiService) getTransactionIntro(params map[string]string) m
 				acc.FromAddress.ToReadable(),
 				acc.ToAddress.ToReadable(),
 			)
+		} else if kind == 7 {
+			acc := act.(*actions.Action_7_SatoshiGenesis)
+			actstr += fmt.Sprintf(`,"trs_no":%d,"btc_num":%d,"hac_subsidy":%d,"address":"%s","lockbls_id":"%s"`,
+				acc.TransferNo,
+				acc.BitcoinQuantity,
+				acc.AdditionalTotalHacAmount,
+				acc.OriginAddress.ToReadable(),
+				hex.EncodeToString(actions.GainLockblsIdByBtcMove(uint32(acc.TransferNo))),
+			)
+		} else if kind == 8 {
+			acc := act.(*actions.Action_8_SimpleSatoshiTransfer)
+			actstr += fmt.Sprintf(`,"to":"%s","amount":%d`,
+				acc.Address.ToReadable(),
+				acc.Amount,
+			)
+		} else if kind == 9 {
+			acc := act.(*actions.Action_9_LockblsCreate)
+			actstr += fmt.Sprintf(`,"lockbls_id":"%s","total_amount":"%s"`,
+				hex.EncodeToString(acc.LockblsId),
+				acc.TotalStockAmount.ToFinString(),
+			)
+		} else if kind == 10 {
+			acc := act.(*actions.Action_10_LockblsRelease)
+			actstr += fmt.Sprintf(`,"lockbls_id":"%s","amount":"%s"`,
+				hex.EncodeToString(acc.LockblsId),
+				acc.ReleaseAmount.ToFinString(),
+			)
+		} else if kind == 11 {
+			acc := act.(*actions.Action_11_FromToSatoshiTransfer)
+			actstr += fmt.Sprintf(`,"from":"%s","to":"%s","amount":%d`,
+				acc.FromAddress.ToReadable(),
+				acc.ToAddress.ToReadable(),
+				acc.Amount,
+			)
+		} else if kind == 12 {
+			acc := act.(*actions.Action_12_ClosePaymentChannelBySetupAmount)
+			actstr += fmt.Sprintf(`,"channel_id":"%s"`,
+				hex.EncodeToString(acc.ChannelId),
+			)
 		}
 		actstr += "}"
 		actions_ary = append(actions_ary, actstr)
