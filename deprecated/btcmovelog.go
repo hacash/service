@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"github.com/hacash/core/stores"
 	"strconv"
 	"strings"
 )
@@ -22,7 +23,7 @@ func (api *DeprecatedApiService) getBtcMoveLogPageData(params map[string]string)
 	}
 
 	// 返回信息
-
-	result["jsondata"] = "[\"" + strings.Join(datas, "\",\"") + "\"]"
+	//fmt.Println(datas)
+	result["jsondata"] = "[\"" + strings.Join(stores.SatoshiGenesisPageSerializeForShow(datas), "\",\"") + "\"]"
 	return result
 }
