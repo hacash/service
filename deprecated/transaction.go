@@ -239,6 +239,11 @@ func (api *DeprecatedApiService) getTransactionIntro(params map[string]string) m
 		actions_strings,
 	)
 
+	if _, ok := params["txbodyhex"]; ok {
+		result["jsondata"] += fmt.Sprintf(`,"txbodyhex":"%s"`,
+			hex.EncodeToString(trsresbytes))
+	}
+
 	// 收尾并返回
 	result["jsondata"] += "}"
 	return result
