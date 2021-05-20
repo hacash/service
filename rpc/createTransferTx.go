@@ -160,7 +160,7 @@ func appendActionSimpleTransferHacash(r *http.Request, isUnitMei bool, allprikey
 		return e8
 	}
 
-	var actObj = &actions.Action_1_SimpleTransfer{
+	var actObj = &actions.Action_1_SimpleToTransfer{
 		ToAddress: *to_addr,
 		Amount:    *amountAmt,
 	}

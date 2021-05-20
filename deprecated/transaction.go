@@ -132,8 +132,21 @@ func (api *DeprecatedApiService) getTransactionIntro(params map[string]string) m
 		var kind = act.Kind()
 		actstr := fmt.Sprintf(`{"k":%d`, kind)
 		if kind == 1 {
-			acc := act.(*actions.Action_1_SimpleTransfer)
+			acc := act.(*actions.Action_1_SimpleToTransfer)
 			actstr += fmt.Sprintf(`,"to":"%s","amount":"%s"`,
+				acc.ToAddress.ToReadable(),
+				acc.Amount.ToFinString(),
+			)
+		} else if kind == 13 {
+			acc := act.(*actions.Action_13_FromTransfer)
+			actstr += fmt.Sprintf(`,"from":"%s","amount":"%s"`,
+				acc.FromAddress.ToReadable(),
+				acc.Amount.ToFinString(),
+			)
+		} else if kind == 14 {
+			acc := act.(*actions.Action_14_FromToTransfer)
+			actstr += fmt.Sprintf(`,"from":"%s","to":"%s","amount":"%s"`,
+				acc.FromAddress.ToReadable(),
 				acc.ToAddress.ToReadable(),
 				acc.Amount.ToFinString(),
 			)

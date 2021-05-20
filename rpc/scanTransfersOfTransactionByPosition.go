@@ -110,8 +110,19 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 	for i, act := range trsActions {
 		var item = make(map[string]interface{})
 
-		if tarAct, ok := act.(*actions.Action_1_SimpleTransfer); ok && (actAllKinds || actKindHacash) {
+		if tarAct, ok := act.(*actions.Action_1_SimpleToTransfer); ok && (actAllKinds || actKindHacash) {
 
+			item["to"] = tarAct.ToAddress.ToReadable()
+			item["hacash"] = tarAct.Amount.ToMeiOrFinString(isUnitMei)
+
+		} else if tarAct, ok := act.(*actions.Action_13_FromTransfer); ok && (actAllKinds || actKindHacash) {
+
+			item["from"] = tarAct.FromAddress.ToReadable()
+			item["hacash"] = tarAct.Amount.ToMeiOrFinString(isUnitMei)
+
+		} else if tarAct, ok := act.(*actions.Action_14_FromToTransfer); ok && (actAllKinds || actKindHacash) {
+
+			item["from"] = tarAct.FromAddress.ToReadable()
 			item["to"] = tarAct.ToAddress.ToReadable()
 			item["hacash"] = tarAct.Amount.ToMeiOrFinString(isUnitMei)
 
@@ -141,11 +152,7 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 
 			item["from"] = tarAct.FromAddress.ToReadable()
 			item["to"] = tarAct.ToAddress.ToReadable()
-			var diamonds = make([]string, tarAct.DiamondCount)
-			for i, v := range tarAct.Diamonds {
-				diamonds[i] = string(v)
-			}
-			item["diamonds"] = strings.Join(diamonds, ",")
+			item["diamonds"] = actions.SerializeHACDlistToCommaSplitString(tarAct.Diamonds)
 
 		} else {
 			continue

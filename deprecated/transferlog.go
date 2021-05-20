@@ -2,7 +2,6 @@ package rpc
 
 import (
 	"github.com/hacash/core/actions"
-	"github.com/hacash/core/fields"
 	rpc "github.com/hacash/service/server"
 	"strconv"
 	"strings"
@@ -51,14 +50,30 @@ func (api *DeprecatedApiService) getAllTransferLogByBlockHeight(params map[strin
 		if 0 == v.Type() { // coinbase
 			continue
 		}
-		from := fields.Address(v.GetAddress())
 		for _, act := range v.GetActions() {
 			if 1 == act.Kind() { // 类型为普通转账
-				act_k1 := act.(*actions.Action_1_SimpleTransfer)
+				fromAddr := v.GetAddress()
+				act_k1 := act.(*actions.Action_1_SimpleToTransfer)
 				allTransferLogs = append(allTransferLogs,
-					from.ToReadable()+"|"+
+					fromAddr.ToReadable()+"|"+
 						act_k1.ToAddress.ToReadable()+"|"+
-						act_k1.Amount.ToFinString())
+						act_k1.Amount.ToFinString(),
+				)
+			} else if 13 == act.Kind() { // 类型为普通转账
+				toAddr := v.GetAddress()
+				act_k13 := act.(*actions.Action_13_FromTransfer)
+				allTransferLogs = append(allTransferLogs,
+					act_k13.FromAddress.ToReadable()+"|"+
+						toAddr.ToReadable()+"|"+
+						act_k13.Amount.ToFinString(),
+				)
+			} else if 14 == act.Kind() { // 类型为普通转账
+				act_k14 := act.(*actions.Action_14_FromToTransfer)
+				allTransferLogs = append(allTransferLogs,
+					act_k14.FromAddress.ToReadable()+"|"+
+						act_k14.ToAddress.ToReadable()+"|"+
+						act_k14.Amount.ToFinString(),
+				)
 			}
 		}
 	}
