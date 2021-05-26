@@ -102,6 +102,8 @@ func (api *DeprecatedApiService) getDiamond(params map[string]string) map[string
 	result["number"] = strconv.Itoa(int(store.Number))
 	result["miner_address"] = store.MinerAddress.ToReadable()
 	result["custom_message"] = store.CustomMessage.ToHex()
+	result["approx_fee_offer"] = store.GetApproxFeeOffer().ToFinString()
+	result["average_burn_price"] = "ㄜ" + strconv.FormatUint(uint64(store.AverageBidBurnPrice), 10) + ":248"
 	return result
 }
 
