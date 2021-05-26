@@ -132,9 +132,11 @@ func (api *DeprecatedApiService) transferDiamondMultiple(params map[string]strin
 		result["err"] = "param diamonds must"
 		return result
 	}
-	diamonds := strings.Split(diamondstr, ",")
-	if len(diamonds) > 200 {
-		result["err"] = "too many diamond values"
+
+	var diamonds = fields.DiamondListMaxLen200{}
+	e11 := diamonds.ParseHACDlistBySplitCommaFromString(diamondstr)
+	if e11 != nil {
+		result["err"] = e11.Error()
 		return result
 	}
 
@@ -150,16 +152,10 @@ func (api *DeprecatedApiService) transferDiamondMultiple(params map[string]strin
 	diamond_action := &actions.Action_6_OutfeeQuantityDiamondTransfer{}
 	diamond_action.FromAddress = diamondAcc.Address
 	diamond_action.ToAddress = *toAddress
-	diamond_action.DiamondCount = fields.VarUint1(len(diamonds))
-	diamond_action.Diamonds = make([]fields.Bytes6, len(diamonds))
+	diamond_action.DiamondList = diamonds
 
 	// append diamond action
-	for i, v := range diamonds {
-		if len(v) != 6 {
-			result["err"] = v + " is not diamond value"
-			return result
-		}
-		diamond_action.Diamonds[i] = fields.Bytes6(v)
+	for range diamonds.Diamonds {
 		feeAmount, _ = feeAmount.Add(feeBase)
 	}
 

@@ -181,12 +181,12 @@ func (api *DeprecatedApiService) getTransactionIntro(params map[string]string) m
 			)
 		} else if kind == 6 {
 			acc := act.(*actions.Action_6_OutfeeQuantityDiamondTransfer)
-			dmds := make([]string, len(acc.Diamonds))
-			for i, v := range acc.Diamonds {
+			dmds := make([]string, len(acc.DiamondList.Diamonds))
+			for i, v := range acc.DiamondList.Diamonds {
 				dmds[i] = string(v)
 			}
 			actstr += fmt.Sprintf(`,"count":%d,"names":"%s","from":"%s","to":"%s"`,
-				acc.DiamondCount,
+				acc.DiamondList.Count,
 				strings.Join(dmds, ","),
 				acc.FromAddress.ToReadable(),
 				acc.ToAddress.ToReadable(),

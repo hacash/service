@@ -152,7 +152,7 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 
 			item["from"] = tarAct.FromAddress.ToReadable()
 			item["to"] = tarAct.ToAddress.ToReadable()
-			item["diamonds"] = actions.SerializeHACDlistToCommaSplitString(tarAct.Diamonds)
+			item["diamonds"] = tarAct.DiamondList.SerializeHACDlistToCommaSplitString()
 
 		} else {
 			continue

@@ -8,7 +8,6 @@ import (
 	"github.com/hacash/core/fields"
 	"github.com/hacash/core/interfaces"
 	"github.com/hacash/core/transactions"
-	"github.com/hacash/x16rs"
 	"net/http"
 	"strings"
 	"time"
@@ -217,23 +216,14 @@ func appendActionTransferDiamond(r *http.Request, isUnitMei bool, allprikey map[
 	if len(diamondsStr) == 0 {
 		return fmt.Errorf("param diamonds must give")
 	}
-	diamonds := strings.Split(diamondsStr, ",")
-	if len(diamonds) > 1 {
-		isMultiTrs = true
+	var diamonds = fields.DiamondListMaxLen200{}
+	e0 := diamonds.ParseHACDlistBySplitCommaFromString(diamondsStr)
+	if e0 != nil {
+		return e0
 	}
-	if len(diamonds) > 200 {
-		// 最多一次转移200枚
-		return fmt.Errorf("diamonds quantity cannot over 200")
+	if diamonds.Count > 1 {
+		isMultiTrs = true // 大于一个批量转账
 	}
-	// check diamond name
-	var realDiamonds = make([]fields.Bytes6, len(diamonds))
-	for i, v := range diamonds {
-		if !x16rs.IsDiamondValueString(v) {
-			return fmt.Errorf("<%s> is not a diamond name", v)
-		}
-		realDiamonds[i] = fields.Bytes6(v)
-	}
-
 	var diamondOwnerAccount *account.Account = nil
 	// address
 	diamondOwnerStr := strings.TrimPrefix(CheckParamString(r, "diamond_owner_prikey", ""), "0x")
@@ -276,10 +266,9 @@ func appendActionTransferDiamond(r *http.Request, isUnitMei bool, allprikey map[
 	if isMultiTrs {
 		// 批量转账
 		actObj = &actions.Action_6_OutfeeQuantityDiamondTransfer{
-			FromAddress:  diamondOwnerAccount.Address,
-			ToAddress:    *to_addr,
-			DiamondCount: fields.VarUint1(len(realDiamonds)),
-			Diamonds:     realDiamonds,
+			FromAddress: diamondOwnerAccount.Address,
+			ToAddress:   *to_addr,
+			DiamondList: diamonds,
 		}
 		//fmt.Println(diamondOwnerAccount.AddressReadable, to_addr.ToReadable(), len(realDiamonds), realDiamonds)
 		//fmt.Println( `
@@ -294,7 +283,7 @@ func appendActionTransferDiamond(r *http.Request, isUnitMei bool, allprikey map[
 	} else {
 		// 单个转账
 		actObj = &actions.Action_5_DiamondTransfer{
-			Diamond: fields.Bytes6(diamonds[0]),
+			Diamond: fields.Bytes6(diamonds.Diamonds[0]),
 			Address: *to_addr,
 		}
 		//fmt.Println( `
