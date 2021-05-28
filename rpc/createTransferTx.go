@@ -216,7 +216,7 @@ func appendActionTransferDiamond(r *http.Request, isUnitMei bool, allprikey map[
 	if len(diamondsStr) == 0 {
 		return fmt.Errorf("param diamonds must give")
 	}
-	var diamonds = fields.DiamondListMaxLen200{}
+	var diamonds = fields.NewEmptyDiamondListMaxLen200()
 	e0 := diamonds.ParseHACDlistBySplitCommaFromString(diamondsStr)
 	if e0 != nil {
 		return e0
@@ -268,7 +268,7 @@ func appendActionTransferDiamond(r *http.Request, isUnitMei bool, allprikey map[
 		actObj = &actions.Action_6_OutfeeQuantityDiamondTransfer{
 			FromAddress: diamondOwnerAccount.Address,
 			ToAddress:   *to_addr,
-			DiamondList: diamonds,
+			DiamondList: *diamonds,
 		}
 		//fmt.Println(diamondOwnerAccount.AddressReadable, to_addr.ToReadable(), len(realDiamonds), realDiamonds)
 		//fmt.Println( `

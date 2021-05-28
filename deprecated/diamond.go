@@ -135,7 +135,7 @@ func (api *DeprecatedApiService) transferDiamondMultiple(params map[string]strin
 		return result
 	}
 
-	var diamonds = fields.DiamondListMaxLen200{}
+	var diamonds = fields.NewEmptyDiamondListMaxLen200()
 	e11 := diamonds.ParseHACDlistBySplitCommaFromString(diamondstr)
 	if e11 != nil {
 		result["err"] = e11.Error()
@@ -154,7 +154,7 @@ func (api *DeprecatedApiService) transferDiamondMultiple(params map[string]strin
 	diamond_action := &actions.Action_6_OutfeeQuantityDiamondTransfer{}
 	diamond_action.FromAddress = diamondAcc.Address
 	diamond_action.ToAddress = *toAddress
-	diamond_action.DiamondList = diamonds
+	diamond_action.DiamondList = *diamonds
 
 	// append diamond action
 	for range diamonds.Diamonds {

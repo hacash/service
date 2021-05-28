@@ -20,7 +20,7 @@ func (api *DeprecatedApiService) addTxToPool(w http.ResponseWriter, value []byte
 
 	var tx, _, e = transactions.ParseTransaction(value, 0)
 	if e != nil {
-		w.Write([]byte("Transaction format error"))
+		w.Write([]byte("Transaction format error:\n" + e.Error()))
 		return
 	}
 	//fmt.Println("---- 2 ----")
