@@ -41,7 +41,7 @@ func (api *RpcService) raiseTxFee(r *http.Request, w http.ResponseWriter, bodyby
 	}
 	var feeAmt *fields.Amount = nil
 	if isUnitMei {
-		feeAmt, err = fields.NewAmountFromMeiString(feeStr)
+		feeAmt, err = fields.NewAmountFromMeiStringUnsafe(feeStr)
 	} else {
 		feeAmt, err = fields.NewAmountFromFinString(feeStr)
 	}

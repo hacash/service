@@ -47,7 +47,7 @@ func (api *RpcService) createValueTransferTx(r *http.Request, w http.ResponseWri
 	}
 	var feeAmt *fields.Amount = nil
 	if isUnitMei {
-		feeAmt, err = fields.NewAmountFromMeiString(feeStr)
+		feeAmt, err = fields.NewAmountFromMeiStringUnsafe(feeStr)
 	} else {
 		feeAmt, err = fields.NewAmountFromFinString(feeStr)
 	}
@@ -141,7 +141,7 @@ func appendActionSimpleTransferHacash(r *http.Request, isUnitMei bool, allprikey
 	}
 	var amountAmt *fields.Amount = nil
 	if isUnitMei {
-		amountAmt, err = fields.NewAmountFromMeiString(amountStr)
+		amountAmt, err = fields.NewAmountFromMeiStringUnsafe(amountStr)
 	} else {
 		amountAmt, err = fields.NewAmountFromFinString(amountStr)
 	}
