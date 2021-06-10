@@ -174,10 +174,10 @@ func (api *DeprecatedApiService) getTransactionIntro(params map[string]string) m
 		} else if kind == 5 {
 			acc := act.(*actions.Action_5_DiamondTransfer)
 			actstr += fmt.Sprintf(`,"count":1,"names":"%s","from":"%s","to":"%s"`,
-				acc.Address.ToReadable(),
+				acc.ToAddress.ToReadable(),
 				acc.Diamond,
 				trsres.GetAddress().ToReadable(),
-				acc.Address.ToReadable(),
+				acc.ToAddress.ToReadable(),
 			)
 		} else if kind == 6 {
 			acc := act.(*actions.Action_6_OutfeeQuantityDiamondTransfer)
@@ -203,7 +203,7 @@ func (api *DeprecatedApiService) getTransactionIntro(params map[string]string) m
 		} else if kind == 8 {
 			acc := act.(*actions.Action_8_SimpleSatoshiTransfer)
 			actstr += fmt.Sprintf(`,"to":"%s","amount":%d`,
-				acc.Address.ToReadable(),
+				acc.ToAddress.ToReadable(),
 				acc.Amount,
 			)
 		} else if kind == 9 {

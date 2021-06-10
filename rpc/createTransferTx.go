@@ -192,8 +192,8 @@ func appendActionSimpleTransferSatoshi(r *http.Request, isUnitMei bool, allprike
 	}
 
 	var actObj = &actions.Action_8_SimpleSatoshiTransfer{
-		Address: *to_addr,
-		Amount:  fields.VarUint8(amountAmt),
+		ToAddress: *to_addr,
+		Amount:    fields.VarUint8(amountAmt),
 	}
 
 	tx.AppendAction(actObj)
@@ -283,8 +283,8 @@ func appendActionTransferDiamond(r *http.Request, isUnitMei bool, allprikey map[
 	} else {
 		// 单个转账
 		actObj = &actions.Action_5_DiamondTransfer{
-			Diamond: fields.Bytes6(diamonds.Diamonds[0]),
-			Address: *to_addr,
+			Diamond:   fields.Bytes6(diamonds.Diamonds[0]),
+			ToAddress: *to_addr,
 		}
 		//fmt.Println( `
 		//// 单个转账

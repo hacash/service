@@ -134,7 +134,7 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 
 		} else if tarAct, ok := act.(*actions.Action_8_SimpleSatoshiTransfer); ok && (actAllKinds || actKindSatoshi) {
 
-			item["to"] = tarAct.Address.ToReadable()
+			item["to"] = tarAct.ToAddress.ToReadable()
 			item["satoshi"] = tarAct.Amount
 
 		} else if tarAct, ok := act.(*actions.Action_4_DiamondCreate); ok && (actAllKinds || actKindDiamond) {
@@ -145,7 +145,7 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 
 		} else if tarAct, ok := act.(*actions.Action_5_DiamondTransfer); ok && (actAllKinds || actKindDiamond) {
 
-			item["to"] = tarAct.Address.ToReadable()
+			item["to"] = tarAct.ToAddress.ToReadable()
 			item["diamonds"] = string(tarAct.Diamond)
 
 		} else if tarAct, ok := act.(*actions.Action_6_OutfeeQuantityDiamondTransfer); ok && (actAllKinds || actKindDiamond) {
