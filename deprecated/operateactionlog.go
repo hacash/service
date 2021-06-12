@@ -11,10 +11,17 @@ import (
 )
 
 const (
-	tystrOpenClannel     = "channel open"
-	tystrCloseClannel    = "channel close"
-	tystrOpenUsrLending  = "user lending open"
-	tystrCloseUsrLending = "user lending close"
+	tystrOpenClannel         = "channel open"
+	tystrCloseClannel        = "channel close"
+	tystrOpenUsrLending      = "user lending open"
+	tystrCloseUsrLending     = "user lending close"
+	tystrOpenDiamondLending  = "diamond syslend open"
+	tystrCloseDiamondLending = "diamond syslend close"
+	tystrOpenBitcoinLending  = "bitcoin syslend open"
+	tystrCloseBitcoinLending = "bitcoin syslend close"
+
+	tystrBitcoinMove = "bitcoin move"
+	tystrOpenLockbls = "lockbls open"
 )
 
 // 扫描区块 获取所有通道开启交易
@@ -60,6 +67,7 @@ func (api *DeprecatedApiService) getAllOperateActionLogByBlockHeight(params map[
 		if 0 == v.Type() { // coinbase
 			continue
 		}
+		mainAddressString := v.GetAddress().ToReadable()
 		for _, act := range v.GetActions() {
 			kid := act.Kind()
 			// 通道相关
@@ -71,11 +79,13 @@ func (api *DeprecatedApiService) getAllOperateActionLogByBlockHeight(params map[
 					kid, tystrOpenClannel, act.ChannelId,
 					act.LeftAddress, act.RightAddress,
 					desstr)
+
 			} else if 3 == kid { // 关闭通道
 				act := act.(*actions.Action_3_ClosePaymentChannel)
 				appendOperateActionLogEx(&allOperateLogs,
 					kid, tystrCloseClannel, act.ChannelId,
-					"-", "-", "")
+					mainAddressString, "-", "")
+
 			} else if 12 == kid { // 关闭通道
 				act := act.(*actions.Action_12_ClosePaymentChannelBySetupAmount)
 				desstr := act.LeftAmount.ToFinString() +
@@ -83,6 +93,29 @@ func (api *DeprecatedApiService) getAllOperateActionLogByBlockHeight(params map[
 				appendOperateActionLog(&allOperateLogs,
 					kid, tystrCloseClannel, act.ChannelId,
 					act.LeftAddress, act.RightAddress,
+					desstr)
+			}
+			// 比特币转移和锁仓
+			if 7 == kid { // 比特币转移
+				act := act.(*actions.Action_7_SatoshiGenesis)
+				dataID := actions.GainLockblsIdByBtcMove(uint32(act.TransferNo))
+				desstr := fmt.Sprintf("move: %d BTC, reward: ㄜ%d:248",
+					act.BitcoinQuantity,
+					act.AdditionalTotalHacAmount)
+				appendOperateActionLogEx(&allOperateLogs,
+					kid, tystrBitcoinMove, dataID,
+					act.OriginAddress.ToReadable(), "-",
+					desstr)
+
+			} else if 9 == kid { // 线性锁仓，创建
+				act := act.(*actions.Action_9_LockblsCreate)
+				desstr := fmt.Sprintf("lock: %s, release: %s, step: %d",
+					act.TotalStockAmount.ToFinString(),
+					act.LinearReleaseAmount.ToFinString(),
+					act.LinearBlockNumber)
+				appendOperateActionLog(&allOperateLogs,
+					kid, tystrOpenLockbls, act.LockblsId,
+					act.PaymentAddress, act.MasterAddress,
 					desstr)
 			}
 			// 借贷相关
@@ -101,7 +134,8 @@ func (api *DeprecatedApiService) getAllOperateActionLogByBlockHeight(params map[
 					kid, tystrOpenUsrLending, act.LendingID,
 					act.MortgagorAddress, act.LendersAddress,
 					"collateral: "+strings.Join(desstrs, ", "))
-			} else if 20 == kid {
+
+			} else if 20 == kid { // 赎回或清算用户间借贷
 				act := act.(*actions.Action_20_UsersLendingRansom)
 				desstr := fmt.Sprintf("redeem: %s", act.RansomAmount.ToFinString())
 				if act.RansomAmount.IsEmpty() {
@@ -109,8 +143,49 @@ func (api *DeprecatedApiService) getAllOperateActionLogByBlockHeight(params map[
 				}
 				appendOperateActionLogEx(&allOperateLogs,
 					kid, tystrCloseUsrLending, act.LendingID,
-					"-", "-",
+					mainAddressString, "-",
 					desstr)
+
+			} else if 15 == kid { // 钻石系统借贷 开启
+				act := act.(*actions.Action_15_DiamondsSystemLendingCreate)
+				desstr := fmt.Sprintf("mortgage: %d HACD, loan: %s, interest: %.1f%%",
+					act.MortgageDiamondList.Count,
+					act.LoanTotalAmount.ToFinString(),
+					float32(act.BorrowPeriod)*0.5)
+				appendOperateActionLogEx(&allOperateLogs,
+					kid, tystrOpenDiamondLending, act.LendingID,
+					mainAddressString, "-",
+					desstr)
+
+			} else if 16 == kid { // 钻石系统借贷 赎回
+				act := act.(*actions.Action_16_DiamondsSystemLendingRansom)
+				desstr := fmt.Sprintf("redeem: %s",
+					act.RansomAmount.ToFinString())
+				appendOperateActionLogEx(&allOperateLogs,
+					kid, tystrCloseDiamondLending, act.LendingID,
+					mainAddressString, "-",
+					desstr)
+
+			} else if 17 == kid { // 比特币系统借贷 开启
+				act := act.(*actions.Action_17_BitcoinsSystemLendingCreate)
+				desstr := fmt.Sprintf("mortgage:%.2f BTC, loan: %s, interest: %s",
+					float64(act.MortgageBitcoinPortion)/100,
+					act.LoanTotalAmount.ToFinString(),
+					act.PreBurningInterestAmount.ToFinString())
+				appendOperateActionLogEx(&allOperateLogs,
+					kid, tystrOpenBitcoinLending, act.LendingID,
+					mainAddressString, "-",
+					desstr)
+
+			} else if 18 == kid { // 比特币系统借贷 赎回
+				act := act.(*actions.Action_18_BitcoinsSystemLendingRansom)
+				desstr := fmt.Sprintf("redeem: %s",
+					act.RansomAmount.ToFinString())
+				appendOperateActionLogEx(&allOperateLogs,
+					kid, tystrCloseBitcoinLending, act.LendingID,
+					mainAddressString, "-",
+					desstr)
+
 			}
 
 		}
