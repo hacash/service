@@ -65,7 +65,7 @@ func (api *RpcService) raiseTxFee(r *http.Request, w http.ResponseWriter, bodyby
 	}
 
 	// check
-	if fields.Address(feeAccount.Address).Equal(tx.GetAddress()) != true {
+	if fields.Address(feeAccount.Address).NotEqual(tx.GetAddress()) {
 		ResponseError(w, fmt.Errorf("Tx fee address password error: need %s but got %s", tx.GetAddress().ToReadable(), feeAccount.AddressReadable))
 		return
 	}

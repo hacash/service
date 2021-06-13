@@ -61,7 +61,7 @@ func (api *DeprecatedApiService) quoteFee(params map[string]string) map[string]s
 		acc = account.CreateAccountByPassword(password_or_privatekey)
 	}
 	// check
-	if fields.Address(acc.Address).Equal(tx.GetAddress()) != true {
+	if fields.Address(acc.Address).NotEqual(tx.GetAddress()) {
 		result["err"] = "Tx fee address password error."
 		return result
 	}
