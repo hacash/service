@@ -1,7 +1,7 @@
 package rpc
 
 import (
-	"github.com/hacash/core/stores"
+	rpc "github.com/hacash/service/server"
 	"net/http"
 )
 
@@ -18,37 +18,10 @@ func (api *RpcService) totalSupply(r *http.Request, w http.ResponseWriter, bodyb
 
 	//fmt.Println(ttspl.Serialize())
 
-	// return
-	data := ResponseCreateData("minted_diamond", int(ttspl.Get(stores.TotalSupplyStoreTypeOfDiamond)))
+	var data = make(map[string]interface{})
 
-	data["transferred_bitcoin"] = uint64(ttspl.Get(stores.TotalSupplyStoreTypeOfTransferBitcoin))
-
-	// 统计
-	miner_reward,
-		channel_interest,
-		btcmove_subsidy,
-		burned_fee :=
-		ttspl.Get(stores.TotalSupplyStoreTypeOfBlockMinerReward),
-		ttspl.Get(stores.TotalSupplyStoreTypeOfChannelInterest),
-		ttspl.Get(stores.TotalSupplyStoreTypeOfBitcoinTransferUnlockSuccessed),
-		ttspl.Get(stores.TotalSupplyStoreTypeOfBurningFee)
-
-	data["miner_reward"] = miner_reward
-	data["channel_interest"] = channel_interest
-	data["btcmove_subsidy"] = btcmove_subsidy
-
-	data["burned_fee"] = burned_fee
-
-	// 计算
-	data["current_circulation"] = miner_reward + channel_interest + btcmove_subsidy - burned_fee
-
-	// 统计
-	// 位于通道链中的HAC
-	located_in_channel := ttspl.Get(stores.TotalSupplyStoreTypeOfLocatedInChannel)
-	if located_in_channel < 0.00000001 {
-		located_in_channel = 0
-	}
-	data["located_in_channel"] = located_in_channel
+	// 读取流通量统计
+	data, _ = rpc.RenderTotalSupplyObject(ttspl, false)
 
 	// ok
 	ResponseData(w, data)

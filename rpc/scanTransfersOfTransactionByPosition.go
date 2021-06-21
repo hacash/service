@@ -17,6 +17,9 @@ import (
  */
 func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w http.ResponseWriter, bodybytes []byte) {
 
+	state := api.backend.BlockChain().State()
+	store := state.BlockStore()
+
 	height := CheckParamUint64(r, "height", 0) // 区块高度
 	txposi := CheckParamUint64(r, "txposi", 0) // 交易索引位置
 
@@ -37,6 +40,8 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 	actKindHacash := false
 	actKindSatoshi := false
 	actKindDiamond := false
+	actKindChannel := false // 支持通道链
+	actKindLending := false // 支持借贷
 	if len(kindStr) == 0 {
 		actAllKinds = true
 	} else {
@@ -49,12 +54,23 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 		if strings.Contains(kindStr, "d") {
 			actKindDiamond = true
 		}
+		if strings.Contains(kindStr, "l") {
+			actKindLending = true
+		}
+		if strings.Contains(kindStr, "c") {
+			actKindChannel = true
+		}
 	}
+
+	// 借贷标记
+	kindDiamondLending := (actAllKinds || (actKindDiamond && actKindLending))
+	kindSatoshiLending := (actAllKinds || (actKindSatoshi && actKindLending))
+	kindHacashLending := (actAllKinds || (actKindHacash && actKindLending))
 
 	// read tx
 	var tx interfaces.Transaction = nil
 	if height > 0 {
-		blockObj, e := rpc.LoadBlockWithCache(api.backend.BlockChain().State(), height)
+		blockObj, e := rpc.LoadBlockWithCache(state, height)
 		if e != nil {
 			ResponseError(w, e)
 			return
@@ -72,7 +88,7 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 		txhash = tx.Hash()
 	} else if txhash != nil {
 		// read tx body from disk
-		blockheight, txbody, e := api.backend.BlockChain().State().BlockStore().ReadTransactionBytesByHash(txhash)
+		blockheight, txbody, e := store.ReadTransactionBytesByHash(txhash)
 		if e != nil {
 			ResponseError(w, e)
 			return
@@ -153,6 +169,106 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 			item["from"] = tarAct.FromAddress.ToReadable()
 			item["to"] = tarAct.ToAddress.ToReadable()
 			item["diamonds"] = tarAct.DiamondList.SerializeHACDlistToCommaSplitString()
+
+			// 通道链相关
+		} else if _, ok := act.(*actions.Action_2_OpenPaymentChannel); ok && (actKindChannel) {
+
+			// TODO::
+
+			// 借贷相关
+		} else if tarAct, ok := act.(*actions.Action_19_UsersLendingCreate); ok && (kindDiamondLending || kindSatoshiLending || kindHacashLending) {
+
+			// 用户借贷抵押
+			item["mortgagor"] = tarAct.MortgagorAddress.ToReadable() // 抵押人
+			if kindDiamondLending && tarAct.MortgageDiamondList.Count > 0 {
+				item["diamonds"] = tarAct.MortgageDiamondList.SerializeHACDlistToCommaSplitString()
+			}
+			if kindSatoshiLending && tarAct.MortgageBitcoin.NotEmpty.Check() {
+				item["satoshi"] = tarAct.MortgageBitcoin.ValueSAT
+			}
+			if kindHacashLending {
+				item["loaner"] = tarAct.LendersAddress.ToReadable()                          // 债权人
+				item["charge"] = tarAct.PreBurningInterestAmount.ToMeiOrFinString(isUnitMei) // 系统销毁的1%利息
+				item["hacash"] = tarAct.LoanTotalAmount.ToMeiOrFinString(isUnitMei)          // 借出的HAC
+			}
+
+		} else if tarAct, ok := act.(*actions.Action_20_UsersLendingRansom); ok && (kindDiamondLending || kindSatoshiLending || kindHacashLending) {
+
+			// 用户借贷抵押赎回
+			item["redeemer"] = tx.GetAddress().ToReadable() // 赎回人 or 扣押人
+			// 查询对象
+			ldobj := state.UserLending(tarAct.LendingID)
+			if ldobj == nil {
+				ResponseError(w, fmt.Errorf("User lending <%s> not find.", tarAct.LendingID.ToHex()))
+				return
+			}
+			if kindDiamondLending && ldobj.MortgageDiamondList.Count > 0 {
+				item["diamonds"] = ldobj.MortgageDiamondList.SerializeHACDlistToCommaSplitString()
+			}
+			if kindSatoshiLending && ldobj.MortgageBitcoin.NotEmpty.Check() {
+				item["satoshi"] = ldobj.MortgageBitcoin.ValueSAT
+			}
+			if kindHacashLending {
+				item["loaner"] = ldobj.LendersAddress.ToReadable()               // 债权人
+				item["hacash"] = tarAct.RansomAmount.ToMeiOrFinString(isUnitMei) // 归还的HAC（在劝人自己扣押则为零）
+			}
+
+		} else if tarAct, ok := act.(*actions.Action_15_DiamondsSystemLendingCreate); ok && (kindDiamondLending || kindHacashLending) {
+
+			// 钻石系统借贷
+			item["mortgagor"] = tx.GetAddress().ToReadable() // 抵押人
+			if kindDiamondLending {                          // 抵押的 HACD
+				item["diamonds"] = tarAct.MortgageDiamondList.SerializeHACDlistToCommaSplitString()
+			}
+			if kindHacashLending { // 从系统借出的 HAC
+				item["hacash"] = tarAct.LoanTotalAmount.ToMeiOrFinString(isUnitMei)
+			}
+
+		} else if tarAct, ok := act.(*actions.Action_16_DiamondsSystemLendingRansom); ok && (kindDiamondLending || kindHacashLending) {
+
+			// 钻石系统借贷赎回
+			item["redeemer"] = tx.GetAddress().ToReadable() // 私有 or 公共赎回人
+			// 查询对象
+			ldobj := state.DiamondSystemLending(tarAct.LendingID)
+			if ldobj == nil {
+				ResponseError(w, fmt.Errorf("Diamond system lending <%s> not find.", tarAct.LendingID.ToHex()))
+				return
+			}
+			if kindDiamondLending { // 赎回的 HACD
+				item["diamonds"] = ldobj.MortgageDiamondList.SerializeHACDlistToCommaSplitString()
+			}
+			if kindHacashLending { // 归还的 HAC
+				item["hacash"] = tarAct.RansomAmount.ToMeiOrFinString(isUnitMei)
+			}
+
+		} else if tarAct, ok := act.(*actions.Action_17_BitcoinsSystemLendingCreate); ok && (kindSatoshiLending || kindHacashLending) {
+
+			// 比特币系统借贷
+			item["mortgagor"] = tx.GetAddress().ToReadable() // 抵押人
+			if kindSatoshiLending {                          // 抵押的 HACD
+				item["satoshi"] = tarAct.MortgageBitcoinPortion * 100 * 10000 // 单位为0.01BTC
+			}
+			if kindHacashLending { // 从系统借出的 HAC
+				item["hacash"] = tarAct.LoanTotalAmount.ToMeiOrFinString(isUnitMei)
+				item["charge"] = tarAct.PreBurningInterestAmount.ToMeiOrFinString(isUnitMei) // 系统预先销毁的利息
+			}
+
+		} else if tarAct, ok := act.(*actions.Action_18_BitcoinsSystemLendingRansom); ok && (kindSatoshiLending || kindHacashLending) {
+
+			// 钻石系统借贷赎回
+			item["redeemer"] = tx.GetAddress().ToReadable() // 私有 or 公共赎回人
+			// 查询对象
+			ldobj := state.BitcoinSystemLending(tarAct.LendingID)
+			if ldobj == nil {
+				ResponseError(w, fmt.Errorf("Bitcoin system lending <%s> not find.", tarAct.LendingID.ToHex()))
+				return
+			}
+			if kindSatoshiLending { // 赎回的 HACD
+				item["satoshi"] = ldobj.MortgageBitcoinPortion * 100 * 10000 // 单位为0.01BTC
+			}
+			if kindHacashLending { // 归还的 HAC
+				item["hacash"] = tarAct.RansomAmount.ToMeiOrFinString(isUnitMei)
+			}
 
 		} else {
 			continue

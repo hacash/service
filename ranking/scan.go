@@ -51,7 +51,8 @@ func (r *Ranking) scanOneBlock() error {
 
 	// 扫描交易
 	for txposi := 0; txposi < int(txs); txposi++ {
-		scanUrl := fmt.Sprintf("/query?action=scan_value_transfers&unitmei=1&height=%d&txposi=%d", scanHeight, txposi)
+		// 仅仅扫描和钻石挖矿、钻石转账及钻石借贷相关的action
+		scanUrl := fmt.Sprintf("/query?action=scan_value_transfers&unitmei=1&height=%d&txposi=%d&kind=dl", scanHeight, txposi)
 		resbts, e1 := HttpGetBytes(r.node_rpc_url + scanUrl)
 		if e1 != nil {
 			return fmt.Errorf("rpc not yet") // 错误
@@ -71,6 +72,10 @@ func (r *Ranking) scanOneBlock() error {
 			r.addWaitUpdateAddressUnsafe(v1)
 			v2, _ := jsonparser.GetString(value, "miner")
 			r.addWaitUpdateAddressUnsafe(v2)
+			l1, _ := jsonparser.GetString(value, "mortgagor") // 抵押人
+			r.addWaitUpdateAddressUnsafe(l1)
+			l2, _ := jsonparser.GetString(value, "redeemer") // 赎回人
+			r.addWaitUpdateAddressUnsafe(l2)
 			v3, _ := jsonparser.GetString(value, "diamond")
 			v4, _ := jsonparser.GetString(value, "diamonds")
 			if len(v3) > 0 {
@@ -80,6 +85,10 @@ func (r *Ranking) scanOneBlock() error {
 				// 写入钻石更新
 				if len(v2) > 0 {
 					r.changeDiamondsUnsafe(v2, v4, true) // 挖到
+				} else if len(l1) > 0 {
+					r.changeDiamondsUnsafe(l1, v4, false) // 抵押
+				} else if len(l2) > 0 {
+					r.changeDiamondsUnsafe(l2, v4, true) // 赎回
 				} else {
 					from := mainAddrStr
 					if len(a1) > 0 {
