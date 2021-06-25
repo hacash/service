@@ -246,7 +246,7 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 			// 比特币系统借贷
 			item["mortgagor"] = tx.GetAddress().ToReadable() // 抵押人
 			if kindSatoshiLending {                          // 抵押的 HACD
-				item["satoshi"] = tarAct.MortgageBitcoinPortion * 100 * 10000 // 单位为0.01BTC
+				item["satoshi"] = uint64(tarAct.MortgageBitcoinPortion) * 100 * 10000 // 单位为0.01BTC
 			}
 			if kindHacashLending { // 从系统借出的 HAC
 				item["hacash"] = tarAct.LoanTotalAmount.ToMeiOrFinString(isUnitMei)
@@ -264,7 +264,7 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 				return
 			}
 			if kindSatoshiLending { // 赎回的 HACD
-				item["satoshi"] = ldobj.MortgageBitcoinPortion * 100 * 10000 // 单位为0.01BTC
+				item["satoshi"] = uint64(ldobj.MortgageBitcoinPortion) * 100 * 10000 // 单位为0.01BTC
 			}
 			if kindHacashLending { // 归还的 HAC
 				item["hacash"] = tarAct.RansomAmount.ToMeiOrFinString(isUnitMei)
