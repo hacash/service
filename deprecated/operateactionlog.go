@@ -132,7 +132,7 @@ func (api *DeprecatedApiService) getAllOperateActionLogByBlockHeight(params map[
 				desstrs = append(desstrs, fmt.Sprintf("repay: %s", act.AgreedRedemptionAmount.ToFinString()))
 				appendOperateActionLog(&allOperateLogs,
 					kid, tystrOpenUsrLending, act.LendingID,
-					act.MortgagorAddress, act.LendersAddress,
+					act.MortgagorAddress, act.LenderAddress,
 					"collateral: "+strings.Join(desstrs, ", "))
 
 			} else if 20 == kid { // 赎回或清算用户间借贷

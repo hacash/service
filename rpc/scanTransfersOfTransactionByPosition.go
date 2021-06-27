@@ -187,7 +187,7 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 				item["satoshi"] = tarAct.MortgageBitcoin.ValueSAT
 			}
 			if kindHacashLending {
-				item["loaner"] = tarAct.LendersAddress.ToReadable()                          // 债权人
+				item["lender"] = tarAct.LenderAddress.ToReadable()                           // 债权人
 				item["charge"] = tarAct.PreBurningInterestAmount.ToMeiOrFinString(isUnitMei) // 系统销毁的1%利息
 				item["hacash"] = tarAct.LoanTotalAmount.ToMeiOrFinString(isUnitMei)          // 借出的HAC
 			}
@@ -209,7 +209,7 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 				item["satoshi"] = ldobj.MortgageBitcoin.ValueSAT
 			}
 			if kindHacashLending {
-				item["loaner"] = ldobj.LendersAddress.ToReadable()               // 债权人
+				item["lender"] = ldobj.LenderAddress.ToReadable()                // 债权人
 				item["hacash"] = tarAct.RansomAmount.ToMeiOrFinString(isUnitMei) // 归还的HAC（在劝人自己扣押则为零）
 			}
 

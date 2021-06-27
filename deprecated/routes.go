@@ -19,7 +19,9 @@ func (api *DeprecatedApiService) initRoutes() {
 
 	queryRoutes["channel"] = api.getChannel              // 查询通道
 	queryRoutes["lockbls"] = api.getLockBlsInfo          // 查询线性锁仓
-	queryRoutes["dialend"] = api.getSystemLendingDiamond // 查询比特币系统借贷
+	queryRoutes["dialend"] = api.getSystemLendingDiamond // 查询钻石系统借贷
+	queryRoutes["btclend"] = api.getSystemLendingBitcoin // 查询比特币系统借贷
+	queryRoutes["usrlend"] = api.getUserLending          // 查询比特币系统借贷
 
 	queryRoutes["passwd"] = newAccountByPassword // 通过密码创建账户
 	queryRoutes["newacc"] = newAccount           // 随机创建账户
