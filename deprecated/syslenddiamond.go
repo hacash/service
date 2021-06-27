@@ -41,6 +41,8 @@ func (api *DeprecatedApiService) getSystemLendingDiamond(params map[string]strin
 	result["create_block_height"] = strconv.FormatUint(uint64(stoobj.CreateBlockHeight), 10)
 	result["main_address"] = stoobj.MainAddress.ToReadable()
 	result["borrow_period"] = strconv.Itoa(int(stoobj.BorrowPeriod))
+	result["interest_rate"] = fmt.Sprintf("%.1f%%", float64(stoobj.BorrowPeriod)*0.5) // 单位百分比
+	result["mortgage_time"] = fmt.Sprintf("%.1f days", float64(stoobj.BorrowPeriod)*10000/288)
 	result["diamonds"] = stoobj.MortgageDiamondList.SerializeHACDlistToCommaSplitString() // 钻石列表
 	result["loan_amount"] = fmt.Sprintf("ㄜ%d:248", stoobj.LoanTotalAmountMei)
 	// 显示归还状态

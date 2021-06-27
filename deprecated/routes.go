@@ -16,14 +16,17 @@ func (api *DeprecatedApiService) initRoutes() {
 	queryRoutes["diamond"] = api.getDiamond                       // 查询钻石
 	queryRoutes["diamondcreate"] = api.showDiamondCreateTxs       // 显示钻石创建交易
 	queryRoutes["transferdiamonds"] = api.transferDiamondMultiple // 钻石批量转账
-	queryRoutes["channel"] = api.getChannel                       // 查询通道
-	queryRoutes["lockbls"] = api.getLockBlsInfo                   // 查询线性锁仓
-	queryRoutes["passwd"] = newAccountByPassword                  // 通过密码创建账户
-	queryRoutes["newacc"] = newAccount                            // 随机创建账户
-	queryRoutes["createtx"] = api.transferSimple                  // 创建普通转账交易
-	queryRoutes["quotefee"] = api.quoteFee                        // 修改交易池内的交易手续费
-	queryRoutes["txconfirm"] = api.txStatus                       // 查询交易确认状态
-	queryRoutes["powpower"] = api.powPower                        // 实时算力大小
+
+	queryRoutes["channel"] = api.getChannel              // 查询通道
+	queryRoutes["lockbls"] = api.getLockBlsInfo          // 查询线性锁仓
+	queryRoutes["dialend"] = api.getSystemLendingDiamond // 查询比特币系统借贷
+
+	queryRoutes["passwd"] = newAccountByPassword // 通过密码创建账户
+	queryRoutes["newacc"] = newAccount           // 随机创建账户
+	queryRoutes["createtx"] = api.transferSimple // 创建普通转账交易
+	queryRoutes["quotefee"] = api.quoteFee       // 修改交易池内的交易手续费
+	queryRoutes["txconfirm"] = api.txStatus      // 查询交易确认状态
+	queryRoutes["powpower"] = api.powPower       // 实时算力大小
 
 	queryRoutes["hashrate"] = api.hashRate                   // 当前哈希率
 	queryRoutes["hashrate_charts"] = api.hashRateCharts      // 哈希率波动表
