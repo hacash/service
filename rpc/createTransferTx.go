@@ -78,7 +78,7 @@ func (api *RpcService) createValueTransferTx(r *http.Request, w http.ResponseWri
 		ResponseErrorString(w, "create tx error: "+e1.Error())
 		return
 	}
-	newTrs.Timestamp = fields.VarUint5(timestamp)
+	newTrs.Timestamp = fields.BlockTxTimestamp(timestamp)
 	newTrs.Fee = *feeAmt
 
 	// create action

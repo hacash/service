@@ -17,7 +17,7 @@ func (r *Ranking) init() error {
 	v, e := r.ldb.Get([]byte(DBKeyFinishScanBlockHeight), nil)
 	//fmt.Println(v, e)
 	if e == nil && len(v) == 5 {
-		vb := fields.VarUint5(0)
+		vb := fields.BlockHeight(0)
 		if _, e2 := vb.Parse(v, 0); e2 == nil {
 			r.finish_scan_block_height = uint64(vb)
 			fmt.Printf("[Init] load finish_scan_block_height = %d.\n", vb)

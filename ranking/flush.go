@@ -85,7 +85,7 @@ func (r *Ranking) flushStateToDisk() error {
 	r.cache_update_diamonds = make(map[string][]byte, 0) // 重设
 
 	// 保存扫描区块记录
-	hei := fields.VarUint5(r.finish_scan_block_height)
+	hei := fields.BlockHeight(r.finish_scan_block_height)
 	heibts, _ := hei.Serialize()
 	r.ldb.Put([]byte(DBKeyFinishScanBlockHeight), heibts, nil)
 

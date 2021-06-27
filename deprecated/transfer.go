@@ -74,8 +74,8 @@ func (api *DeprecatedApiService) transferSimple(params map[string]string) map[st
 		}
 		curtime = time.Unix(timebig.Int64(), 0)
 	}
-	newTrs.Timestamp = fields.VarUint5(curtime.Unix()) // 使用当前时间戳
-	newTrs.Fee = *fee                                  // set fee
+	newTrs.Timestamp = fields.BlockTxTimestamp(curtime.Unix()) // 使用当前时间戳
+	newTrs.Fee = *fee                                          // set fee
 	tranact := actions.NewAction_1_SimpleToTransfer(*to_addr, amount)
 	newTrs.AppendAction(tranact)
 	// sign
