@@ -1,9 +1,9 @@
 Hacash 挖矿规范、数据和服务接口文档
 ===
 
-本文档包含 Hacash 挖矿相关的一系列数据和服务的运行方式和接口规范，用于开发第三方商业矿池、私人挖矿客户端或矿池统计服务等等业务。
+本文档包含 Hacash 挖矿相关的一系列数据和服务的运行方式和接口规范，用于开发第三方商业矿池、私人挖矿客户端或矿池统计服务等等与挖矿相关的业务。
 
-1. 体系结构
+1 体系结构
 ---
 
 我们采用“中继节点（Relay Nodes）”方式提供挖矿相关的数据接口服务，示意如下：
@@ -11,6 +11,182 @@ Hacash 挖矿规范、数据和服务接口文档
 ![miner relay service](miner_relay_service.png)
 
 
-中继节点不仅是连接若干个挖矿客户端的服务端，也是所有挖矿相关的数据接口的服务端。一个 Hacash 全节点下面可以挂载若干个中继节点（基于TCP连接，连接数量视服务器性能是带宽大小而定），中继节点还可以串联（即中继节点作为服务端，下方再连接挂载若干个个中继节点），由此可以在一个全节点下方挂载理论上无数台挖矿客户端机器。
+中继节点不仅是连接若干个挖矿客户端的服务端，也是所有挖矿相关的数据接口的服务端。一个 Hacash 全节点下面可以挂载若干个中继节点（基于TCP连接，连接数量视服务器性能和带宽大小而定），中继节点还可以树状串联（即中继节点作为服务端，下方再连接挂载若干个个中继节点，且可以多层连接），由此可以在一个全节点下方挂载理论上无数台挖矿客户端机器。
 
-挖矿客户端（矿工机器）除了可连接到中继节点，有需要也可以直接连接到全节点。中继服务节点除了提供实时的挖矿相关的状态和数据、计算生成挖矿所需的数据准备材料，也可以统计和保存下连矿工的算力数据，并且提供算力统计数据的查询接口，为更上层的矿池整体算力计算和奖励分配计算提供统计信息数据。
+挖矿客户端（矿工机器）除了可连接到中继节点，有需要时也可以直接连接到全节点。中继服务节点除了提供实时的挖矿相关的状态和数据、计算生成挖矿所需的数据准备材料，也可以统计和保存下连矿工的算力数据，并且提供算力统计数据的查询接口，为更上层的矿池整体算力计算和奖励分配计算提供统计数据。
+
+2 部署运行
+---
+
+请在 [software_release_log.md](https://github.com/hacash/miner/blob/master/doc/software_release_log.md) 地址中下载全节点软件和中继服务节点软件，分别按照一下配置运行
+
+第一步：首先需要运行一台 Hacash 的全节点，相关配置文件 `hacash.config.ini` 如下：
+
+```ini
+data_dir = ./hacash_mainnet_data
+
+[p2p]
+listen_port = 3337
+boot_nodes = 182.92.163.225:3337,47.244.26.14:3337
+
+[miner]
+enable = true
+rewards = 1AVRuFXNFi3rdMrPH4hdqSgFrEBnWisWaS
+
+[minerserver]
+enable = true
+listen_port = 3350
+```
+
+以上配置中， `[miner]` 必须开启，表示全节点开启挖矿相关功能。而 `[minerserver]` 部分也必须同时开启，表示开启挖矿服务端服务，且服务监听 TCP 端口为 `3350` ，中继节点需要连接到此端口以同步最新区块信息。
+
+命令行运行示例如下：
+
+```shell script
+./hacash_node_2021_05_15_01 hacash.config.ini
+```
+
+第二步：运行中继节点并连接到全节点，相关配置文件 `hacash_relay_service.config.ini` 如下：
+
+```ini
+server_connect = 127.0.0.1:3350
+server_listen_port = 19991
+
+http_api_listen_port = 8080
+
+accept_hashrate = true
+report_hashrate = true
+
+[store]
+enable = true
+data_dir = ./hacash_relay_service_data
+save_mining_block_stuff = true
+save_mining_hash = true
+save_mining_nonce = true
+```
+
+以上配置，其中 `server_connect` 表示要连接到的全节点或上级中继节点。 `server_listen_port` 表示本中继服务监听的端口，以供下级中继节点连接。 `http_api_listen_port` 表示 http 的 api 服务监听的端口。 `accept_hashrate` 表示是否接受下级中继节点上报的算力统计数据， `report_hashrate` 表示是否向上级中继节点或全节点提交算力统计信息。
+
+`[store]` 配置部分则与保存算力统计和挖矿日志相关。
+
+命令行运行示例如下：
+
+```shell script
+./hacash_miner_relay_service_2021_05_12_01 hacash_relay_service.config.ini
+```
+
+正常情况下可以看到输出：
+
+```
+Load ini config file: "./hacash_relay_service.config.ini" at time:07/15 17:17:27
+[Miner Relay Service] Start server and listen on port 19991.
+[Miner Relay Service] Http api listen on port: 8080
+connecting server <127.0.0.1:3350>... success.
+note: pool is not accept PoW power statistics.
+receive new block <257282> mining stuff forward to [0] clients at time 07/15 17:17:28.
+
+```
+
+服务正确运行之后，我们访问 `http://127.0.0.1:8080/` 将看待如下信息
+
+```js
+{
+  ret: 0,
+  service: "hacash miner relay service"
+}
+```
+
+表示 HTTP 接口服务正常运行中。
+
+3 HTTP 接口服务
+---
+
+#### 3.1 [GET] /query?action=pending_block 获取当前正在挖矿的区块信息
+
+示例接口访问： `http://127.0.0.1:8080/query?action=pending_block&only_height=0&unitmei=0`
+
+可选参数：
+
+- [only_height] `bool` 是否只返回区块高度，用于判断最新挖掘的区块高度是否发生变化
+- [unitmei] `bool` 是否按浮点数单位`枚`的形式返回 HAC 的数量
+
+返回值示例：
+
+```js
+{
+    block: {
+        height: 257301
+    },
+    ret: 0
+}
+
+// 或者
+
+{
+    block: {
+        difficulty: 3670274902,
+        height: 257301,
+        prevhash: "00000000006cddd0c5837d077509714aa8070588599ce35ad41188c14a911ec9",
+        timestamp: 1626342425,
+        transaction_count: 1,
+        version: 1,
+        witness_stage: 0
+    },
+    coinbase: {
+        address: "1AVRuFXNFi3rdMrPH4hdqSgFrEBnWisWaS",
+        body_version: 1,
+        message: "",
+        message_hex: "20202020202020202020202020202020",
+        reward: "ㄜ2:248",
+        witness_count: 0,
+        witness_sigs: [ ],
+        witnesses: [ ]
+    },
+    mrkl_miner_related_hash_list: [ ],
+    ret: 0
+}
+```
+
+本接口将返回所有与挖矿相关的区块信息（不包含交易列表），理论上第三方开发者可以按照区块数据格式“拼装”成区块头数据，并根据默克尔相关hash（即 `mrkl_miner_related_hash_list` 参数）得出待挖矿基础数据。但这需要深度理解 Hacash 的区块数格式细节，对于第三方开发者来说过于复杂。所以我们接下来提供另一个十分简捷的接口来获得待挖矿基础数据。
+
+#### 3.2 [GET] /query?action=mining_stuff 获取挖矿模块数据
+
+示例接口访问： `http://127.0.0.1:8080/query?action=mining_stuff`
+
+返回值示例：
+
+```js
+{
+    ret: 0,
+    height: 257301,
+    coinbase_nonce: "6d4519e65ec75d191d741343d3a46fcf8f75081aacddd01d2be25f0febb9d760",
+    stuff: "01000003ed150060f0041900000000006cddd0c5837d077509714aa8070588599ce35ad41188c14a911ec9dbe4be5a0ce2729659e5dbba7d6dea54a9e4b62dffd811a1cfad66ae33eac0390000000100000000dac3f3560000",
+    head_nonce_start: 79,
+    head_nonce_len: 4
+}
+```
+
+本接口以最简捷且向后兼容的格式返回待挖矿的基础数据，第三方无需理解区块格式的细节。具体返回值说明如下：
+
+- [height] `int` 待挖矿的区块高度
+- [coinbase_nonce] `hex string` 以 HEX 格式返回的随机 nonce 值，此值每次访问接口时都会随机产生，为固定长度32位hash，每次都不同，用途将在下文解释
+- [stuff] `hex string` 以 HEX 格式返回的区块挖矿基础数据，用于做 `x16rs` 算法挖矿的输入数据
+- [head_nonce_start] `int` 区块头 nonce 值在基础挖矿数据（即 stuff 返回值）内的起始位置
+- [head_nonce_len] `int` 区块头 nonce 值的长度
+
+与其它基于 PoW 挖矿的项目一样，Hacash 也通过不断的重复尝试某种哈希运算（不断地改变输入值），直到寻找到符合难度目标的哈希。 Hacash 的区块挖掘哈希函数采用原创的 `X16RS` 算法，要了解这种算法的代码细节请参见链接：[]()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
