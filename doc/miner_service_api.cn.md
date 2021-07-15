@@ -159,6 +159,7 @@ receive new block <257282> mining stuff forward to [0] clients at time 07/15 17:
 {
     ret: 0,
     height: 257301,
+    target_difficulty_hash: "00000000061f9ab0000000000000000000000000000000000000000000000000",
     coinbase_nonce: "6d4519e65ec75d191d741343d3a46fcf8f75081aacddd01d2be25f0febb9d760",
     stuff: "01000003ed150060f0041900000000006cddd0c5837d077509714aa8070588599ce35ad41188c14a911ec9dbe4be5a0ce2729659e5dbba7d6dea54a9e4b62dffd811a1cfad66ae33eac0390000000100000000dac3f3560000",
     head_nonce_start: 79,
@@ -169,24 +170,55 @@ receive new block <257282> mining stuff forward to [0] clients at time 07/15 17:
 本接口以最简捷且向后兼容的格式返回待挖矿的基础数据，第三方无需理解区块格式的细节。具体返回值说明如下：
 
 - [height] `int` 待挖矿的区块高度
-- [coinbase_nonce] `hex string` 以 HEX 格式返回的随机 nonce 值，此值每次访问接口时都会随机产生，为固定长度32位hash，每次都不同，用途将在下文解释
+- [target_difficulty_hash] 难度目标哈希值，用于判断挖矿是否成功
+- [coinbase_nonce] `hex string` 以 HEX 格式返回的随机 nonce 值，此值每次访问接口时都会随机产生，为固定长度32位hash，每次都不同。此值需要临时保存在挖矿客户端，以便向服务器报告挖矿结果时附带回传，具体用途将在下文解释
 - [stuff] `hex string` 以 HEX 格式返回的区块挖矿基础数据，用于做 `x16rs` 算法挖矿的输入数据
 - [head_nonce_start] `int` 区块头 nonce 值在基础挖矿数据（即 stuff 返回值）内的起始位置
 - [head_nonce_len] `int` 区块头 nonce 值的长度
 
-与其它基于 PoW 挖矿的项目一样，Hacash 也通过不断的重复尝试某种哈希运算（不断地改变输入值），直到寻找到符合难度目标的哈希。 Hacash 的区块挖掘哈希函数采用原创的 `X16RS` 算法，要了解这种算法的代码细节请参见链接：[]()
+与其它基于 PoW 挖矿的项目一样，Hacash 也通过不断的重复尝试某种哈希运算（不断地改变输入值），直到寻找到符合难度目标的哈希。 Hacash 的区块挖掘哈希函数采用原创的 `X16RS` 算法，要了解这种算法的细节请参见源代码 [https://github.com/hacash/x16rs/blob/master/x16rs.go#L72](https://github.com/hacash/x16rs/blob/master/x16rs.go#L72) 中的两个相关函数：
 
+```go
+func HashX16RS(loopnum int, data []byte) []byte {
+    // ...
+}
 
+func CalculateBlockHash(blockHeight uint64, stuff []byte) []byte {
+    // ...
+}
+```
 
+其中 `CalculateBlockHash(uint64, []byte)` 函数的两个参数即分别是上文接口返回的 `height` 与 `stuff` 的值，此函数返回一个 32 位的哈希结果，即区块哈希，用于判断挖矿是否成功。但如果每次都传递相同的 height 与 stuff 值，则 CalculateBlockHash 函数返回的哈希结果不变。
 
+挖矿的过程即每次都尝试不同的 `stuff` 值作为 `CalculateBlockHash` 函数的参数，多次执行运算得出不同的结果，并判断哈希结果是否满足难度要求（即 target_difficulty_hash 返回值，比此目标难度哈希定义的更“小”的哈希 ）的过程。
 
+但 `stuff` 的值并不是完全随机的，它包含了区块头的结构化数据，所以不能随机任意传递 `stuff` 的值，而必须在上文接口中 `stuff` 返回数据的基础上按规则修改，才能得到合法的 `stuff` 值。合法的修改需要借助于 `head_nonce_start` 以及 `head_nonce_len` 两个参数，也就是说，只有这两个值定义的 stuff 数据的指定部分才是可以随机修改的，我们称作为 `head_nonce`，而其它部分不能修改，否则导致区块数据被破坏，挖矿将无效。由于必须考虑到区块格式版本升级等向后兼容的问题，所以 `stuff` 值中可以被随机替换的部分也可能在将来被升级改动，所以 `head_nonce_start` 和 `head_nonce_len` 的值并不是固定不变的，这也就意味着 `stuff` 能够被合法随机替换的部分，包括位置和长度，也是可能变动的。
 
+例如上文接口返回的 `stuff` 值是一个长度为 89 的 buffer ， `head_nonce_start` 返回 79 且 `head_nonce_len` 返回 4 则表示 stuff 中从第 79 位开始后 4 位的值是可以随机替换的 `head_nonce` 值，具体为下面数据中被括号括起来的数据（即 00000001 四位字节）是可以被随机替换的部分。
 
+01000003ed380060f035f000000000011c057cabe71255adb713ffda047e429e602054154416432299e3b089ba5abbbbc8eca9c38d5bcdada7fdf8c81027b61ddfd11adb27be19520ecf63(`00000001`)00000000dac3f3560000
 
+总共四位可被随机替换，则共有 `255^4 = 4228250625` 约 42 亿次哈希运算尝试的机会。如果 42 亿个 `head_nonce` 被全部尝试完毕却仍然没有找到复合目标难度的哈希结果，则需要再次调用本接口（即 /query?action=pending_block ）以获得一个新的 `stuff` 值及一个新的 32 位的 `coinbase_nonce` 值。也就是说，Hacash 区块内部其实有两个可以随机尝试替换的 nonce 值： `coinbase_nonce` 和 `head_nonce`。而一旦 `coinbase_nonce` 值改变，则 `head_nonce` 又将获得一个新的 42 次尝试机会。只不过，为了封装技术细节，保持第三方挖矿的简洁性，从 `coinbase_nonce` 值结合区块头数据生成有效 `stuff` 这一过程被隐藏了，由接口每次被调用时自动化随机生成 `coinbase_nonce` 供大家直接使用。
 
+那么如何判断 `CalculateBlockHash` 挖矿函数的哈希结果是否满足难度目标（即挖矿成功）呢？我们来看另一个位于 [https://github.com/hacash/mint/blob/master/difficulty/check.go#L14](https://github.com/hacash/mint/blob/master/difficulty/check.go#L14) 的函数 `CheckHashDifficultySatisfy`：
 
+```go
+func CheckHashDifficultySatisfy(result_hash, target_diffculty_hash []byte) bool {
+	if len(result_hash) != 32 || len(target_diffculty_hash) != 32 {
+		panic("CheckHashDifficultySatisfy hx1, hx2 size must be 32.")
+	}
+	for k := 0; k < 32; k++ {
+		if result_hash[k] < target_diffculty_hash[k] {
+			return true
+		} else if result_hash[k] > target_diffculty_hash[k] {
+			return false
+		}
+	}
+	return true
+}
+```
 
-
+此函数很简单，即比较哈希计算尝试的结果 `result_hash` 与目标难度哈希值 `target_diffculty_hash` 的“大小”，当 结果哈希“小于”目标难度时，则挖矿成功。
 
 
 
