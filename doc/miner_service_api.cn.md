@@ -194,7 +194,7 @@ func CalculateBlockHash(blockHeight uint64, stuff []byte) []byte {
 
 但 `stuff` 的值并不是完全随机的，它包含了区块头的结构化数据，所以不能随机任意传递 `stuff` 的值，而必须在上文接口中 `stuff` 返回数据的基础上按规则修改，才能得到合法的 `stuff` 值。合法的修改需要借助于 `head_nonce_start` 以及 `head_nonce_len` 两个参数，也就是说，只有这两个值定义的 stuff 数据的指定部分才是可以随机修改的，我们称作为 `head_nonce`，而其它部分不能修改，否则导致区块数据被破坏，挖矿将无效。由于必须考虑到区块格式版本升级等向后兼容的问题，所以 `stuff` 值中可以被随机替换的部分也可能在将来被升级改动，所以 `head_nonce_start` 和 `head_nonce_len` 的值并不是固定不变的，这也就意味着 `stuff` 能够被合法随机替换的部分，包括位置和长度，也是可能变动的。
 
-例如上文接口返回的 `stuff` 值是一个长度为 89 的 buffer ， `head_nonce_start` 返回 79 且 `head_nonce_len` 返回 4 则表示 stuff 中从第 79 位开始后 4 位的值是可以随机替换的 `head_nonce` 值，具体为下面数据中被括号括起来的数据（即 00000001 四位字节）是可以被随机替换的部分。
+例如上文接口返回的 `stuff` 值是一个长度为 89 的 buffer ， `head_nonce_start` 返回 79 且 `head_nonce_len` 返回 4 则表示 stuff 数据 buffer 数组索引（下标从 0 开始） 79 位开始的后 4 位值是可以随机替换的 `head_nonce` 值，具体为下面数据中被括号括起来的数据（即 00000001 四位字节）是可以被随机替换的部分。
 
 01000003ed380060f035f000000000011c057cabe71255adb713ffda047e429e602054154416432299e3b089ba5abbbbc8eca9c38d5bcdada7fdf8c81027b61ddfd11adb27be19520ecf63(`00000001`)00000000dac3f3560000
 
@@ -218,7 +218,35 @@ func CheckHashDifficultySatisfy(result_hash, target_diffculty_hash []byte) bool 
 }
 ```
 
-此函数很简单，即比较哈希计算尝试的结果 `result_hash` 与目标难度哈希值 `target_diffculty_hash` 的“大小”，当 结果哈希“小于”目标难度时，则挖矿成功。
+此函数很简单，即比较哈希计算尝试的结果 `result_hash` 与目标难度哈希值 `target_diffculty_hash` 的“大小”，当 结果哈希“小于”目标难度时（也就是表现为哈希值前导零的数量更多），则表示挖矿成功。
 
 
+#### 3.3 [GET] /submit?action=mining_result 提交挖矿结果（挖矿成功或者算力统计）
+
+示例接口访问： `http://127.0.0.1:8080/submit?action=mining_result&mint_success=0&reward_address=1AVRuFXNFi3rdMrPH4hdqSgFrEBnWisWaS&block_height=257370&head_nonce=f6f6f6f6&coinbase_nonce=6d4519e65ec75d191d741343d3a46fcf8f75081aacddd01d2be25f0febb9d760`
+
+参数说明：
+
+- [mint_success] `bool` 本地自己判断是否挖矿成功（远程服务端会再做一次判断）
+- [reward_address] `string` 挖矿奖励统计的收益账户
+- [block_height] `int` 本次挖矿的区块高度 
+- [head_nonce] `hex string` 挖矿的随机数结果
+- [coinbase_nonce] `hex string` 从接口获取并原样回传的 coinbase_nonce 值
+
+返回结果：
+
+```js
+{
+    ret: 0,
+    stat: "ok"
+}
+```
+
+在上一个接口 `/query?action=mining_stuff` 内获取的 `coinbase_nonce` 值，需要在本接口原封不动的回传，服务端将用到此参数进行区块头数据的组装和哈希运算结果的验证。
+
+当我们判断成功挖到一个区块时，则调用本接口，提交 `head_nonce` 及相关数据，中继节点会一层一层提交到全节点，并且验证后将成功挖到的区块广播到全网，其他所有矿工就会收到新的区块，自动开始挖掘下一个区块。
+
+同样，当别人成功挖掘到区块时，新的区块通知将到达每一台矿机，所有矿工自动调用 `/query?action=mining_stuff` 接口获取下一个将被挖掘的区块数据，开始新一轮的挖掘。
+
+但 HTTP 接口是无状态的协议，你可以通过定时轮询 `/query?action=pending_block&only_height=1` 判断是否有新区快到来，从而判断是否切换到下一个挖掘的区块上。 当然，如果你的采矿机器性能足够好，可以在几秒甚至一秒以内尝试完 42 亿次的 `head_nonce` 值空间，那就不需要轮询监听新区块了， `/query?action=mining_stuff` 接口会自动返回新待挖掘的区块数据。
 
