@@ -57,7 +57,7 @@ func RenderTotalSupplyObject(totalsupply *stores.TotalSupply, isformatstring boo
 
 	// 增发
 	appendToFloat64(object, objstr, "miner_reward", miner_reward, ifs)
-	appendToFloat64(object, objstr, "channel_interest", btcmove_subsidy, ifs)
+	appendToFloat64(object, objstr, "channel_interest", channel_interest, ifs)
 	appendToFloat64(object, objstr, "btcmove_subsidy", btcmove_subsidy, ifs)
 	appendToFloat64(object, objstr, "syslend_diamond_loan_hac_count", syslend_diamond_loan_hac_count, ifs)   // 钻石系统借贷借出HAC累计
 	appendToFloat64(object, objstr, "syslend_diamond_repay_hac_count", syslend_diamond_repay_hac_count, ifs) // 钻石系统借贷赎回HAC累计
