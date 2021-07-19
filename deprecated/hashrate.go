@@ -15,7 +15,7 @@ func (api *DeprecatedApiService) hashRate(params map[string]string) map[string]s
 		return result
 	}
 	curheight := lastest.GetHeight()
-	targetHashWorth := difficulty.CalculateDifficultyWorth(curheight, lastest.GetDifficulty())
+	targetHashWorth := difficulty.CalculateDifficultyWorth(lastest.GetDifficulty())
 
 	// 当前实时哈希率： 4小时48区块所耗费的时间
 	curCalcBlockNum := int64(48)

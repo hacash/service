@@ -10,8 +10,8 @@ import (
 	"strings"
 )
 
-func hashRateList(blockstore interfaces.BlockStore, curheight uint64, allHistoryOr30Days bool, appendItem *big.Int) ([]string, error) {
-	var stepNum = 30
+func hashRateList(blockstore interfaces.BlockStore, curheight uint64, allHistoryOr300Days bool, appendItem *big.Int) ([]string, error) {
+	var stepNum = 300
 	// 第一个附加
 	var hsti = 0
 	if appendItem != nil {
@@ -27,7 +27,7 @@ func hashRateList(blockstore interfaces.BlockStore, curheight uint64, allHistory
 	var allHistoryRateStrs = make([]string, stepNum+hsti)
 	var allHistoryRates = make([]*big.Int, stepNum+hsti)
 	stepBlkHei := mint.AdjustTargetDifficultyNumberOfBlocks
-	if allHistoryOr30Days {
+	if allHistoryOr300Days {
 		stepBlkHei = curheight/uint64(stepNum) - 1
 	}
 
@@ -51,8 +51,8 @@ func hashRateList(blockstore interfaces.BlockStore, curheight uint64, allHistory
 		if err3 != nil {
 			return nil, err3
 		}
-		//fmt.Println(tarhei, blk.GetDifficulty(), hex.EncodeToString(headbytes))
-		targetHashWorth := difficulty.CalculateDifficultyWorth(tarhei, blk.GetDifficulty())
+		//fmt.Println(tarhei, blk.GetDifficulty(), hex.EncodeToString(difficulty.DifficultyUint32ToHash(blk.GetDifficulty())))
+		targetHashWorth := difficulty.CalculateDifficultyWorth(blk.GetDifficulty())
 		if targetHashWorth.Cmp(allMaxRate) == 1 {
 			allMaxRate = targetHashWorth
 			allDivCut = new(big.Int).Div(targetHashWorth, big.NewInt(10000))

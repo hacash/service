@@ -6,10 +6,37 @@ import (
 	"github.com/hacash/mint/difficulty"
 	"math/big"
 	"strings"
+	"sync"
+	"time"
 )
+
+// 缓存
+var hashRateChartsV3_lock sync.Mutex
+var hashRateChartsV3_lastreqtime *time.Time = nil
+var hashRateChartsV3_cachedata map[string]string = nil
 
 func (api *DeprecatedApiService) hashRateChartsV3(params map[string]string) map[string]string {
 	result := make(map[string]string)
+
+	hashRateChartsV3_lock.Lock()
+	var tn = time.Now()
+
+	// 检查缓存
+	if hashRateChartsV3_cachedata != nil && hashRateChartsV3_lastreqtime != nil {
+		if tn.Sub(*hashRateChartsV3_lastreqtime) < time.Minute*time.Duration(5) {
+			hashRateChartsV3_lock.Unlock() // 解锁
+			//fmt.Println("hashRateChartsV3_cachedata // 返回缓存")
+			return hashRateChartsV3_cachedata // 返回缓存
+		}
+	}
+	//fmt.Println("////////////////////")
+	hashRateChartsV3_lock.Unlock()
+
+	// 锁定
+	hashRateChartsV3_lock.Lock()
+	defer hashRateChartsV3_lock.Unlock()
+
+	// 正式开始计算
 	lastest, err1 := api.blockchain.State().ReadLastestBlockHeadAndMeta()
 	if err1 != nil {
 		result["err"] = err1.Error()
@@ -23,9 +50,9 @@ func (api *DeprecatedApiService) hashRateChartsV3(params map[string]string) map[
 
 	// 当前
 	var currentHashWorth *big.Int = nil
-	targetHashWorth := difficulty.CalculateDifficultyWorth(curheight, lastest.GetDifficulty())
-	// 当前实时哈希率： 4小时48区块所耗费的时间
-	curCalcBlockNum := int64(48)
+	targetHashWorth := difficulty.CalculateDifficultyWorth(lastest.GetDifficulty())
+	// 当前实时哈希率： 300区块所耗费的时间
+	curCalcBlockNum := int64(300)
 	prevHeight := int64(curheight) - curCalcBlockNum
 	if prevHeight > 0 {
 		headbytes, err2 := api.blockchain.State().BlockStore().ReadBlockHeadBytesByHeight(uint64(prevHeight))
@@ -42,7 +69,7 @@ func (api *DeprecatedApiService) hashRateChartsV3(params map[string]string) map[
 		// 实时哈希率
 		//fmt.Println("realEachBlockCostTimeSec:  ", realEachBlockCostTimeSec)
 		currentHashRate := new(big.Int).Div(targetHashWorth, new(big.Int).SetUint64(realEachBlockCostTimeSec))
-		currentHashWorth = new(big.Int).Mul(currentHashRate, new(big.Int).SetUint64(300))
+		currentHashWorth = new(big.Int).Mul(currentHashRate, new(big.Int).SetUint64(mint.EachBlockRequiredTargetTime))
 		jsondatastring += `,"current_hashrate":` + currentHashRate.String()
 		jsondatastring += `,"current_show":"` + difficulty.ConvertPowPowerToShowFormat(currentHashRate) + `"`
 	} else {
@@ -67,6 +94,10 @@ func (api *DeprecatedApiService) hashRateChartsV3(params map[string]string) map[
 	// ok
 	result["jsondata"] = jsondatastring
 	// `{"target":`+`,"current":`+currentHashRate.String()+`,"days30":[` + strings.Join(days30, ",") + `]}`
+
+	// 缓存
+	hashRateChartsV3_lastreqtime = &tn  // 缓存时间
+	hashRateChartsV3_cachedata = result // 缓存数据
 
 	// 返回
 	return result

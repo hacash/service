@@ -34,7 +34,7 @@ func (api *DeprecatedApiService) powPower(params map[string]string) map[string]s
 	}
 	//fmt.Println(cost288sec)
 	// cost time
-	powbitsbig := difficulty.CalculateDifficultyWorth(lastest.GetHeight(), lastest.GetDifficulty())
+	powbitsbig := difficulty.CalculateDifficultyWorth(lastest.GetDifficulty())
 	powervalue := new(big.Int).Div(powbitsbig, big.NewInt(int64(cost288sec)))
 	//fmt.Println( mint_num288dj, cost288sec, powbitsbig.String(), powervalue.String() )
 	// return
