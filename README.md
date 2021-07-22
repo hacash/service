@@ -6,7 +6,7 @@ RPC API 接口
 
 English Doc：[rpc_api_doc.en.md](doc/rpc_api_doc.en.md) 
 
-Compilation instructions: [hacash-compilation_en.md](https://github.com/hacash/miner/hacash-compilation_en.md)
+Compilation instructions: [hacash-compilation_en.md](https://github.com/hacash/miner/blob/master/doc/build_compilation_en.md)
 
 ---
 
