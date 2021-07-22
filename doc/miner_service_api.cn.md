@@ -18,7 +18,7 @@ Hacash 挖矿规范、数据和服务接口文档
 2 部署运行
 ---
 
-请在 [software_release_log.md](https://github.com/hacash/miner/blob/master/doc/software_release_log.md) 地址中下载全节点软件和中继服务节点软件，分别按照一下配置运行
+请在 [software_release_log.md](https://github.com/hacash/miner/blob/master/doc/software_release_log.md) 地址中下载全节点软件、中继服务节点软件和矿工客户端软件，分别按照一下配置运行
 
 第一步：首先需要运行一台 Hacash 的全节点，相关配置文件 `hacash.config.ini` 如下：
 
@@ -97,6 +97,37 @@ receive new block <257282> mining stuff forward to [0] clients at time 07/15 17:
 ```
 
 表示 HTTP 接口服务正常运行中。
+
+第三步：运行挖矿客户端，相关配置文件 `minerworker.config.ini` 如下：
+
+```ini
+pool = 127.0.0.1:19991
+
+rewards = 1AVRuFXNFi3rdMrPH4hdqSgFrEBnWisWaS
+
+supervene = 1 
+```
+
+配置里 `pool` 为要连接到的中继节点或全节点的地址。`rewards` 为收取挖矿奖励的统计地址。 `supervene` 为挖矿的并发数量，设置值与 CPU 核心数量有关。
+
+命令行运行示例如下：
+
+```shell script
+./hacash_miner_worker_2021_05_24_01 minerworker.config.ini
+```
+
+运行后挖矿客户端就会连接到中继服务节点 `127.0.0.1:19991` 上开始挖矿，正常情况下将输出一下信息：
+
+```
+[Start] connect: 127.0.0.1:19991, reward: 1AVRuFXNFi3rdMrPH4hdqSgFrEBnWisWaS. 
+startup CPU device of [1] supervene.
+connecting miner server...connected successfully.
+do mining height:‹259297›, difficulty: 00000000054e5b1...
+```
+
+表示成功连接，正在挖矿
+
+
 
 3 HTTP 接口服务
 ---
@@ -250,3 +281,95 @@ func CheckHashDifficultySatisfy(result_hash, target_diffculty_hash []byte) bool 
 
 但 HTTP 接口是无状态的协议，你可以通过定时轮询 `/query?action=pending_block&only_height=1` 判断是否有新区快到来，从而判断是否切换到下一个挖掘的区块上。 当然，如果你的采矿机器性能足够好，可以在几秒甚至一秒以内尝试完 42 亿次的 `head_nonce` 值空间，那就不需要轮询监听新区块了， `/query?action=mining_stuff` 接口会自动返回新待挖掘的区块数据。
 
+#### 3.4 [GET] /uery?action=mining_result 查询算力统计
+
+可以通过 idx_start 和 idx_limit 组成的全局自增序号（类似数据库的自增主键）来查询全部算力统计的日志。only_worth 参数标记是否忽略其他统计信息，仅仅返回 result_hash_worth 即算力哈希率统计值。 result_hash_worth 是矿池按照算力大小决定分配奖励的比例的主要指标。
+
+示例接口访问1： `http://127.0.0.1:8080/query?action=mining_result&idx_start=1&idx_limit=10&only_worth=0`
+
+返回值示例1：
+
+```js
+{
+    list: [
+    {
+        block_height: 259297,
+        coinbase_nonce: "e5fd87815870054a7c4f210fa7f8ed80fd4f6793ecfdacbbcf26dbcff4bafad1",
+        head_nonce: "57f03300",
+        mint_success: 0,
+        result_hash: "00000001218476129eaaf2e665ac11195026786bfd3f68630ae3c654042ef62c",
+        result_hash_worth: "4275993344", // 算力哈希率
+        reward_address: "1AVRuFXNFi3rdMrPH4hdqSgFrEBnWisWaS"
+    },
+    {
+        block_height: 259298,
+        coinbase_nonce: "4cbc0c77bbf17b992285a9dcabbf199dbd7219106254fa72f8960a1341f7b3d4",
+        head_nonce: "99190d00",
+        mint_success: 0,
+        result_hash: "0000031336414d6b1db663c289f061d68c0e491b6c01fe9b30ccd16dc2c4d204",
+        result_hash_worth: "16575689",
+        reward_address: "1AVRuFXNFi3rdMrPH4hdqSgFrEBnWisWaS"
+    },
+    ...
+    ]
+}
+```
+
+除了按日志序号查询算力统计，也可以通过区块高度和奖励地址查询更加精确仔细的统计数据。
+
+示例接口访问2： `http://127.0.0.1:8080/query?action=mining_result&reward_address=1AVRuFXNFi3rdMrPH4hdqSgFrEBnWisWaS&block_height_start=259297&block_height_limit=10&only_worth=1`
+
+返回值示例2：
+
+```js
+{
+    list: [
+    {
+        block_height: 259297,
+        result_hash_worth: "4275993344" // 如果传递 only_worth 参数则只返回算力值统计
+    },
+    {
+        block_height: 259298,
+        result_hash_worth: "16575689"
+    },
+    ...
+    ]
+}
+```
+
+本接口用来查询挖矿客户端上报的挖矿结果日志和算力统计记录，是自主开发第三方矿池的必备统计数据。当然，这并不是必须的，若具备相应的开发能力，了解 Hacash 底层的技术，第三方可以开发自己的算力统计服务。
+
+
+#### 3.5 [GET] /uery?action=mining_result 查询算力统计
+
+示例接口访问： `http://127.0.0.1:8080/query?action=historical_block&height=259298`
+
+返回值示例：
+
+```js
+{
+    block: {
+        difficulty: 3668560738,
+        height: 259298,
+        prevhash: "00000000011e293f92e9d93ea9ab2dce6a012fb1e8f467e9ab08511813fb162e",
+        timestamp: 1626945557,
+        transaction_count: 1,
+        version: 1,
+        witness_stage: 0
+    },
+    coinbase: {
+        address: "1MzNY1oA3kfgYi75zquj3SRUPYztzXHzK9",
+        body_version: 1,
+        message: "unknown",
+        message_hex: "756e6b6e6f776e202020202020202020",
+        reward: "ㄜ2:248",
+        witness_count: 0,
+        witness_sigs: [ ],
+        witnesses: [ ]
+    },
+    mrkl_miner_related_hash_list: [ ],
+    ret: 0
+}
+```
+
+本接口是查询本中继节点历史挖矿的区块信息（无论是否成功挖出），用于可能的算力验证。
