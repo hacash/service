@@ -45,7 +45,7 @@ func (api *DeprecatedApiService) getChannel(params map[string]string) map[string
 		totalamt, _ := store.LeftAmount.Add(&store.RightAmount)
 		if len(idlist) == 1 {
 			// 只有一条数据则返回详情
-			result["is_closed"] = strconv.Itoa(int(store.IsClosed))
+			result["is_closed"] = strconv.Itoa(int(store.IsClosed.Value()))
 			result["belong_height"] = strconv.FormatUint(uint64(store.BelongHeight), 10)
 			result["left_address"] = store.LeftAddress.ToReadable()
 			result["left_amount"] = store.LeftAmount.ToFinString()

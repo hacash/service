@@ -9,7 +9,7 @@ import (
 
 type BalanceRankingItem struct {
 	Address       fields.Address
-	BlsUseFloat64 fields.VarUint1 // 标记是否是浮点数
+	BlsUseFloat64 fields.Bool // 标记是否是浮点数
 	Balance       fields.VarUint8
 }
 
@@ -21,12 +21,12 @@ func NewBalanceRankingItem(addrstr string, isfloat bool) *BalanceRankingItem {
 	}
 	return &BalanceRankingItem{
 		Address:       *addr,
-		BlsUseFloat64: fields.VarUint1(isf),
+		BlsUseFloat64: fields.Bool(isf),
 		Balance:       fields.VarUint8(0),
 	}
 }
 func (b *BalanceRankingItem) GetBalance() float64 {
-	if b.BlsUseFloat64 == 1 {
+	if b.BlsUseFloat64.Check() {
 		return math.Float64frombits(uint64(b.Balance))
 	}
 	return float64(b.Balance)
@@ -35,11 +35,11 @@ func (b *BalanceRankingItem) GetBalanceForceUint64() uint64 {
 	return uint64(b.Balance)
 }
 func (b *BalanceRankingItem) SetBalanceByUint64(v uint64) {
-	b.BlsUseFloat64 = fields.VarUint1(0)
+	b.BlsUseFloat64.Set(false)
 	b.Balance = fields.VarUint8(v)
 }
 func (b *BalanceRankingItem) SetBalanceByFloat64(v float64) {
-	b.BlsUseFloat64 = fields.VarUint1(1)
+	b.BlsUseFloat64.Set(true)
 	uv := math.Float64bits(v)
 	b.Balance = fields.VarUint8(uv)
 }
@@ -56,7 +56,7 @@ func ParseBalanceRankingItems(buf []byte) []*BalanceRankingItem {
 		}
 		one.Address = buf[seek : seek+21]
 		seek += 21
-		one.BlsUseFloat64 = fields.VarUint1(buf[seek])
+		one.BlsUseFloat64 = fields.Bool(buf[seek])
 		seek += 1
 		one.Balance = fields.VarUint8(binary.BigEndian.Uint64(buf[seek : seek+8]))
 		seek += 8
