@@ -38,13 +38,13 @@ func (api *DeprecatedApiService) getLockBlsInfo(params map[string]string) map[st
 	result["master_address"] = lockblsItem.MasterAddress.ToReadable()
 	result["effect_block_height"] = strconv.FormatUint(uint64(lockblsItem.EffectBlockHeight), 10)
 	result["linear_block_number"] = strconv.FormatUint(uint64(lockblsItem.LinearBlockNumber), 10)
-	amt1, _ := lockblsItem.GetAmount(&lockblsItem.TotalLockAmountBytes)
+	amt1 := lockblsItem.TotalLockAmount
 	result["total_lock_amount"] = amt1.ToFinString()
-	amt2, _ := lockblsItem.GetAmount(&lockblsItem.LinearReleaseAmountBytes)
+	amt2 := lockblsItem.LinearReleaseAmount
 	result["linear_release_amount"] = amt2.ToFinString()
-	amt3, _ := lockblsItem.GetAmount(&lockblsItem.BalanceAmountBytes)
+	amt3 := lockblsItem.BalanceAmount
 	result["balance_amount"] = amt3.ToFinString()
-	amt4, _ := amt1.Sub(amt3)
+	amt4, _ := amt1.Sub(&amt3)
 	result["released_amount"] = amt4.ToFinString()
 
 	// 是否为单向转移比特币增发

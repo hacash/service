@@ -76,7 +76,7 @@ func (api *DeprecatedApiService) getDiamond(params map[string]string) map[string
 			result["fail"] = "name format error."
 			return result
 		}
-		store, _ = blockstore.ReadDiamond(fields.Bytes6(dmstr))
+		store, _ = blockstore.ReadDiamond(fields.DiamondName(dmstr))
 	}
 	if store == nil {
 		result["fail"] = "not find."
@@ -84,7 +84,7 @@ func (api *DeprecatedApiService) getDiamond(params map[string]string) map[string
 	}
 	dmstr = string(store.Diamond)
 	// get current belong
-	sto2 := state.Diamond(fields.Bytes6(dmstr))
+	sto2 := state.Diamond(fields.DiamondName(dmstr))
 	if sto2 != nil {
 		result["address"] = sto2.Address.ToReadable()
 	} else {

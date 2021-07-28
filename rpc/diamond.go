@@ -41,7 +41,7 @@ func (api *RpcService) diamond(r *http.Request, w http.ResponseWriter, bodybytes
 			return
 		}
 	} else if len(diamondValue) == 6 {
-		diamondSto, err = blockstore.ReadDiamond(fields.Bytes6(diamondValue))
+		diamondSto, err = blockstore.ReadDiamond(fields.DiamondName(diamondValue))
 		if err != nil {
 			ResponseError(w, err)
 			return
@@ -58,8 +58,7 @@ func (api *RpcService) diamond(r *http.Request, w http.ResponseWriter, bodybytes
 
 	diamondValue = string(diamondSto.Diamond)
 
-	bidfee := fields.Amount{}
-	bidfee.Parse(diamondSto.ApproxFeeOffer, 0)
+	bidfee := diamondSto.GetApproxFeeOffer()
 
 	// data
 	retdata := ResponseCreateData("number", diamondSto.Number)
@@ -73,7 +72,7 @@ func (api *RpcService) diamond(r *http.Request, w http.ResponseWriter, bodybytes
 	retdata["prev_block_hash"] = hex.EncodeToString(diamondSto.PrevContainBlockHash)
 
 	// get current belong
-	sto2 := api.backend.BlockChain().State().Diamond(fields.Bytes6(diamondValue))
+	sto2 := api.backend.BlockChain().State().Diamond(fields.DiamondName(diamondValue))
 	if sto2 != nil {
 		retdata["current_belong_address"] = sto2.Address.ToReadable()
 	} else {

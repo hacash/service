@@ -283,7 +283,7 @@ func appendActionTransferDiamond(r *http.Request, isUnitMei bool, allprikey map[
 	} else {
 		// 单个转账
 		actObj = &actions.Action_5_DiamondTransfer{
-			Diamond:   fields.Bytes6(diamonds.Diamonds[0]),
+			Diamond:   fields.DiamondName(diamonds.Diamonds[0]),
 			ToAddress: *to_addr,
 		}
 		//fmt.Println( `
