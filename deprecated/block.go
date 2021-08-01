@@ -36,7 +36,7 @@ func (api *DeprecatedApiService) getBlockIntro(params map[string]string) map[str
 			result["err"] = err.Error()
 			return result
 		}
-	} else if bhx, e := hex.DecodeString(blkid); e == nil && len(bhx) == 32 {
+	} else if bhx, e := hex.DecodeString(blkid); e == nil && len(bhx) == fields.HashSize {
 		blockhx = bhx
 		blockbytes, err = store.ReadBlockBytesByHash(bhx, 0)
 		if err != nil {
