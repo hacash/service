@@ -104,7 +104,58 @@ func (api *DeprecatedApiService) getDiamond(params map[string]string) map[string
 	result["custom_message"] = store.CustomMessage.ToHex()
 	result["approx_fee_offer"] = store.GetApproxFeeOffer().ToFinString()
 	result["average_burn_price"] = "ㄜ" + strconv.FormatUint(uint64(store.AverageBidBurnPrice), 10) + ":248"
+	result["visual_gene"] = store.VisualGene.ToHex()
 	return result
+}
+
+func (api *DeprecatedApiService) getDiamondVisualGeneList(params map[string]string) map[string]string {
+	result := make(map[string]string)
+	start_number, ok1 := params["start_number"]
+	if !ok1 {
+		result["err"] = "params <start_number> must."
+		return result
+	}
+	limit, _ := params["limit"]
+	if len(limit) == 0 {
+		limit = "10"
+	}
+	var limit_num uint64 = 10
+	var start_num uint64 = 1
+	if lmt, err := strconv.ParseUint(limit, 10, 0); err == nil {
+		limit_num = lmt
+	}
+	if limit_num > 50 {
+		limit_num = 50 // 最多50枚
+	}
+	if stt, err := strconv.ParseUint(start_number, 10, 0); err == nil {
+		start_num = stt
+	}
+
+	// 查询
+	state := api.blockchain.State()
+	blockstore := state.BlockStore()
+
+	jsondata := `{"list":[`
+	var dtlist = make([]string, 0)
+
+	for dianum := start_num; dianum < start_num+limit_num; dianum++ {
+
+		store, e := blockstore.ReadDiamondByNumber(uint32(dianum))
+		if e != nil || store == nil {
+			break
+		}
+		dtlist = append(dtlist, fmt.Sprintf(
+			`{"name":"%s","number":%d,"visual_gene":"%s"}`,
+			string(store.Diamond),
+			store.Number,
+			store.VisualGene.ToHex()),
+		)
+	}
+	jsondata += strings.Join(dtlist, ",")
+	jsondata += `]}`
+	result["jsondata"] = jsondata
+	return result
+
 }
 
 func (api *DeprecatedApiService) transferDiamondMultiple(params map[string]string) map[string]string {
