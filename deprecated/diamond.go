@@ -145,10 +145,11 @@ func (api *DeprecatedApiService) getDiamondVisualGeneList(params map[string]stri
 			break
 		}
 		dtlist = append(dtlist, fmt.Sprintf(
-			`{"name":"%s","number":%d,"visual_gene":"%s"}`,
+			`{"name":"%s","number":%d,"visual_gene":"%s","bid_fee":"%s"}`,
 			string(store.Diamond),
 			store.Number,
-			store.VisualGene.ToHex()),
+			store.VisualGene.ToHex(),
+			store.ApproxFeeOffer.ToFinString()),
 		)
 	}
 	jsondata += strings.Join(dtlist, ",")
