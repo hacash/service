@@ -51,8 +51,8 @@ func (r *Ranking) scanOneBlock() error {
 
 	// 扫描交易
 	for txposi := 0; txposi < int(txs); txposi++ {
-		// 仅仅扫描和钻石挖矿、钻石转账及钻石借贷相关的action
-		scanUrl := fmt.Sprintf("/query?action=scan_value_transfers&unitmei=1&height=%d&txposi=%d&kind=dl", scanHeight, txposi)
+		// 扫描HAC转账、BTC转账、钻石挖矿、钻石转账及钻石借贷相关的action
+		scanUrl := fmt.Sprintf("/query?action=scan_value_transfers&unitmei=1&height=%d&txposi=%d&kind=hsdl", scanHeight, txposi)
 		resbts, e1 := HttpGetBytes(r.node_rpc_url + scanUrl)
 		if e1 != nil {
 			return fmt.Errorf("rpc not yet") // 错误
