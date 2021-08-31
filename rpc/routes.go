@@ -14,6 +14,7 @@ func (api *RpcService) initRoutes() {
 
 	api.queryRoutes["balances"] = api.balances
 	api.queryRoutes["diamond"] = api.diamond
+	api.queryRoutes["channel"] = api.channel
 
 	api.queryRoutes["last_block"] = api.lastBlock
 	api.queryRoutes["block_intro"] = api.blockIntro
