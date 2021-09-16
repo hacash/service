@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"strings"
 	"time"
+	"sync"
 )
 
 var (
@@ -17,13 +18,18 @@ var (
 	dealHomePrintCacheBytes []byte
 )
 
+homeLock := sync.RWMutex{}
+
 func (api *DeprecatedApiService) dealHome(response http.ResponseWriter, request *http.Request) {
 
+	homeLock.Lock()
 	if len(dealHomePrintCacheBytes) > 0 && time.Now().Unix() < dealHomePrintCacheTime.Unix()+5 {
+		defer homeLock.Unlock()
 		response.Write(dealHomePrintCacheBytes)
 		return
 	}
 	dealHomePrintCacheTime = time.Now()
+	homeLock.Unlock()
 
 	state := api.blockchain.State()
 	//store := state.BlockStore()
@@ -156,8 +162,10 @@ func (api *DeprecatedApiService) dealHome(response http.ResponseWriter, request 
 
 	// Write
 	responseStrAry = append(responseStrAry, "")
+	homeLock.Lock()
 	dealHomePrintCacheBytes = []byte("<html>" + strings.Join(responseStrAry, "\n\n<br><br> ") + "</html>")
 	response.Write(dealHomePrintCacheBytes)
+	homeLock.Unlock()
 }
 
 func (api *DeprecatedApiService) getMiao(minerblkhead interfaces.Block, prev288height uint64, blknum uint64) uint64 {
