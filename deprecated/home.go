@@ -18,7 +18,7 @@ var (
 	dealHomePrintCacheBytes []byte
 )
 
-homeLock := sync.RWMutex{}
+var homeLock sync.RWMutex
 
 func (api *DeprecatedApiService) dealHome(response http.ResponseWriter, request *http.Request) {
 
