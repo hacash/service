@@ -7,6 +7,7 @@ import (
 	"github.com/hacash/core/fields"
 	"github.com/hacash/core/stores"
 	"github.com/hacash/core/transactions"
+	"github.com/hacash/x16rs"
 	"strconv"
 	"strings"
 )
@@ -110,26 +111,6 @@ func (api *DeprecatedApiService) getDiamond(params map[string]string) map[string
 
 func (api *DeprecatedApiService) getDiamondVisualGeneList(params map[string]string) map[string]string {
 	result := make(map[string]string)
-	start_number, ok1 := params["start_number"]
-	if !ok1 {
-		result["err"] = "params <start_number> must."
-		return result
-	}
-	limit, _ := params["limit"]
-	if len(limit) == 0 {
-		limit = "10"
-	}
-	var limit_num uint64 = 10
-	var start_num uint64 = 1
-	if lmt, err := strconv.ParseUint(limit, 10, 0); err == nil {
-		limit_num = lmt
-	}
-	if limit_num > 50 {
-		limit_num = 50 // 最多50枚
-	}
-	if stt, err := strconv.ParseUint(start_number, 10, 0); err == nil {
-		start_num = stt
-	}
 
 	// 查询
 	state := api.blockchain.State()
@@ -138,20 +119,73 @@ func (api *DeprecatedApiService) getDiamondVisualGeneList(params map[string]stri
 	jsondata := `{"list":[`
 	var dtlist = make([]string, 0)
 
-	for dianum := start_num; dianum < start_num+limit_num; dianum++ {
+	dianamestr, ok0 := params["dianames"]
+	if ok0 && len(dianamestr) >= 6 {
 
-		store, e := blockstore.ReadDiamondByNumber(uint32(dianum))
-		if e != nil || store == nil {
-			break
+		// 按名称列表查询
+		diamonds := strings.Split(dianamestr, ",")
+		dianum := 0
+		for _, v := range diamonds {
+			if x16rs.IsDiamondValueString(v) {
+				store, e := blockstore.ReadDiamond(fields.DiamondName(v))
+				if e != nil || store == nil {
+					break
+				}
+				dtlist = append(dtlist, fmt.Sprintf(
+					`{"name":"%s","number":%d,"visual_gene":"%s","bid_fee":"%s"}`,
+					string(store.Diamond),
+					store.Number,
+					store.VisualGene.ToHex(),
+					store.ApproxFeeOffer.ToFinString()),
+				)
+				dianum++
+				if dianum >= 50 {
+					break // 最多50枚
+				}
+			}
 		}
-		dtlist = append(dtlist, fmt.Sprintf(
-			`{"name":"%s","number":%d,"visual_gene":"%s","bid_fee":"%s"}`,
-			string(store.Diamond),
-			store.Number,
-			store.VisualGene.ToHex(),
-			store.ApproxFeeOffer.ToFinString()),
-		)
+
+	} else {
+
+		// 按翻页查询
+		start_number, ok1 := params["start_number"]
+		if !ok1 {
+			result["err"] = "params <start_number> must."
+			return result
+		}
+		limit, _ := params["limit"]
+		if len(limit) == 0 {
+			limit = "10"
+		}
+		var limit_num uint64 = 10
+		var start_num uint64 = 1
+		if lmt, err := strconv.ParseUint(limit, 10, 0); err == nil {
+			limit_num = lmt
+		}
+		if limit_num > 50 {
+			limit_num = 50 // 最多50枚
+		}
+		if stt, err := strconv.ParseUint(start_number, 10, 0); err == nil {
+			start_num = stt
+		}
+
+		for dianum := start_num; dianum < start_num+limit_num; dianum++ {
+
+			store, e := blockstore.ReadDiamondByNumber(uint32(dianum))
+			if e != nil || store == nil {
+				break
+			}
+			dtlist = append(dtlist, fmt.Sprintf(
+				`{"name":"%s","number":%d,"visual_gene":"%s","bid_fee":"%s"}`,
+				string(store.Diamond),
+				store.Number,
+				store.VisualGene.ToHex(),
+				store.ApproxFeeOffer.ToFinString()),
+			)
+		}
+
 	}
+
 	jsondata += strings.Join(dtlist, ",")
 	jsondata += `]}`
 	result["jsondata"] = jsondata
