@@ -508,7 +508,7 @@ Use the `scan_value_transfers` interface note:
     ret: 0,
     minted_diamond: 27538, // The number of diamonds that have been minted successfully
     transferred_bitcoin: 0, // Number of bitcoins successfully transferred to hacash main network, unit: BTC
-    miner_reward: 240213, // Block reward HAC accumulation
+    block_reward: 240213, // Block reward HAC accumulation
     channel_interest: 151.6902713463587, // Channel interest HAC accumulation
     btcmove_subsidy: 0, // BTC transfer and additional issuance of HAC
     burning_fee: 0, // tx fee by burning

@@ -28,13 +28,13 @@ func RenderTotalSupplyObject(totalsupply *stores.TotalSupply, isformatstring boo
 	appendToFloat64(object, objstr, "usrlend_loan_hac_count", totalsupply.Get(stores.TotalSupplyStoreTypeOfUsersLendingCumulationHacAmount), ifs)
 
 	// 统计 HAC 增发
-	miner_reward,
+	block_reward,
 		channel_interest,
 		btcmove_subsidy,
 		syslend_diamond_loan_hac_count,
 		syslend_bitcoin_loan_hac_count :=
 		// 挖矿 + 通道利息 + 比特币转移增发
-		totalsupply.Get(stores.TotalSupplyStoreTypeOfBlockMinerReward),
+		totalsupply.Get(stores.TotalSupplyStoreTypeOfBlockReward),
 		totalsupply.Get(stores.TotalSupplyStoreTypeOfChannelInterest),
 		totalsupply.Get(stores.TotalSupplyStoreTypeOfBitcoinTransferUnlockSuccessed),
 		// 统计借贷相关增发
@@ -56,7 +56,7 @@ func RenderTotalSupplyObject(totalsupply *stores.TotalSupply, isformatstring boo
 		totalsupply.Get(stores.TotalSupplyStoreTypeOfUsersLendingBurningOnePercentInterestHacAmount) // 用户借贷销毁1%利息
 
 	// 增发
-	appendToFloat64(object, objstr, "miner_reward", miner_reward, ifs)
+	appendToFloat64(object, objstr, "block_reward", block_reward, ifs)
 	appendToFloat64(object, objstr, "channel_interest", channel_interest, ifs)
 	appendToFloat64(object, objstr, "btcmove_subsidy", btcmove_subsidy, ifs)
 	appendToFloat64(object, objstr, "syslend_diamond_loan_hac_count", syslend_diamond_loan_hac_count, ifs)   // 钻石系统借贷借出HAC累计
@@ -70,7 +70,7 @@ func RenderTotalSupplyObject(totalsupply *stores.TotalSupply, isformatstring boo
 	appendToFloat64(object, objstr, "usrlend_burning_interest", usrlend_burning_interest, ifs)
 
 	// 计算实时流通量
-	totalAddAmountNum := miner_reward + channel_interest + btcmove_subsidy                        // 总增发
+	totalAddAmountNum := block_reward + channel_interest + btcmove_subsidy                        // 总增发
 	totalSubAmountNum := burned_fee + syslend_bitcoin_burning_interest + usrlend_burning_interest // 总销毁
 	// 借贷相关实时流通量统计
 	totalAddAmountNum += syslend_diamond_loan_hac_count + syslend_bitcoin_loan_hac_count
@@ -82,10 +82,12 @@ func RenderTotalSupplyObject(totalsupply *stores.TotalSupply, isformatstring boo
 	// 统计
 	// 位于通道链中的HAC
 	located_in_channel := totalsupply.Get(stores.TotalSupplyStoreTypeOfLocatedInChannel)
+	channel_of_opening := totalsupply.Get(stores.TotalSupplyStoreTypeOfChannelOfOpening)
 	if located_in_channel < 0.00000001 {
 		located_in_channel = 0
 	}
 	appendToFloat64(object, objstr, "located_in_channel", located_in_channel, ifs)
+	appendToUint64(object, objstr, "channel_of_opening", uint64(channel_of_opening), ifs)
 
 	// 返回
 	return object, objstr

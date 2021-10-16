@@ -487,7 +487,7 @@ curl "http://rpcapi.hacash.org/submit?action=transaction&hexbody=1" -X POST -d "
     ret: 0, // 通用返回值
     minted_diamond: 27538, // 当前已经成功挖掘出的钻石数量
     transferred_bitcoin: 0, // 成功转移到hacash主网的比特币数量，单位：枚
-    miner_reward: 240213, // 区块奖励HAC累计
+    block_reward: 240213, // 区块奖励HAC累计
     channel_interest: 151.6902713463587, // 通道锁定利息HAC累计
     btcmove_subsidy: 0, // BTC转移增发HAC已解锁部分累计
     burning_fee: 0, // 被燃烧销毁的手续费
