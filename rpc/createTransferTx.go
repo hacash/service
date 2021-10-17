@@ -193,7 +193,7 @@ func appendActionSimpleTransferSatoshi(r *http.Request, isUnitMei bool, allprike
 
 	var actObj = &actions.Action_8_SimpleSatoshiTransfer{
 		ToAddress: *to_addr,
-		Amount:    fields.VarUint8(amountAmt),
+		Amount:    fields.Satoshi(amountAmt),
 	}
 
 	tx.AppendAction(actObj)
