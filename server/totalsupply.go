@@ -81,7 +81,7 @@ func RenderTotalSupplyObject(totalsupply *stores.TotalSupply, isformatstring boo
 
 	// 统计
 	// 位于通道链中的HAC
-	located_in_channel := totalsupply.Get(stores.TotalSupplyStoreTypeOfLocatedInChannel)
+	located_in_channel := totalsupply.Get(stores.TotalSupplyStoreTypeOfLocatedHACInChannel)
 	channel_of_opening := totalsupply.Get(stores.TotalSupplyStoreTypeOfChannelOfOpening)
 	if located_in_channel < 0.00000001 {
 		located_in_channel = 0
