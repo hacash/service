@@ -39,7 +39,7 @@ func (api *RpcService) channel(r *http.Request, w http.ResponseWriter, bodybytes
 	retdata["right_address"] = channel.RightAddress.ToReadable()
 	retdata["right_amount"] = channel.RightAmount.ToMeiOrFinString(isUnitMei)
 	retdata["reuse_version"] = channel.ReuseVersion
-	retdata["lock_block"] = channel.LockBlock
+	retdata["lock_block"] = channel.ArbitrationLockBlock
 
 	// return
 	ResponseData(w, retdata)
