@@ -225,9 +225,40 @@ func (api *DeprecatedApiService) getTransactionIntro(params map[string]string) m
 				acc.ToAddress.ToReadable(),
 				acc.Amount,
 			)
+		} else if kind == 11 {
+			acc := act.(*actions.Action_28_FromSatoshiTransfer)
+			actstr += fmt.Sprintf(`,"from":"%s","amount":%d`,
+				acc.FromAddress.ToReadable(),
+				acc.Amount,
+			)
 		} else if kind == 12 {
 			acc := act.(*actions.Action_12_ClosePaymentChannelBySetupAmount)
 			actstr += fmt.Sprintf(`,"channel_id":"%s"`,
+				hex.EncodeToString(acc.ChannelId),
+			)
+		} else if kind == 21 {
+			acc := act.(*actions.Action_21_ClosePaymentChannelBySetupOnlyLeftAmount)
+			actstr += fmt.Sprintf(`,"channel_id":"%s"`,
+				hex.EncodeToString(acc.ChannelId),
+			)
+		} else if kind == 22 {
+			acc := act.(*actions.Action_22_UnilateralClosePaymentChannelByNothing)
+			actstr += fmt.Sprintf(`,"channel_id":"%s","assert_address"":"%s","bill_number"":0`,
+				hex.EncodeToString(acc.ChannelId), acc.AssertCloseAddress.ToReadable(),
+			)
+		} else if kind == 23 {
+			acc := act.(*actions.Action_23_UnilateralCloseOrRespondChallengePaymentChannelByRealtimeReconciliation)
+			actstr += fmt.Sprintf(`,"channel_id":"%s","assert_address":"%s","bill_number":%d`,
+				hex.EncodeToString(acc.Reconciliation.GetChannelId()), acc.AssertAddress.ToReadable(), acc.Reconciliation.GetAutoNumber(),
+			)
+		} else if kind == 24 {
+			acc := act.(*actions.Action_24_UnilateralCloseOrRespondChallengePaymentChannelByChannelChainTransferBody)
+			actstr += fmt.Sprintf(`,"channel_id":"%s","assert_address":"%s","bill_number":%d`,
+				hex.EncodeToString(acc.ChannelChainTransferTargetProveBody.GetChannelId()), acc.AssertAddress.ToReadable(), acc.ChannelChainTransferTargetProveBody.GetAutoNumber(),
+			)
+		} else if kind == 27 {
+			acc := act.(*actions.Action_27_ClosePaymentChannelByClaimDistribution)
+			actstr += fmt.Sprintf(`,"channel_id":"%s","assert_address":"any","bill_number"":"closed"`,
 				hex.EncodeToString(acc.ChannelId),
 			)
 		}
