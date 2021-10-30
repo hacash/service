@@ -208,7 +208,7 @@ func (api *DeprecatedApiService) getTransactionIntro(params map[string]string) m
 			)
 		} else if kind == 9 {
 			acc := act.(*actions.Action_9_LockblsCreate)
-			actstr += fmt.Sprintf(`,"lockbls_id":"%s","total_amount":"%s"`,
+			actstr += fmt.Sprintf(`,"lockbls_id":"%s","amount":"%s"`,
 				hex.EncodeToString(acc.LockblsId),
 				acc.TotalStockAmount.ToFinString(),
 			)
@@ -225,7 +225,7 @@ func (api *DeprecatedApiService) getTransactionIntro(params map[string]string) m
 				acc.ToAddress.ToReadable(),
 				acc.Amount,
 			)
-		} else if kind == 11 {
+		} else if kind == 28 {
 			acc := act.(*actions.Action_28_FromSatoshiTransfer)
 			actstr += fmt.Sprintf(`,"from":"%s","amount":%d`,
 				acc.FromAddress.ToReadable(),
