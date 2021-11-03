@@ -5,7 +5,6 @@ import (
 	"github.com/hacash/core/interfaces"
 	"github.com/hacash/core/sys"
 	"net/http"
-	"os"
 )
 
 type RpcConfig struct {
@@ -55,17 +54,16 @@ func NewRpcService(cnf *RpcConfig) *RpcService {
 	}
 }
 
-func (api *RpcService) Start() {
+func (api *RpcService) Start() error {
 	if api.backend == nil {
-		fmt.Println("api.backend not be set.")
-		os.Exit(0)
+		return fmt.Errorf("api.backend not be set.")
 	}
 	if api.txpool == nil {
-		fmt.Println("api.txpool not be set.")
-		os.Exit(0)
+		return fmt.Errorf("api.txpool not be set.")
 	}
 	// start
 	api.RunHttpRpcService(api.config.HttpListenPort)
+	return nil
 }
 
 func (api *RpcService) SetTxPool(txpool interfaces.TxPool) {

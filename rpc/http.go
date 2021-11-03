@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 )
 
@@ -36,8 +35,8 @@ func (api *RpcService) RunHttpRpcService(port int) {
 	go func() {
 		err := server.ListenAndServe()
 		if err != nil {
-			log.Fatal("ListenAndServe: ", err)
-			os.Exit(0)
+			log.Fatal("ListenAndServe Error: ", err)
+			return
 		}
 	}()
 }

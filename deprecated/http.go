@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
-	"os"
 	"strconv"
 
 	"github.com/hacash/node/websocket"
@@ -101,8 +100,7 @@ func (api *DeprecatedApiService) RunHttpRpcService(port int) {
 	go func() {
 		err := server.ListenAndServe()
 		if err != nil {
-			log.Fatal("ListenAndServe: ", err)
-			os.Exit(0)
+			log.Fatal("ListenAndServe Error: ", err)
 		} else {
 			fmt.Println("RunHttpRpcService on " + portstr)
 		}

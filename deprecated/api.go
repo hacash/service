@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/hacash/core/interfaces"
 	"github.com/hacash/core/sys"
-	"os"
 )
 
 type DeprecatedApiServiceConfig struct {
@@ -47,18 +46,16 @@ func NewDeprecatedApiService(cnf *DeprecatedApiServiceConfig) *DeprecatedApiServ
 	}
 }
 
-func (api *DeprecatedApiService) Start() {
+func (api *DeprecatedApiService) Start() error {
 	if api.blockchain == nil {
-		fmt.Println("api.blockchain not be set.")
-		os.Exit(0)
+		return fmt.Errorf("api.blockchain not be set.")
 	}
 	if api.txpool == nil {
-		fmt.Println("api.txpool not be set.")
-		os.Exit(0)
+		return fmt.Errorf("api.txpool not be set.")
 	}
 	// start
-
 	api.RunHttpRpcService(api.config.HttpListenPort)
+	return nil
 }
 
 func (api *DeprecatedApiService) SetBlockChain(blockchain interfaces.BlockChain) {
