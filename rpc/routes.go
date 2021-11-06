@@ -21,6 +21,8 @@ func (api *RpcService) initRoutes() {
 
 	api.queryRoutes["scan_value_transfers"] = api.scanTransfersOfTransactionByPosition
 
+	api.queryRoutes["hdns"] = api.hdns
+
 	// operate
 	api.operateRoutes["raise_tx_fee"] = api.raiseTxFee
 
