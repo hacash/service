@@ -30,7 +30,7 @@ func (api *DeprecatedApiService) showDiamondCreateTxs(params map[string]string) 
 		for _, act := range tx.GetActions() {
 			if dcact, ok := act.(*actions.Action_4_DiamondCreate); ok {
 				fee := tx.GetFee()
-				feeaddramt := api.blockchain.State().Balance(tx.GetAddress())
+				feeaddramt, _ := api.blockchain.State().Balance(tx.GetAddress())
 				status_code := 0 // ok
 				if feeaddramt == nil || feeaddramt.Hacash.LessThan(fee) {
 					status_code = 1 // 余额不足以支付手续费
@@ -85,7 +85,7 @@ func (api *DeprecatedApiService) getDiamond(params map[string]string) map[string
 	}
 	dmstr = string(store.Diamond)
 	// get current belong
-	sto2 := state.Diamond(fields.DiamondName(dmstr))
+	sto2, _ := state.Diamond(fields.DiamondName(dmstr))
 	if sto2 != nil {
 		result["address"] = sto2.Address.ToReadable()
 	} else {

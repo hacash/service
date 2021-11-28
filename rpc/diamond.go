@@ -72,7 +72,11 @@ func (api *RpcService) diamond(r *http.Request, w http.ResponseWriter, bodybytes
 	retdata["prev_block_hash"] = hex.EncodeToString(diamondSto.PrevContainBlockHash)
 
 	// get current belong
-	sto2 := api.backend.BlockChain().State().Diamond(fields.DiamondName(diamondValue))
+	sto2, e := api.backend.BlockChain().State().Diamond(fields.DiamondName(diamondValue))
+	if e != nil {
+		ResponseError(w, e)
+		return
+	}
 	if sto2 != nil {
 		retdata["current_belong_address"] = sto2.Address.ToReadable()
 	} else {

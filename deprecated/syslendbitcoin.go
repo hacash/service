@@ -31,7 +31,7 @@ func (api *DeprecatedApiService) getSystemLendingBitcoin(params map[string]strin
 	}
 	state := api.blockchain.State()
 
-	stoobj := state.BitcoinSystemLending(fields.BitcoinSyslendId(dataid))
+	stoobj, _ := state.BitcoinSystemLending(fields.BitcoinSyslendId(dataid))
 	if stoobj == nil {
 		result["fail"] = "not find."
 		return result

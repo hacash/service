@@ -30,7 +30,7 @@ func (api *DeprecatedApiService) getSystemLendingDiamond(params map[string]strin
 	}
 	state := api.blockchain.State()
 
-	stoobj := state.DiamondSystemLending(fields.DiamondSyslendId(dataid))
+	stoobj, _ := state.DiamondSystemLending(fields.DiamondSyslendId(dataid))
 	if stoobj == nil {
 		result["fail"] = "not find."
 		return result

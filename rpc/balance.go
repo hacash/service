@@ -63,7 +63,10 @@ func (api *RpcService) balances(r *http.Request, w http.ResponseWriter, bodybyte
 	state := api.backend.BlockChain().State()
 	for i, addr := range addresses {
 		var item = make(map[string]interface{})
-		bls := state.Balance(*addr)
+		bls, e := state.Balance(*addr)
+		if e != nil {
+			continue
+		}
 		if actAllKinds || actKindHacash {
 			if bls != nil {
 				item["hacash"] = bls.Hacash.ToMeiOrFinString(isUnitMei)

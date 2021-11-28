@@ -34,7 +34,12 @@ func (api *DeprecatedApiService) getBalance(params map[string]string) map[string
 			amtstrings += "[format error]|"
 			continue
 		}
-		finditem := state.Balance(*addrhash)
+		finditem, e := state.Balance(*addrhash)
+		if e != nil {
+			amtstrings += e.Error()
+			continue
+		}
+
 		if finditem == nil {
 			amtstrings += "ㄜ0:0|"
 			satoshistrs += "0|"

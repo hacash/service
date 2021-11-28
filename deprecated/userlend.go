@@ -29,7 +29,7 @@ func (api *DeprecatedApiService) getUserLending(params map[string]string) map[st
 	}
 	state := api.blockchain.State()
 
-	stoobj := state.UserLending(fields.UserLendingId(dataid))
+	stoobj, _ := state.UserLending(fields.UserLendingId(dataid))
 	if stoobj == nil {
 		result["fail"] = "not find."
 		return result

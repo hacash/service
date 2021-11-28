@@ -197,7 +197,7 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 			// 用户借贷抵押赎回
 			item["redeemer"] = tx.GetAddress().ToReadable() // 赎回人 or 扣押人
 			// 查询对象
-			ldobj := state.UserLending(tarAct.LendingID)
+			ldobj, _ := state.UserLending(tarAct.LendingID)
 			if ldobj == nil {
 				ResponseError(w, fmt.Errorf("User lending <%s> not find.", tarAct.LendingID.ToHex()))
 				return
@@ -229,7 +229,7 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 			// 钻石系统借贷赎回
 			item["redeemer"] = tx.GetAddress().ToReadable() // 私有 or 公共赎回人
 			// 查询对象
-			ldobj := state.DiamondSystemLending(tarAct.LendingID)
+			ldobj, _ := state.DiamondSystemLending(tarAct.LendingID)
 			if ldobj == nil {
 				ResponseError(w, fmt.Errorf("Diamond system lending <%s> not find.", tarAct.LendingID.ToHex()))
 				return
@@ -258,7 +258,7 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 			// 钻石系统借贷赎回
 			item["redeemer"] = tx.GetAddress().ToReadable() // 私有 or 公共赎回人
 			// 查询对象
-			ldobj := state.BitcoinSystemLending(tarAct.LendingID)
+			ldobj, _ := state.BitcoinSystemLending(tarAct.LendingID)
 			if ldobj == nil {
 				ResponseError(w, fmt.Errorf("Bitcoin system lending <%s> not find.", tarAct.LendingID.ToHex()))
 				return

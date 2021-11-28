@@ -25,7 +25,11 @@ func (api *RpcService) channel(r *http.Request, w http.ResponseWriter, bodybytes
 	var blockstate = api.backend.BlockChain().State()
 	//var err error
 
-	channel := blockstate.Channel(channelId)
+	channel, e := blockstate.Channel(channelId)
+	if e != nil {
+		ResponseError(w, e)
+		return
+	}
 	if channel == nil {
 		ResponseErrorString(w, "channel not find")
 		return

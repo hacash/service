@@ -28,7 +28,7 @@ func (api *RpcService) hdns(r *http.Request, w http.ResponseWriter, bodybytes []
 
 	// 字面值
 	if x16rs.IsDiamondValueString(diamondStr) {
-		disobj := api.backend.BlockChain().State().Diamond(fields.DiamondName(diamondStr))
+		disobj, _ := api.backend.BlockChain().State().Diamond(fields.DiamondName(diamondStr))
 		if disobj != nil {
 			data := map[string]interface{}{
 				"address": disobj.Address.ToReadable(),

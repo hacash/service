@@ -38,7 +38,7 @@ func (api *DeprecatedApiService) getChannel(params map[string]string) map[string
 
 		state := api.blockchain.State()
 
-		store := state.Channel(fields.ChannelId(chanid))
+		store, _ := state.Channel(fields.ChannelId(chanid))
 		if store == nil {
 			result["fail"] = "not find."
 			return result
