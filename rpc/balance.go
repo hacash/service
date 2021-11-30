@@ -60,7 +60,7 @@ func (api *RpcService) balances(r *http.Request, w http.ResponseWriter, bodybyte
 
 	// read
 	var lists = make([]interface{}, len(addresses))
-	state := api.backend.BlockChain().State()
+	state := api.backend.BlockChain().StateRead()
 	for i, addr := range addresses {
 		var item = make(map[string]interface{})
 		bls, e := state.Balance(*addr)

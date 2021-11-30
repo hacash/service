@@ -20,7 +20,7 @@ func (api *DeprecatedApiService) showDiamondCreateTxs(params map[string]string) 
 	txs := api.txpool.GetDiamondCreateTxs(-1)
 
 	var number int = 1
-	diamd, _ := api.backend.BlockChain().State().ReadLastestDiamond()
+	diamd, _ := api.backend.BlockChain().StateRead().ReadLastestDiamond()
 	if diamd != nil {
 		number = int(diamd.Number) + 1
 	}
@@ -30,7 +30,7 @@ func (api *DeprecatedApiService) showDiamondCreateTxs(params map[string]string) 
 		for _, act := range tx.GetActions() {
 			if dcact, ok := act.(*actions.Action_4_DiamondCreate); ok {
 				fee := tx.GetFee()
-				feeaddramt, _ := api.blockchain.State().Balance(tx.GetAddress())
+				feeaddramt, _ := api.blockchain.StateRead().Balance(tx.GetAddress())
 				status_code := 0 // ok
 				if feeaddramt == nil || feeaddramt.Hacash.LessThan(fee) {
 					status_code = 1 // 余额不足以支付手续费
@@ -46,7 +46,7 @@ func (api *DeprecatedApiService) showDiamondCreateTxs(params map[string]string) 
 		}
 	}
 	perhei := 0
-	lastest, _ := api.backend.BlockChain().State().ReadLastestBlockHeadAndMeta()
+	lastest, _ := api.backend.BlockChain().StateRead().ReadLastestBlockHeadMetaForRead()
 	if lastest != nil {
 		perhei = (int(lastest.GetHeight()) + 5) / 5 * 5
 	}
@@ -66,8 +66,8 @@ func (api *DeprecatedApiService) getDiamond(params map[string]string) map[string
 		return result
 	}
 
-	state := api.blockchain.State()
-	blockstore := state.BlockStore()
+	state := api.blockchain.StateRead()
+	blockstore := state.BlockStoreRead()
 
 	var store *stores.DiamondSmelt = nil
 	if dmnum, e := strconv.Atoi(dmstr); e == nil {
@@ -113,8 +113,8 @@ func (api *DeprecatedApiService) getDiamondVisualGeneList(params map[string]stri
 	result := make(map[string]string)
 
 	// 查询
-	state := api.blockchain.State()
-	blockstore := state.BlockStore()
+	state := api.blockchain.StateRead()
+	blockstore := state.BlockStoreRead()
 
 	jsondata := `{"list":[`
 	var dtlist = make([]string, 0)

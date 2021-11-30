@@ -29,7 +29,7 @@ func (api *DeprecatedApiService) getSystemLendingBitcoin(params map[string]strin
 		result["fail"] = "id length error."
 		return result
 	}
-	state := api.blockchain.State()
+	state := api.blockchain.StateRead()
 
 	stoobj, _ := state.BitcoinSystemLending(fields.BitcoinSyslendId(dataid))
 	if stoobj == nil {

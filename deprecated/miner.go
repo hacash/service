@@ -9,7 +9,7 @@ import (
 
 func (api *DeprecatedApiService) powPower(params map[string]string) map[string]string {
 	result := make(map[string]string)
-	lastest, err1 := api.blockchain.State().ReadLastestBlockHeadAndMeta()
+	lastest, err1 := api.blockchain.StateRead().ReadLastestBlockHeadMetaForRead()
 	if err1 != nil {
 		result["err"] = err1.Error()
 		return result
@@ -17,7 +17,7 @@ func (api *DeprecatedApiService) powPower(params map[string]string) map[string]s
 	curheight := lastest.GetHeight()
 	mint_num288dj := uint64(mint.AdjustTargetDifficultyNumberOfBlocks / 4)
 	prev288height := curheight - uint64(mint_num288dj)
-	headbytes, err2 := api.blockchain.State().BlockStore().ReadBlockHeadBytesByHeight(prev288height)
+	_, headbytes, err2 := api.blockchain.StateRead().BlockStoreRead().ReadBlockBytesByHeight(prev288height)
 	if err2 != nil {
 		result["err"] = err2.Error()
 		return result

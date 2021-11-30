@@ -106,9 +106,7 @@ func (api *DeprecatedApiService) getTransactionIntro(params map[string]string) m
 	}
 	// 查询交易
 
-	store := api.blockchain.State().BlockStore()
-
-	blkhei, trsresbytes, err := store.ReadTransactionBytesByHash(trshx)
+	blkhei, trsresbytes, err := api.blockchain.StateRead().ReadTransactionBytesByHash(trshx)
 	if err != nil {
 		result["err"] = err.Error()
 		return result

@@ -20,7 +20,7 @@ func (api *RpcService) hdns(r *http.Request, w http.ResponseWriter, bodybytes []
 
 	// 编号
 	if dianum, e := strconv.Atoi(diamondStr); e == nil && dianum > 0 && dianum < 16777216 {
-		disobj, e := api.backend.BlockChain().State().BlockStore().ReadDiamondByNumber(uint32(dianum))
+		disobj, e := api.backend.BlockChain().StateRead().BlockStoreRead().ReadDiamondByNumber(uint32(dianum))
 		if e == nil || disobj != nil {
 			diamondStr = string(disobj.Diamond) // 编号映射到字面值
 		}
@@ -28,7 +28,7 @@ func (api *RpcService) hdns(r *http.Request, w http.ResponseWriter, bodybytes []
 
 	// 字面值
 	if x16rs.IsDiamondValueString(diamondStr) {
-		disobj, _ := api.backend.BlockChain().State().Diamond(fields.DiamondName(diamondStr))
+		disobj, _ := api.backend.BlockChain().StateRead().Diamond(fields.DiamondName(diamondStr))
 		if disobj != nil {
 			data := map[string]interface{}{
 				"address": disobj.Address.ToReadable(),

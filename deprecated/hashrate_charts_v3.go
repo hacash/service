@@ -37,7 +37,7 @@ func (api *DeprecatedApiService) hashRateChartsV3(params map[string]string) map[
 	defer hashRateChartsV3_lock.Unlock()
 
 	// 正式开始计算
-	lastest, err1 := api.blockchain.State().ReadLastestBlockHeadAndMeta()
+	lastest, err1 := api.blockchain.StateRead().ReadLastestBlockHeadMetaForRead()
 	if err1 != nil {
 		result["err"] = err1.Error()
 		return result
@@ -46,7 +46,7 @@ func (api *DeprecatedApiService) hashRateChartsV3(params map[string]string) map[
 	var jsondatastring = `{"ret":0`
 
 	curheight := lastest.GetHeight()
-	blockstore := api.blockchain.State().BlockStore()
+	blockstore := api.blockchain.StateRead().BlockStoreRead()
 
 	// 当前
 	var currentHashWorth *big.Int = nil
@@ -55,7 +55,7 @@ func (api *DeprecatedApiService) hashRateChartsV3(params map[string]string) map[
 	curCalcBlockNum := int64(300)
 	prevHeight := int64(curheight) - curCalcBlockNum
 	if prevHeight > 0 {
-		headbytes, err2 := api.blockchain.State().BlockStore().ReadBlockHeadBytesByHeight(uint64(prevHeight))
+		_, headbytes, err2 := api.blockchain.StateRead().BlockStoreRead().ReadBlockBytesByHeight(uint64(prevHeight))
 		if err2 != nil {
 			result["err"] = err2.Error()
 			return result

@@ -111,8 +111,8 @@ func (api *DeprecatedApiService) txStatus(params map[string]string) map[string]s
 		return result
 	}
 
-	state := api.blockchain.State()
-	store := state.BlockStore()
+	state := api.blockchain.StateRead()
+	store := state.BlockStoreRead()
 
 	// 从交易池中读取
 	_, ok2 := api.txpool.CheckTxExistByHash(txhash)
@@ -142,7 +142,7 @@ func (api *DeprecatedApiService) txStatus(params map[string]string) map[string]s
 	//fmt.Println("GetGlobalInstanceBlocksDataStore")
 	// 从区块数据中查询
 
-	blkhei, txbody, e3 := store.ReadTransactionBytesByHash(txhash)
+	blkhei, txbody, e3 := state.ReadTransactionBytesByHash(txhash)
 	if e3 != nil {
 		result["err"] = e3.Error()
 		return result
@@ -154,22 +154,22 @@ func (api *DeprecatedApiService) txStatus(params map[string]string) map[string]s
 	// 存在并返回
 	result["status"] = "confirm" // 表示不存在
 
-	lastest, e4 := state.ReadLastestBlockHeadAndMeta()
+	lastest, e4 := state.ReadLastestBlockHeadMetaForRead()
 	if e4 != nil {
 		result["err"] = e4.Error()
 		return result
 	}
 
 	// 查询区块hash
-	tarblkhash, e5 := state.BlockStore().ReadBlockHashByHeight(blkhei)
+	tarblkhash, e5 := store.ReadBlockHashByHeight(uint64(blkhei))
 	if e5 != nil {
 		result["err"] = e5.Error()
 		return result
 	}
 
-	confirm_height := lastest.GetHeight() - blkhei
-	result["confirm_height"] = strconv.Itoa(int(confirm_height)) // 确认区块数
-	result["block_height"] = strconv.FormatUint(blkhei, 10)      // 所属区块高度
-	result["block_hash"] = tarblkhash.ToHex()                    // 所属区块hash
+	confirm_height := lastest.GetHeight() - uint64(blkhei)
+	result["confirm_height"] = strconv.Itoa(int(confirm_height))    // 确认区块数
+	result["block_height"] = strconv.FormatUint(uint64(blkhei), 10) // 所属区块高度
+	result["block_hash"] = tarblkhash.ToHex()                       // 所属区块hash
 	return result
 }

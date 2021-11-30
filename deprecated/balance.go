@@ -16,7 +16,7 @@ func (api *DeprecatedApiService) getBalance(params map[string]string) map[string
 		return result
 	}
 
-	state := api.blockchain.State()
+	state := api.blockchain.StateRead()
 
 	addrs := strings.Split(addrstr, ",")
 	amtstrings := ""

@@ -2,7 +2,7 @@ package rpc
 
 import (
 	"fmt"
-	"github.com/hacash/core/interfaces"
+	"github.com/hacash/core/interfacev2"
 	"github.com/hacash/core/sys"
 )
 
@@ -31,11 +31,11 @@ func NewDeprecatedApiServiceConfig(inicnf *sys.Inicnf) *DeprecatedApiServiceConf
 type DeprecatedApiService struct {
 	config *DeprecatedApiServiceConfig
 
-	backend interfaces.Backend
+	backend interfacev2.Backend
 
-	blockchain interfaces.BlockChain
+	blockchain interfacev2.BlockChain
 
-	txpool interfaces.TxPool
+	txpool interfacev2.TxPool
 }
 
 func NewDeprecatedApiService(cnf *DeprecatedApiServiceConfig) *DeprecatedApiService {
@@ -58,14 +58,14 @@ func (api *DeprecatedApiService) Start() error {
 	return nil
 }
 
-func (api *DeprecatedApiService) SetBlockChain(blockchain interfaces.BlockChain) {
+func (api *DeprecatedApiService) SetBlockChain(blockchain interfacev2.BlockChain) {
 	api.blockchain = blockchain
 }
 
-func (api *DeprecatedApiService) SetTxPool(txpool interfaces.TxPool) {
+func (api *DeprecatedApiService) SetTxPool(txpool interfacev2.TxPool) {
 	api.txpool = txpool
 }
 
-func (api *DeprecatedApiService) SetBackend(backend interfaces.Backend) {
+func (api *DeprecatedApiService) SetBackend(backend interfacev2.Backend) {
 	api.backend = backend
 }

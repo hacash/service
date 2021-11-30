@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func hashRateList(blockstore interfaces.BlockStore, curheight uint64, allHistoryOr300Days bool, appendItem *big.Int) ([]string, error) {
+func hashRateList(blockstore interfaces.BlockStoreRead, curheight uint64, allHistoryOr300Days bool, appendItem *big.Int) ([]string, error) {
 	var stepNum = 300
 	// 第一个附加
 	var hsti = 0
@@ -40,7 +40,8 @@ func hashRateList(blockstore interfaces.BlockStore, curheight uint64, allHistory
 	// 读取的
 	for i := 0; i < stepNum; i++ {
 		tarhei := curheight - (stepBlkHei * uint64(i))
-		_, headbytes, err2 := blockstore.ReadBlockBytesByHeight(tarhei, blockHeadMetaSize)
+		//_, headbytes, err2 := blockstore.ReadBlockBytesLengthByHeight(tarhei, blockHeadMetaSize)
+		_, headbytes, err2 := blockstore.ReadBlockBytesByHeight(tarhei)
 		if err2 != nil {
 			return nil, err2
 		}
@@ -74,13 +75,13 @@ func hashRateList(blockstore interfaces.BlockStore, curheight uint64, allHistory
 
 func (api *DeprecatedApiService) hashRateCharts(params map[string]string) map[string]string {
 	result := make(map[string]string)
-	lastest, err1 := api.blockchain.State().ReadLastestBlockHeadAndMeta()
+	lastest, err1 := api.blockchain.StateRead().ReadLastestBlockHeadMetaForRead()
 	if err1 != nil {
 		result["err"] = err1.Error()
 		return result
 	}
 	curheight := lastest.GetHeight()
-	blockstore := api.blockchain.State().BlockStore()
+	blockstore := api.blockchain.StateRead().BlockStoreRead()
 
 	allHistory, e1 := hashRateList(blockstore, curheight, true, nil)
 	if e1 != nil {

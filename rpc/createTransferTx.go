@@ -6,7 +6,7 @@ import (
 	"github.com/hacash/core/account"
 	"github.com/hacash/core/actions"
 	"github.com/hacash/core/fields"
-	"github.com/hacash/core/interfaces"
+	"github.com/hacash/core/interfacev2"
 	"github.com/hacash/core/transactions"
 	"net/http"
 	"strings"
@@ -262,7 +262,7 @@ func appendActionTransferDiamond(r *http.Request, isUnitMei bool, allprikey map[
 		return e8
 	}
 
-	var actObj interfaces.Action = nil
+	var actObj interfacev2.Action = nil
 	if isMultiTrs {
 		// 批量转账
 		actObj = &actions.Action_6_OutfeeQuantityDiamondTransfer{

@@ -31,7 +31,7 @@ func (api *RpcService) diamond(r *http.Request, w http.ResponseWriter, bodybytes
 	diamondNumber := CheckParamUint64(r, "number", 0)
 
 	// read store
-	var blockstore = api.backend.BlockChain().State().BlockStore()
+	var blockstore = api.backend.BlockChain().StateRead().BlockStoreRead()
 	var err error
 	var diamondSto *stores.DiamondSmelt = nil
 	if diamondNumber > 0 {
@@ -72,7 +72,7 @@ func (api *RpcService) diamond(r *http.Request, w http.ResponseWriter, bodybytes
 	retdata["prev_block_hash"] = hex.EncodeToString(diamondSto.PrevContainBlockHash)
 
 	// get current belong
-	sto2, e := api.backend.BlockChain().State().Diamond(fields.DiamondName(diamondValue))
+	sto2, e := api.backend.BlockChain().StateRead().Diamond(fields.DiamondName(diamondValue))
 	if e != nil {
 		ResponseError(w, e)
 		return

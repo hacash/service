@@ -2,7 +2,7 @@ package rpc
 
 import (
 	"fmt"
-	"github.com/hacash/core/interfaces"
+	"github.com/hacash/core/interfacev2"
 	"github.com/hacash/core/sys"
 	"net/http"
 )
@@ -32,8 +32,8 @@ func NewRpcConfig(inicnf *sys.Inicnf) *RpcConfig {
 type RpcService struct {
 	config *RpcConfig
 
-	backend interfaces.Backend
-	txpool  interfaces.TxPool
+	backend interfacev2.Backend
+	txpool  interfacev2.TxPool
 
 	// routes
 	queryRoutes   map[string]func(*http.Request, http.ResponseWriter, []byte)
@@ -66,10 +66,10 @@ func (api *RpcService) Start() error {
 	return nil
 }
 
-func (api *RpcService) SetTxPool(txpool interfaces.TxPool) {
+func (api *RpcService) SetTxPool(txpool interfacev2.TxPool) {
 	api.txpool = txpool
 }
 
-func (api *RpcService) SetBackend(backend interfaces.Backend) {
+func (api *RpcService) SetBackend(backend interfacev2.Backend) {
 	api.backend = backend
 }

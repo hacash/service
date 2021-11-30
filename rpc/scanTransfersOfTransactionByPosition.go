@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/hacash/core/actions"
-	"github.com/hacash/core/interfaces"
+	"github.com/hacash/core/interfacev2"
 	"github.com/hacash/core/transactions"
 	rpc "github.com/hacash/service/server"
 	"net/http"
@@ -17,8 +17,7 @@ import (
  */
 func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w http.ResponseWriter, bodybytes []byte) {
 
-	state := api.backend.BlockChain().State()
-	store := state.BlockStore()
+	state := api.backend.BlockChain().StateRead()
 
 	height := CheckParamUint64(r, "height", 0) // 区块高度
 	txposi := CheckParamUint64(r, "txposi", 0) // 交易索引位置
@@ -68,7 +67,7 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 	kindHacashLending := (actAllKinds || (actKindHacash && actKindLending))
 
 	// read tx
-	var tx interfaces.Transaction = nil
+	var tx interfacev2.Transaction = nil
 	if height > 0 {
 		blockObj, e := rpc.LoadBlockWithCache(state, height)
 		if e != nil {
@@ -88,7 +87,7 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 		txhash = tx.Hash()
 	} else if txhash != nil {
 		// read tx body from disk
-		blockheight, txbody, e := store.ReadTransactionBytesByHash(txhash)
+		blockheight, txbody, e := state.ReadTransactionBytesByHash(txhash)
 		if e != nil {
 			ResponseError(w, e)
 			return
@@ -103,7 +102,7 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 			return
 		}
 		tx = txObj
-		height = blockheight
+		height = uint64(blockheight)
 	} else {
 		ResponseErrorString(w, "params error: height, txposi or txhash must give")
 		return

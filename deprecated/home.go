@@ -25,10 +25,10 @@ func (api *DeprecatedApiService) dealHome(response http.ResponseWriter, request 
 	}
 	dealHomePrintCacheTime = time.Now()
 
-	state := api.blockchain.State()
+	state := api.blockchain.StateRead()
 	//store := state.BlockStore()
 
-	lastest, err := state.ReadLastestBlockHeadAndMeta()
+	lastest, err := state.ReadLastestBlockHeadMetaForRead()
 	if err != nil {
 		response.Write([]byte(err.Error()))
 		return
@@ -160,7 +160,7 @@ func (api *DeprecatedApiService) dealHome(response http.ResponseWriter, request 
 	response.Write(dealHomePrintCacheBytes)
 }
 
-func (api *DeprecatedApiService) getMiao(minerblkhead interfaces.Block, prev288height uint64, blknum uint64) uint64 {
+func (api *DeprecatedApiService) getMiao(minerblkhead interfaces.BlockHeadMetaRead, prev288height uint64, blknum uint64) uint64 {
 
 	prevblocktimestamp, err := api.blockchain.ReadPrev288BlockTimestamp(prev288height + 1)
 	if err != nil {

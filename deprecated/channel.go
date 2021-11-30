@@ -36,7 +36,7 @@ func (api *DeprecatedApiService) getChannel(params map[string]string) map[string
 			return result
 		}
 
-		state := api.blockchain.State()
+		state := api.blockchain.StateRead()
 
 		store, _ := state.Channel(fields.ChannelId(chanid))
 		if store == nil {

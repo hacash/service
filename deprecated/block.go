@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/hacash/core/blocks"
 	"github.com/hacash/core/fields"
-	"github.com/hacash/core/interfaces"
+	"github.com/hacash/core/interfacev2"
 	"github.com/hacash/core/transactions"
 	"github.com/hacash/mint/coinbase"
 	"strconv"
@@ -25,20 +25,20 @@ func (api *DeprecatedApiService) getBlockIntro(params map[string]string) map[str
 		return result
 	}
 
-	store := api.blockchain.State().BlockStore()
+	store := api.blockchain.StateRead().BlockStoreRead()
 	var err error
 
 	var blockhx = []byte{}
 	var blockbytes = []byte{}
 	if blkhei, err := strconv.ParseUint(blkid, 10, 0); err == nil {
-		blockhx, blockbytes, err = store.ReadBlockBytesByHeight(blkhei, 0)
+		blockhx, blockbytes, err = store.ReadBlockBytesByHeight(blkhei)
 		if err != nil {
 			result["err"] = err.Error()
 			return result
 		}
 	} else if bhx, e := hex.DecodeString(blkid); e == nil && len(bhx) == fields.HashSize {
 		blockhx = bhx
-		blockbytes, err = store.ReadBlockBytesByHash(bhx, 0)
+		blockbytes, err = store.ReadBlockBytesByHash(bhx)
 		if err != nil {
 			result["err"] = err.Error()
 			return result
@@ -49,7 +49,7 @@ func (api *DeprecatedApiService) getBlockIntro(params map[string]string) map[str
 		return result
 	}
 	// 解析区块
-	var tarblock interfaces.Block
+	var tarblock interfacev2.Block
 	if isgettxhxs {
 		tarblock, _, err = blocks.ParseBlock(blockbytes, 0)
 	} else {
@@ -107,8 +107,8 @@ func (api *DeprecatedApiService) getBlockIntro(params map[string]string) map[str
 func (api *DeprecatedApiService) getLastBlockHeight(params map[string]string) map[string]string {
 	result := make(map[string]string)
 
-	state := api.blockchain.State()
-	lastest, err := state.ReadLastestBlockHeadAndMeta()
+	state := api.blockchain.StateRead()
+	lastest, err := state.ReadLastestBlockHeadMetaForRead()
 	if err != nil {
 		result["err"] = err.Error()
 		return result
@@ -144,19 +144,20 @@ func (api *DeprecatedApiService) getBlockAbstractList(params map[string]string) 
 	}
 	// 查询区块信息
 
-	store := api.blockchain.State().BlockStore()
+	store := api.blockchain.StateRead().BlockStoreRead()
 
 	coinbase_start_pos := uint32(blocks.BlockHeadSize + blocks.BlockMetaSizeV1)
 	coinbase_head_len := uint32(1 + 21 + 3 + 16 + 1)
 	var jsondata = make([]string, 0, end_hei-start_hei+1)
 	for i := end_hei; i >= start_hei; i-- {
-		blkhash, blkbytes, e := store.ReadBlockBytesByHeight(i, coinbase_start_pos+coinbase_head_len)
+		//blkhash, blkbytes, e := store.ReadBlockBytesLengthByHeight(i, coinbase_start_pos+coinbase_head_len)
+		blkhash, blkbytes, e := store.ReadBlockBytesByHeight(i)
 		if e != nil {
 			result["err"] = e.Error()
 			return result
 		}
 		if blkhash == nil || blkbytes == nil {
-			result["err"] = "block height not find."
+			result["err"] = "block height not find. " + fmt.Sprintf("", coinbase_head_len)
 			return result
 		}
 		blkhead, _, e2 := blocks.ParseExcludeTransactions(blkbytes, 0)

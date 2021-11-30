@@ -4,10 +4,10 @@ import "net/http"
 
 func (api *RpcService) lastBlock(r *http.Request, w http.ResponseWriter, bodybytes []byte) {
 
-	state := api.backend.BlockChain().State()
+	state := api.backend.BlockChain().StateRead()
 
 	// get
-	lastblk, e1 := state.ReadLastestBlockHeadAndMeta()
+	lastblk, e1 := state.ReadLastestBlockHeadMetaForRead()
 	if e1 != nil {
 		ResponseError(w, e1)
 		return
@@ -20,7 +20,7 @@ func (api *RpcService) lastBlock(r *http.Request, w http.ResponseWriter, bodybyt
 	data := ResponseCreateData("height", lastblk.GetHeight())
 
 	if retHead || retInfo {
-		data["hash"] = lastblk.HashFresh().ToHex()
+		data["hash"] = lastblk.Hash().ToHex()
 		data["timestamp"] = lastblk.GetTimestamp()
 		data["prev_hash"] = lastblk.GetPrevHash().ToHex()
 		data["mrkl_root"] = lastblk.GetMrklRoot().ToHex()

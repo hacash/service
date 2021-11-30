@@ -33,17 +33,17 @@ func (api *RpcService) blockIntro(r *http.Request, w http.ResponseWriter, bodyby
 	isUnitMei := CheckParamBool(r, "unitmei", false)
 
 	// 区块储存
-	blkstore := api.backend.BlockChain().State().BlockStore()
+	blkstore := api.backend.BlockChain().StateRead().BlockStoreRead()
 
 	// get coinbase
 	coinbase_start_pos := uint32(blocks.BlockHeadSize + blocks.BlockMetaSizeV1)
-	readlen := coinbase_start_pos + uint32(1+21+3+16+1) // coinbase len
+	//readlen := coinbase_start_pos + uint32(1+21+3+16+1) // coinbase len
 
 	// 读取数目
 	if len(blkhash) == 32 {
-		blkbytes, errread = blkstore.ReadBlockBytesByHash(blkhash, readlen)
+		blkbytes, errread = blkstore.ReadBlockBytesByHash(blkhash)
 	} else {
-		blkhash, blkbytes, errread = blkstore.ReadBlockBytesByHeight(height, readlen)
+		blkhash, blkbytes, errread = blkstore.ReadBlockBytesByHeight(height)
 	}
 
 	// 检查错误

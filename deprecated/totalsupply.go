@@ -6,7 +6,7 @@ import (
 
 func (api *DeprecatedApiService) totalSupply(params map[string]string) map[string]string {
 	result := make(map[string]string)
-	state := api.blockchain.State()
+	state := api.blockchain.StateRead()
 
 	// get
 	ttspl, e1 := state.ReadTotalSupply()

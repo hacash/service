@@ -27,9 +27,9 @@ func (api *DeprecatedApiService) getAllTransferLogByBlockHeight(params map[strin
 		return result
 	}
 
-	state := api.blockchain.State()
+	state := api.blockchain.StateRead()
 
-	lastest, e3 := state.ReadLastestBlockHeadAndMeta()
+	lastest, e3 := state.ReadLastestBlockHeadMetaForRead()
 	if e3 != nil {
 		result["err"] = e3.Error()
 		return result
@@ -43,7 +43,7 @@ func (api *DeprecatedApiService) getAllTransferLogByBlockHeight(params map[strin
 	}
 
 	// 查询区块
-	tarblock, e := rpc.LoadBlockWithCache(api.backend.BlockChain().State(), block_height)
+	tarblock, e := rpc.LoadBlockWithCache(api.backend.BlockChain().StateRead(), block_height)
 	if e != nil {
 		result["err"] = "read block data error."
 		return result

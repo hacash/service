@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hacash/core/blocks"
 	"github.com/hacash/core/interfaces"
+	"github.com/hacash/core/interfacev2"
 	"sync"
 )
 
@@ -16,12 +17,12 @@ const (
 )
 
 var (
-	rpcReadBlockCacheDatas = make([]interfaces.Block, 0)
+	rpcReadBlockCacheDatas = make([]interfacev2.Block, 0)
 	rpcReadBlockCacheMux   sync.Mutex
 )
 
 // 加载区块
-func LoadBlockWithCache(state interfaces.ChainState, height uint64) (interfaces.Block, error) {
+func LoadBlockWithCache(state interfaces.ChainStateOperationRead, height uint64) (interfacev2.Block, error) {
 	rpcReadBlockCacheMux.Lock()
 	defer rpcReadBlockCacheMux.Unlock()
 
@@ -33,14 +34,14 @@ func LoadBlockWithCache(state interfaces.ChainState, height uint64) (interfaces.
 	}
 
 	// load from disk
-	last, e1 := state.ReadLastestBlockHeadAndMeta()
+	last, e1 := state.ReadLastestBlockHeadMetaForRead()
 	if e1 != nil {
 		return nil, e1
 	}
 	if height > last.GetHeight() {
 		return nil, fmt.Errorf("block is not find.")
 	}
-	_, blkbody, err := state.BlockStore().ReadBlockBytesByHeight(height, 0)
+	_, blkbody, err := state.BlockStoreRead().ReadBlockBytesByHeight(height)
 	if err != nil {
 		return nil, err
 	}
