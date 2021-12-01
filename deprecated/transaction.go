@@ -66,7 +66,7 @@ func (api *DeprecatedApiService) quoteFee(params map[string]string) map[string]s
 		return result
 	}
 	// change fee
-	tx = tx.Copy()
+	tx = tx.Clone()
 	tx.SetFee(feeamt)
 	// 私钥
 	allPrivateKeyBytes := make(map[string][]byte, 1)
@@ -106,7 +106,7 @@ func (api *DeprecatedApiService) getTransactionIntro(params map[string]string) m
 	}
 	// 查询交易
 
-	blkhei, trsresbytes, err := api.blockchain.StateRead().ReadTransactionBytesByHash(trshx)
+	blkhei, trsresbytes, err := api.blockchain.GetChainEngineKernel().StateRead().ReadTransactionBytesByHash(trshx)
 	if err != nil {
 		result["err"] = err.Error()
 		return result
@@ -123,7 +123,7 @@ func (api *DeprecatedApiService) getTransactionIntro(params map[string]string) m
 	}
 
 	// 解析 actions
-	var allactions = trsres.GetActions()
+	var allactions = trsres.GetActionList()
 	var actions_ary []string
 	var actions_strings = ""
 	for _, act := range allactions {

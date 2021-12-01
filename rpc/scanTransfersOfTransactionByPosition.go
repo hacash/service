@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/hacash/core/actions"
-	"github.com/hacash/core/interfacev2"
+	"github.com/hacash/core/interfaces"
 	"github.com/hacash/core/transactions"
 	rpc "github.com/hacash/service/server"
 	"net/http"
@@ -17,7 +17,8 @@ import (
  */
 func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w http.ResponseWriter, bodybytes []byte) {
 
-	state := api.backend.BlockChain().StateRead()
+	kernel := api.backend.BlockChain().GetChainEngineKernel()
+	state := kernel.StateRead()
 
 	height := CheckParamUint64(r, "height", 0) // 区块高度
 	txposi := CheckParamUint64(r, "txposi", 0) // 交易索引位置
@@ -67,16 +68,16 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 	kindHacashLending := (actAllKinds || (actKindHacash && actKindLending))
 
 	// read tx
-	var tx interfacev2.Transaction = nil
+	var tx interfaces.Transaction = nil
 	if height > 0 {
-		blockObj, e := rpc.LoadBlockWithCache(state, height)
+		blockObj, e := rpc.LoadBlockWithCache(kernel, height)
 		if e != nil {
 			ResponseError(w, e)
 			return
 		}
 		blktxnum := blockObj.GetTransactionCount()
 		txPosMargin := blktxnum - blockObj.GetCustomerTransactionCount()
-		blktrs := blockObj.GetTransactions()
+		blktrs := blockObj.GetTrsList()
 		realtxpos := uint32(txposi) + txPosMargin
 		if realtxpos >= blktxnum || realtxpos >= uint32(len(blktrs)) {
 			ResponseError(w, fmt.Errorf(" txposi <%d> overflow", txposi))
@@ -110,7 +111,7 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 
 	// ret data
 	var retdata = ResponseCreateData("type", tx.Type())
-	trsActions := tx.GetActions()
+	trsActions := tx.GetActionList()
 	txfeepay := tx.GetFee()
 	txfeegot := tx.GetFeeOfMinerRealReceived()
 	retdata["hash"] = hex.EncodeToString(txhash)

@@ -7,7 +7,7 @@ import (
 
 func (api *RpcService) totalSupply(r *http.Request, w http.ResponseWriter, bodybytes []byte) {
 
-	state := api.backend.BlockChain().StateRead()
+	state := api.backend.BlockChain().GetChainEngineKernel().StateRead()
 
 	// get
 	ttspl, e1 := state.ReadTotalSupply()

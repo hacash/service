@@ -111,7 +111,8 @@ func (api *DeprecatedApiService) txStatus(params map[string]string) map[string]s
 		return result
 	}
 
-	state := api.blockchain.StateRead()
+	kernel := api.blockchain.GetChainEngineKernel()
+	state := kernel.StateRead()
 	store := state.BlockStoreRead()
 
 	// 从交易池中读取
@@ -154,7 +155,7 @@ func (api *DeprecatedApiService) txStatus(params map[string]string) map[string]s
 	// 存在并返回
 	result["status"] = "confirm" // 表示不存在
 
-	lastest, e4 := state.ReadLastestBlockHeadMetaForRead()
+	lastest, _, e4 := kernel.LatestBlock()
 	if e4 != nil {
 		result["err"] = e4.Error()
 		return result

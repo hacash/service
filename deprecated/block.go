@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/hacash/core/blocks"
 	"github.com/hacash/core/fields"
-	"github.com/hacash/core/interfacev2"
+	"github.com/hacash/core/interfaces"
 	"github.com/hacash/core/transactions"
 	"github.com/hacash/mint/coinbase"
 	"strconv"
@@ -25,7 +25,7 @@ func (api *DeprecatedApiService) getBlockIntro(params map[string]string) map[str
 		return result
 	}
 
-	store := api.blockchain.StateRead().BlockStoreRead()
+	store := api.blockchain.GetChainEngineKernel().StateRead().BlockStoreRead()
 	var err error
 
 	var blockhx = []byte{}
@@ -49,7 +49,7 @@ func (api *DeprecatedApiService) getBlockIntro(params map[string]string) map[str
 		return result
 	}
 	// 解析区块
-	var tarblock interfacev2.Block
+	var tarblock interfaces.Block
 	if isgettxhxs {
 		tarblock, _, err = blocks.ParseBlock(blockbytes, 0)
 	} else {
@@ -76,7 +76,7 @@ func (api *DeprecatedApiService) getBlockIntro(params map[string]string) map[str
 		var blktxhxsstr = ""
 		var rwdaddr fields.Address // 奖励地址
 		var rwdmsg string
-		for i, trs := range tarblock.GetTransactions() {
+		for i, trs := range tarblock.GetTrsList() {
 			if i == 0 {
 				rwdmsg = trs.GetMessage().ValueShow()
 				rwdaddr = trs.GetAddress()
@@ -107,8 +107,7 @@ func (api *DeprecatedApiService) getBlockIntro(params map[string]string) map[str
 func (api *DeprecatedApiService) getLastBlockHeight(params map[string]string) map[string]string {
 	result := make(map[string]string)
 
-	state := api.blockchain.StateRead()
-	lastest, err := state.ReadLastestBlockHeadMetaForRead()
+	lastest, _, err := api.blockchain.GetChainEngineKernel().LatestBlock()
 	if err != nil {
 		result["err"] = err.Error()
 		return result
@@ -144,7 +143,7 @@ func (api *DeprecatedApiService) getBlockAbstractList(params map[string]string) 
 	}
 	// 查询区块信息
 
-	store := api.blockchain.StateRead().BlockStoreRead()
+	store := api.blockchain.GetChainEngineKernel().StateRead().BlockStoreRead()
 
 	coinbase_start_pos := uint32(blocks.BlockHeadSize + blocks.BlockMetaSizeV1)
 	coinbase_head_len := uint32(1 + 21 + 3 + 16 + 1)

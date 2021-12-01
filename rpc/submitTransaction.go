@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"encoding/hex"
+	"github.com/hacash/core/interfaces"
 	"github.com/hacash/core/transactions"
 	"net/http"
 )
@@ -31,7 +32,7 @@ func (api *RpcService) submitTransaction(r *http.Request, w http.ResponseWriter,
 	}
 
 	// 尝试加入交易池
-	e4 := api.txpool.AddTx(trs)
+	e4 := api.txpool.AddTx(trs.(interfaces.Transaction))
 	if e4 != nil {
 		ResponseError(w, e4)
 		return

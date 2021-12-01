@@ -28,7 +28,7 @@ func (api *DeprecatedApiService) getSystemLendingDiamond(params map[string]strin
 		result["fail"] = "id length error."
 		return result
 	}
-	state := api.blockchain.StateRead()
+	state := api.blockchain.GetChainEngineKernel().StateRead()
 
 	stoobj, _ := state.DiamondSystemLending(fields.DiamondSyslendId(dataid))
 	if stoobj == nil {

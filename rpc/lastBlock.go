@@ -4,10 +4,10 @@ import "net/http"
 
 func (api *RpcService) lastBlock(r *http.Request, w http.ResponseWriter, bodybytes []byte) {
 
-	state := api.backend.BlockChain().StateRead()
+	kernel := api.backend.BlockChain().GetChainEngineKernel()
 
 	// get
-	lastblk, e1 := state.ReadLastestBlockHeadMetaForRead()
+	lastblk, _, e1 := kernel.LatestBlock()
 	if e1 != nil {
 		ResponseError(w, e1)
 		return

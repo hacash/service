@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"encoding/hex"
+	"github.com/hacash/core/interfaces"
 	"github.com/hacash/core/transactions"
 	"net/http"
 )
@@ -29,7 +30,7 @@ func (api *DeprecatedApiService) addTxToPool(w http.ResponseWriter, value []byte
 	//
 	// 尝试加入交易池
 	//fmt.Println("---- 3 ----")
-	e3 := api.txpool.AddTx(tx)
+	e3 := api.txpool.AddTx(tx.(interfaces.Transaction))
 	//fmt.Println("---- 4 ----")
 	if e3 != nil {
 		w.Write([]byte("Transaction Add to MemTxPool error: \n" + e3.Error()))

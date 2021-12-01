@@ -75,13 +75,13 @@ func hashRateList(blockstore interfaces.BlockStoreRead, curheight uint64, allHis
 
 func (api *DeprecatedApiService) hashRateCharts(params map[string]string) map[string]string {
 	result := make(map[string]string)
-	lastest, err1 := api.blockchain.StateRead().ReadLastestBlockHeadMetaForRead()
+	lastest, _, err1 := api.blockchain.GetChainEngineKernel().LatestBlock()
 	if err1 != nil {
 		result["err"] = err1.Error()
 		return result
 	}
 	curheight := lastest.GetHeight()
-	blockstore := api.blockchain.StateRead().BlockStoreRead()
+	blockstore := api.blockchain.GetChainEngineKernel().StateRead().BlockStoreRead()
 
 	allHistory, e1 := hashRateList(blockstore, curheight, true, nil)
 	if e1 != nil {

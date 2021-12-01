@@ -71,7 +71,7 @@ func (api *RpcService) raiseTxFee(r *http.Request, w http.ResponseWriter, bodyby
 	}
 
 	// change fee
-	tx = tx.Copy()
+	tx = tx.Clone()
 	tx.SetFee(feeAmt)
 
 	// 私钥

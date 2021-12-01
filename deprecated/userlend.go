@@ -27,7 +27,7 @@ func (api *DeprecatedApiService) getUserLending(params map[string]string) map[st
 		result["fail"] = "id length error."
 		return result
 	}
-	state := api.blockchain.StateRead()
+	state := api.blockchain.GetChainEngineKernel().StateRead()
 
 	stoobj, _ := state.UserLending(fields.UserLendingId(dataid))
 	if stoobj == nil {

@@ -33,7 +33,7 @@ func (api *RpcService) blockIntro(r *http.Request, w http.ResponseWriter, bodyby
 	isUnitMei := CheckParamBool(r, "unitmei", false)
 
 	// 区块储存
-	blkstore := api.backend.BlockChain().StateRead().BlockStoreRead()
+	blkstore := api.backend.BlockChain().GetChainEngineKernel().StateRead().BlockStoreRead()
 
 	// get coinbase
 	coinbase_start_pos := uint32(blocks.BlockHeadSize + blocks.BlockMetaSizeV1)

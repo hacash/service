@@ -27,7 +27,7 @@ func (api *DeprecatedApiService) getLockBlsInfo(params map[string]string) map[st
 	}
 
 	// 查询
-	state := api.blockchain.StateRead()
+	state := api.blockchain.GetChainEngineKernel().StateRead()
 	lockblsItem, _ := state.Lockbls(lockbls_key)
 	if lockblsItem == nil {
 		result["err"] = "not find."

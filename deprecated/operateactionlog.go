@@ -38,9 +38,7 @@ func (api *DeprecatedApiService) getAllOperateActionLogByBlockHeight(params map[
 		return result
 	}
 
-	state := api.blockchain.StateRead()
-
-	lastest, e3 := state.ReadLastestBlockHeadMetaForRead()
+	lastest, _, e3 := api.blockchain.GetChainEngineKernel().LatestBlock()
 	if e3 != nil {
 		result["err"] = e3.Error()
 		return result
@@ -54,7 +52,7 @@ func (api *DeprecatedApiService) getAllOperateActionLogByBlockHeight(params map[
 	}
 
 	// 查询区块
-	tarblock, e := rpc.LoadBlockWithCache(api.backend.BlockChain().StateRead(), block_height)
+	tarblock, e := rpc.LoadBlockWithCache(api.backend.BlockChain().GetChainEngineKernel(), block_height)
 	if e != nil {
 		result["err"] = "read block data error."
 		return result
@@ -62,13 +60,13 @@ func (api *DeprecatedApiService) getAllOperateActionLogByBlockHeight(params map[
 
 	// 开始扫描区块
 	allOperateLogs := make([]string, 0, 4)
-	transactions := tarblock.GetTransactions()
+	transactions := tarblock.GetTrsList()
 	for _, v := range transactions {
 		if 0 == v.Type() { // coinbase
 			continue
 		}
 		mainAddressString := v.GetAddress().ToReadable()
-		for _, act := range v.GetActions() {
+		for _, act := range v.GetActionList() {
 			kid := act.Kind()
 			// 通道相关
 			if 2 == kid { // 开启通道

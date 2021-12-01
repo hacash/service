@@ -16,7 +16,7 @@ func (api *DeprecatedApiService) getBtcMoveLogPageData(params map[string]string)
 	}
 
 	// 查询
-	datas, e2 := api.blockchain.StateRead().BlockStoreRead().GetBTCMoveLogPageData(int(page))
+	datas, e2 := api.blockchain.GetChainEngineKernel().StateRead().BlockStoreRead().GetBTCMoveLogPageData(int(page))
 	if e2 != nil {
 		result["err"] = "not find."
 		return result

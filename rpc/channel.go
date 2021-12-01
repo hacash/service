@@ -22,7 +22,7 @@ func (api *RpcService) channel(r *http.Request, w http.ResponseWriter, bodybytes
 	}
 
 	// read store
-	var blockstate = api.backend.BlockChain().StateRead()
+	var blockstate = api.backend.BlockChain().GetChainEngineKernel().StateRead()
 	//var err error
 
 	channel, e := blockstate.Channel(channelId)

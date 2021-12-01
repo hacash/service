@@ -7,6 +7,7 @@ import (
 	"github.com/hacash/core/interfaces"
 	"github.com/hacash/miner/memtxpool"
 	"github.com/hacash/mint"
+	"github.com/hacash/mint/difficulty"
 	"net/http"
 	"strings"
 	"time"
@@ -25,10 +26,10 @@ func (api *DeprecatedApiService) dealHome(response http.ResponseWriter, request 
 	}
 	dealHomePrintCacheTime = time.Now()
 
-	state := api.blockchain.StateRead()
+	kernel := api.blockchain.GetChainEngineKernel()
 	//store := state.BlockStore()
 
-	lastest, err := state.ReadLastestBlockHeadMetaForRead()
+	lastest, _, err := kernel.LatestBlock()
 	if err != nil {
 		response.Write([]byte(err.Error()))
 		return
@@ -65,7 +66,7 @@ func (api *DeprecatedApiService) dealHome(response http.ResponseWriter, request 
 		prev288height = 1
 	}
 
-	lastestdiamond, err := state.ReadLastestDiamond()
+	lastestdiamond, err := kernel.LatestDiamond()
 	if err != nil {
 		response.Write([]byte(err.Error()))
 		return
@@ -125,7 +126,7 @@ func (api *DeprecatedApiService) dealHome(response http.ResponseWriter, request 
 		hd := pool.GetDiamondCreateTxGroup().Head
 		for i := 0; i < 200; i++ {
 			if hd != nil {
-				if as := hd.GetTx().GetActions(); len(as) > 0 {
+				if as := hd.GetTx().GetActionList(); len(as) > 0 {
 					if as[0].Kind() == 4 {
 						if dia, ok := as[0].(*actions.Action_4_DiamondCreate); ok {
 							if len(diamonds) > 0 {
@@ -162,7 +163,7 @@ func (api *DeprecatedApiService) dealHome(response http.ResponseWriter, request 
 
 func (api *DeprecatedApiService) getMiao(minerblkhead interfaces.BlockHeadMetaRead, prev288height uint64, blknum uint64) uint64 {
 
-	prevblocktimestamp, err := api.blockchain.ReadPrev288BlockTimestamp(prev288height + 1)
+	prevblocktimestamp, err := difficulty.ReadPrev288BlockTimestamp(api.blockchain.GetChainEngineKernel().StateRead().BlockStoreRead(), prev288height+1)
 	if err != nil {
 		return 0
 	}

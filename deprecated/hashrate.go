@@ -9,7 +9,7 @@ import (
 
 func (api *DeprecatedApiService) hashRate(params map[string]string) map[string]string {
 	result := make(map[string]string)
-	lastest, err1 := api.blockchain.StateRead().ReadLastestBlockHeadMetaForRead()
+	lastest, _, err1 := api.blockchain.GetChainEngineKernel().LatestBlock()
 	if err1 != nil {
 		result["err"] = err1.Error()
 		return result
@@ -21,7 +21,7 @@ func (api *DeprecatedApiService) hashRate(params map[string]string) map[string]s
 	curCalcBlockNum := int64(48)
 	prevHeight := int64(curheight) - curCalcBlockNum
 	if prevHeight > 0 {
-		_, blockbytes, err2 := api.blockchain.StateRead().BlockStoreRead().ReadBlockBytesByHeight(uint64(prevHeight))
+		_, blockbytes, err2 := api.blockchain.GetChainEngineKernel().StateRead().BlockStoreRead().ReadBlockBytesByHeight(uint64(prevHeight))
 		if err2 != nil {
 			result["err"] = err2.Error()
 			return result

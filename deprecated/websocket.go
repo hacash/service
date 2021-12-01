@@ -35,7 +35,7 @@ func (api *DeprecatedApiService) webSocketHandler(ws *websocket.Conn) {
 			resmaxsize := 1024 * 512
 			totalsize := 0
 			totaldatas := bytes.NewBuffer([]byte{0, 0, 0, 0})
-			blockstore := api.blockchain.StateRead().BlockStoreRead()
+			blockstore := api.blockchain.GetChainEngineKernel().StateRead().BlockStoreRead()
 			for {
 				_, blkbodybts, e2 := blockstore.ReadBlockBytesByHeight(height_i)
 				if e2 != nil {
