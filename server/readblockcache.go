@@ -21,7 +21,7 @@ var (
 )
 
 // 加载区块
-func LoadBlockWithCache(kernel interfaces.ChainEngineKernel, height uint64) (interfaces.Block, error) {
+func LoadBlockWithCache(kernel interfaces.ChainEngine, height uint64) (interfaces.Block, error) {
 	rpcReadBlockCacheMux.Lock()
 	defer rpcReadBlockCacheMux.Unlock()
 
