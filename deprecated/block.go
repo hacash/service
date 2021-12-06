@@ -43,7 +43,9 @@ func (api *DeprecatedApiService) getBlockIntro(params map[string]string) map[str
 			result["err"] = err.Error()
 			return result
 		}
-	} else {
+	}
+	// if not find
+	if blockbytes == nil || len(blockbytes) == 0 {
 		result["err"] = "block id <" + blkid + "> not find."
 		result["ret"] = "1"
 		return result
