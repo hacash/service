@@ -13,6 +13,54 @@ import (
 )
 
 // 通过 高度 或 hx 获取区块简介
+func (api *DeprecatedApiService) changeBlockReferHeight(params map[string]string) map[string]string {
+	result := make(map[string]string)
+
+	blkid, ok1 := params["id"]
+	if !ok1 {
+		result["err"] = "param id must."
+		return result
+	}
+	store := api.blockchain.GetChainEngineKernel().StateRead().BlockStoreRead()
+
+	var tarblock interfaces.Block = nil
+	if bhx, e := hex.DecodeString(blkid); e == nil && len(bhx) == fields.HashSize {
+		blockbytes, err := store.ReadBlockBytesByHash(bhx)
+		if err != nil {
+			result["err"] = err.Error()
+			return result
+		}
+		if len(blockbytes) > 0 {
+			tarblock, _, err = blocks.ParseExcludeTransactions(blockbytes, 0)
+			if err != nil {
+				result["err"] = err.Error()
+				return result
+			}
+		}
+	}
+
+	// if not find
+	if tarblock == nil {
+		result["err"] = "block hash <" + blkid + "> not find."
+		result["ret"] = "1"
+		return result
+	}
+
+	// 更新
+	state := api.blockchain.GetChainEngineKernel().CurrentState().BlockStore()
+	err := state.UpdateSetBlockHashReferToHeight(tarblock.GetHeight(), tarblock.Hash())
+	if err != nil {
+		result["err"] = err.Error()
+		return result
+	}
+
+	result["ok"] = fmt.Sprintf("Update block refer: %d => %s", tarblock.GetHeight(), tarblock.Hash().ToHex())
+
+	return result
+
+}
+
+// 通过 高度 或 hx 获取区块简介
 func (api *DeprecatedApiService) getBlockIntro(params map[string]string) map[string]string {
 	result := make(map[string]string)
 	var isgettxhxs = false // 是否获取区块交易hash列表

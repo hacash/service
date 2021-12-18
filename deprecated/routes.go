@@ -34,10 +34,11 @@ func (api *DeprecatedApiService) initRoutes() {
 	queryRoutes["hashrate_charts"] = api.hashRateCharts      // 哈希率波动表
 	queryRoutes["hashrate_charts_v3"] = api.hashRateChartsV3 // 哈希率波动表
 
-	queryRoutes["blocks"] = api.getBlockAbstractList  // 查询区块信息
-	queryRoutes["lastblock"] = api.getLastBlockHeight // 查询最新区块高度
-	queryRoutes["blockintro"] = api.getBlockIntro     // 查询区块简介
-	queryRoutes["trsintro"] = api.getTransactionIntro // 查询交易简介
+	queryRoutes["blocks"] = api.getBlockAbstractList                   // 查询区块信息
+	queryRoutes["lastblock"] = api.getLastBlockHeight                  // 查询最新区块高度
+	queryRoutes["blockintro"] = api.getBlockIntro                      // 查询区块简介
+	queryRoutes["changeblockreferheight"] = api.changeBlockReferHeight // 改变区块高度指针
+	queryRoutes["trsintro"] = api.getTransactionIntro                  // 查询交易简介
 
 	queryRoutes["getalltransferlogbyblockheight"] = api.getAllTransferLogByBlockHeight           // 扫描区块 获取所有转账信息
 	queryRoutes["getalloperateactionlogbyblockheight"] = api.getAllOperateActionLogByBlockHeight // 扫描区块 获取除转账以外的操作日志
