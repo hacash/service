@@ -49,6 +49,9 @@ func (api *DeprecatedApiService) initRoutes() {
 
 	queryRoutes["totalsupply"] = api.totalSupply // 总供应量
 
+	// dex
+	queryRoutes["dexbuycreate"] = api.dexBuyCreate // 创建买单
+
 }
 
 func routeQueryRequest(action string, params map[string]string, w http.ResponseWriter, r *http.Request) {

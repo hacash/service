@@ -13,7 +13,6 @@ func (api *RpcService) raiseTxFee(r *http.Request, w http.ResponseWriter, bodyby
 	var err error
 
 	// mei
-	isUnitMei := CheckParamBool(r, "unitmei", false)
 
 	// address
 	feePrikeyStr := strings.TrimPrefix(CheckParamString(r, "fee_prikey", ""), "0x")
@@ -40,11 +39,7 @@ func (api *RpcService) raiseTxFee(r *http.Request, w http.ResponseWriter, bodyby
 		return
 	}
 	var feeAmt *fields.Amount = nil
-	if isUnitMei {
-		feeAmt, err = fields.NewAmountFromMeiStringUnsafe(feeStr)
-	} else {
-		feeAmt, err = fields.NewAmountFromFinString(feeStr)
-	}
+	feeAmt, err = fields.NewAmountFromString(feeStr)
 	if err != nil {
 		ResponseErrorString(w, "param fee format error")
 		return
