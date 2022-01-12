@@ -50,7 +50,9 @@ func (api *DeprecatedApiService) initRoutes() {
 	queryRoutes["totalsupply"] = api.totalSupply // 总供应量
 
 	// dex
-	queryRoutes["dexbuycreate"] = api.dexBuyCreate // 创建买单
+	queryRoutes["dexbuycreate"] = api.dexBuyCreate     // 创建买单
+	queryRoutes["dexbuyconfirm"] = api.dexBuyConfirm   // 确认买单
+	queryRoutes["dexsellconfirm"] = api.dexSellConfirm // 确认卖单
 
 }
 

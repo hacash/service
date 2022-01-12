@@ -116,10 +116,25 @@ func (api *DeprecatedApiService) getDiamondVisualGeneList(params map[string]stri
 	state := api.blockchain.GetChainEngineKernel().StateRead()
 	blockstore := state.BlockStoreRead()
 
+	limit, _ := params["limit"]
+	if len(limit) == 0 {
+		limit = "10"
+	}
+	var limit_num uint64 = 10
+	if lmt, err := strconv.ParseUint(limit, 10, 0); err == nil {
+		limit_num = lmt
+	}
+	if limit_num > 50 {
+		limit_num = 50 // 最多50枚
+	}
+
 	jsondata := `{"list":[`
 	var dtlist = make([]string, 0)
 
 	dianamestr, ok0 := params["dianames"]
+	start_number, ok1 := params["start_number"]
+	isnewest, ok2 := params["newest"]
+
 	if ok0 && len(dianamestr) >= 6 {
 
 		// 按名称列表查询
@@ -145,26 +160,15 @@ func (api *DeprecatedApiService) getDiamondVisualGeneList(params map[string]stri
 			}
 		}
 
-	} else {
+	} else if ok1 && len(start_number) > 0 {
 
 		// 按翻页查询
-		start_number, ok1 := params["start_number"]
+		start_number, ok1 = params["start_number"]
 		if !ok1 {
 			result["err"] = "params <start_number> must."
 			return result
 		}
-		limit, _ := params["limit"]
-		if len(limit) == 0 {
-			limit = "10"
-		}
-		var limit_num uint64 = 10
 		var start_num uint64 = 1
-		if lmt, err := strconv.ParseUint(limit, 10, 0); err == nil {
-			limit_num = lmt
-		}
-		if limit_num > 50 {
-			limit_num = 50 // 最多50枚
-		}
 		if stt, err := strconv.ParseUint(start_number, 10, 0); err == nil {
 			start_num = stt
 		}
@@ -181,6 +185,32 @@ func (api *DeprecatedApiService) getDiamondVisualGeneList(params map[string]stri
 				store.Number,
 				store.VisualGene.ToHex(),
 				store.ApproxFeeOffer.ToFinString()),
+			)
+		}
+
+	} else if ok2 && len(isnewest) > 0 {
+
+		lastdia, e := state.ReadLastestDiamond()
+		if e != nil {
+			result["err"] = "ReadLastestDiamond error."
+			return result
+		}
+		diamonds := make([]*stores.DiamondSmelt, 0)
+		diamonds = append(diamonds, lastdia)
+		for dianum := lastdia.Number - 1; dianum >= 1 && dianum > lastdia.Number-fields.DiamondNumber(limit_num); dianum-- {
+			store, e := blockstore.ReadDiamondByNumber(uint32(dianum))
+			if e != nil || store == nil {
+				break
+			}
+			diamonds = append(diamonds, store)
+		}
+		for _, dia := range diamonds {
+			dtlist = append(dtlist, fmt.Sprintf(
+				`{"name":"%s","number":%d,"visual_gene":"%s","bid_fee":"%s"}`,
+				string(dia.Diamond),
+				dia.Number,
+				dia.VisualGene.ToHex(),
+				dia.ApproxFeeOffer.ToFinString()),
 			)
 		}
 
