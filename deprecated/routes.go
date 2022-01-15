@@ -77,6 +77,7 @@ func routeQueryRequest(action string, params map[string]string, w http.ResponseW
 }
 
 func (api *DeprecatedApiService) routeOperateRequest(w http.ResponseWriter, opcode uint32, value []byte) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	switch opcode {
 	/////////////////////////////
 	case 1:
