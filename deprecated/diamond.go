@@ -134,6 +134,25 @@ func (api *DeprecatedApiService) getDiamondVisualGeneList(params map[string]stri
 	dianamestr, ok0 := params["dianames"]
 	start_number, ok1 := params["start_number"]
 	isnewest, ok2 := params["newest"]
+	_, isonly_gene_number := params["only_gene_number"]
+
+	var appendOne = func(store *stores.DiamondSmelt) {
+		if isonly_gene_number {
+			dtlist = append(dtlist, fmt.Sprintf(
+				`"%d,%s"`,
+				store.Number,
+				store.VisualGene.ToHex(),
+			))
+			return
+		}
+		dtlist = append(dtlist, fmt.Sprintf(
+			`{"name":"%s","number":%d,"visual_gene":"%s","bid_fee":"%s"}`,
+			string(store.Diamond),
+			store.Number,
+			store.VisualGene.ToHex(),
+			store.ApproxFeeOffer.ToFinString()),
+		)
+	}
 
 	if ok0 && len(dianamestr) >= 6 {
 
@@ -146,13 +165,7 @@ func (api *DeprecatedApiService) getDiamondVisualGeneList(params map[string]stri
 				if e != nil || store == nil {
 					break
 				}
-				dtlist = append(dtlist, fmt.Sprintf(
-					`{"name":"%s","number":%d,"visual_gene":"%s","bid_fee":"%s"}`,
-					string(store.Diamond),
-					store.Number,
-					store.VisualGene.ToHex(),
-					store.ApproxFeeOffer.ToFinString()),
-				)
+				appendOne(store)
 				dianum++
 				if dianum >= 50 {
 					break // 最多50枚
@@ -179,13 +192,7 @@ func (api *DeprecatedApiService) getDiamondVisualGeneList(params map[string]stri
 			if e != nil || store == nil {
 				break
 			}
-			dtlist = append(dtlist, fmt.Sprintf(
-				`{"name":"%s","number":%d,"visual_gene":"%s","bid_fee":"%s"}`,
-				string(store.Diamond),
-				store.Number,
-				store.VisualGene.ToHex(),
-				store.ApproxFeeOffer.ToFinString()),
-			)
+			appendOne(store)
 		}
 
 	} else if ok2 && len(isnewest) > 0 {
@@ -205,13 +212,7 @@ func (api *DeprecatedApiService) getDiamondVisualGeneList(params map[string]stri
 			diamonds = append(diamonds, store)
 		}
 		for _, dia := range diamonds {
-			dtlist = append(dtlist, fmt.Sprintf(
-				`{"name":"%s","number":%d,"visual_gene":"%s","bid_fee":"%s"}`,
-				string(dia.Diamond),
-				dia.Number,
-				dia.VisualGene.ToHex(),
-				dia.ApproxFeeOffer.ToFinString()),
-			)
+			appendOne(dia)
 		}
 
 	}

@@ -92,6 +92,9 @@ func (api *DeprecatedApiService) quoteFee(params map[string]string) map[string]s
 // 通过 hx 获取交易简介
 func (api *DeprecatedApiService) getTransactionIntro(params map[string]string) map[string]string {
 	result := make(map[string]string)
+
+	_, is_only_check_exist := params["only_check_exist"]
+
 	trsid, ok1 := params["id"]
 	if !ok1 {
 		result["err"] = "param id must."
@@ -113,6 +116,13 @@ func (api *DeprecatedApiService) getTransactionIntro(params map[string]string) m
 	}
 	if trsresbytes == nil {
 		result["err"] = "transaction not fond."
+		return result
+	}
+
+	// 是否仅仅判断是否存在
+	if is_only_check_exist && len(trsresbytes) > 0 {
+		result["ret"] = "0"
+		result["exist"] = "yes"
 		return result
 	}
 
