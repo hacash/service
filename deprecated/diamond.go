@@ -66,8 +66,31 @@ func (api *DeprecatedApiService) getDiamond(params map[string]string) map[string
 		return result
 	}
 
+	// 迟确认
+	delayckn := uint32(0)
+	dcnstr, ok2 := params["delay_confirm"]
+	if ok2 {
+		if dmnum, e := strconv.Atoi(dcnstr); e == nil {
+			if dmnum > 0 {
+				delayckn = uint32(dmnum)
+			}
+		}
+	}
+
 	state := api.blockchain.GetChainEngineKernel().StateRead()
 	blockstore := state.BlockStoreRead()
+
+	if delayckn > 0 {
+		// 延迟检查
+		if dmnum, e := strconv.Atoi(dmstr); e == nil {
+			s1, _ := blockstore.ReadDiamondNameByNumber(uint32(dmnum) + delayckn)
+			if len(s1) != fields.DiamondNameSize {
+				// not find
+				result["fail"] = "delay confirm check fail."
+				return result
+			}
+		}
+	}
 
 	var store *stores.DiamondSmelt = nil
 	if dmnum, e := strconv.Atoi(dmstr); e == nil {
