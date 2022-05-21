@@ -16,7 +16,6 @@ import (
  * 包括HAC、BTC和HACD的产生和转移
  */
 func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w http.ResponseWriter, bodybytes []byte) {
-
 	kernel := api.backend.BlockChain().GetChainEngineKernel()
 	state := kernel.StateRead()
 
@@ -75,6 +74,7 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 			ResponseError(w, e)
 			return
 		}
+
 		blktxnum := blockObj.GetTransactionCount()
 		txPosMargin := blktxnum - blockObj.GetCustomerTransactionCount()
 		blktrs := blockObj.GetTrsList()
@@ -83,6 +83,7 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 			ResponseError(w, fmt.Errorf(" txposi <%d> overflow", txposi))
 			return
 		}
+
 		// tx ok
 		tx = blktrs[realtxpos]
 		txhash = tx.Hash()
@@ -93,15 +94,18 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 			ResponseError(w, e)
 			return
 		}
+
 		if txbody == nil || len(txbody) == 0 {
 			ResponseErrorString(w, "tx not find")
 			return
 		}
+
 		txObj, _, e2 := transactions.ParseTransaction(txbody, 0)
 		if e2 != nil {
 			ResponseError(w, e2)
 			return
 		}
+
 		tx = txObj
 		height = uint64(blockheight)
 	} else {

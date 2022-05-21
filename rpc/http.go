@@ -8,7 +8,6 @@ import (
 )
 
 func (api *RpcService) RunHttpRpcService(port int) {
-
 	api.initRoutes()
 
 	mux := http.NewServeMux()

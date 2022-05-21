@@ -16,8 +16,6 @@ func (api *RpcService) totalSupply(r *http.Request, w http.ResponseWriter, bodyb
 		return
 	}
 
-	//fmt.Println(ttspl.Serialize())
-
 	var data = make(map[string]interface{})
 
 	// 读取流通量统计

@@ -8,13 +8,13 @@ import (
 
 // 查看账户余额
 func (api *RpcService) balances(r *http.Request, w http.ResponseWriter, bodybytes []byte) {
-
 	// 地址列表
 	addresslistStr := strings.Trim(CheckParamString(r, "address_list", ""), " ")
 	if len(addresslistStr) == 0 {
 		ResponseErrorString(w, "param address_list must give")
 		return
 	}
+
 	addresslists := strings.Split(addresslistStr, ",")
 	addresses := make([]*fields.Address, len(addresslists))
 	for i, v := range addresslists {
@@ -25,10 +25,12 @@ func (api *RpcService) balances(r *http.Request, w http.ResponseWriter, bodybyte
 		}
 		addresses[i] = addr
 	}
+
 	if len(addresses) == 0 {
 		ResponseErrorString(w, "param address_list must give")
 		return
 	}
+
 	if len(addresses) > 200 {
 		ResponseErrorString(w, "address number cannot over 200")
 		return
@@ -67,6 +69,7 @@ func (api *RpcService) balances(r *http.Request, w http.ResponseWriter, bodybyte
 		if e != nil {
 			continue
 		}
+
 		if actAllKinds || actKindHacash {
 			if bls != nil {
 				item["hacash"] = bls.Hacash.ToMeiOrFinString(isUnitMei)
@@ -74,6 +77,7 @@ func (api *RpcService) balances(r *http.Request, w http.ResponseWriter, bodybyte
 				item["hacash"] = emptyAmt.ToMeiOrFinString(isUnitMei)
 			}
 		}
+
 		if actAllKinds || actKindSatoshi {
 			if bls != nil {
 				item["satoshi"] = uint64(bls.Satoshi)
@@ -81,6 +85,7 @@ func (api *RpcService) balances(r *http.Request, w http.ResponseWriter, bodybyte
 				item["satoshi"] = 0
 			}
 		}
+
 		if actAllKinds || actKindDiamond {
 			if bls != nil {
 				item["diamond"] = uint64(bls.Diamond)

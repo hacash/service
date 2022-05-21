@@ -10,7 +10,6 @@ import (
 
 // HDNS 解析服务
 func (api *RpcService) hdns(r *http.Request, w http.ResponseWriter, bodybytes []byte) {
-
 	// 钻石字面值或编号
 	diamondStr := CheckParamString(r, "diamond", "")
 	if len(diamondStr) == 0 {

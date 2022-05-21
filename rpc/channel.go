@@ -30,6 +30,7 @@ func (api *RpcService) channel(r *http.Request, w http.ResponseWriter, bodybytes
 		ResponseError(w, e)
 		return
 	}
+
 	if channel == nil {
 		ResponseErrorString(w, "channel not find")
 		return

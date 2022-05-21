@@ -15,7 +15,6 @@ import (
 
 // 创建价值转移交易
 func (api *RpcService) createValueTransferTx(r *http.Request, w http.ResponseWriter, bodybytes []byte) {
-
 	var err error
 
 	// mei
@@ -28,15 +27,18 @@ func (api *RpcService) createValueTransferTx(r *http.Request, w http.ResponseWri
 		ResponseErrorString(w, "param main_prikey must give")
 		return
 	}
+
 	if len(mainPrikeyStr) != 64 {
 		ResponseErrorString(w, "param main_prikey length error")
 		return
 	}
+
 	var prikeybts []byte
 	if prikeybts, err = hex.DecodeString(mainPrikeyStr); err != nil {
 		ResponseErrorString(w, "param main_prikey format error")
 		return
 	}
+
 	mainAccount, err := account.GetAccountByPriviteKey(prikeybts)
 
 	// fee
@@ -45,12 +47,14 @@ func (api *RpcService) createValueTransferTx(r *http.Request, w http.ResponseWri
 		ResponseErrorString(w, "param fee must give")
 		return
 	}
+
 	var feeAmt *fields.Amount = nil
 	if isUnitMei {
 		feeAmt, err = fields.NewAmountFromMeiStringUnsafe(feeStr)
 	} else {
 		feeAmt, err = fields.NewAmountFromFinString(feeStr)
 	}
+
 	if err != nil {
 		ResponseErrorString(w, "param fee format error")
 		return
@@ -78,6 +82,7 @@ func (api *RpcService) createValueTransferTx(r *http.Request, w http.ResponseWri
 		ResponseErrorString(w, "create tx error: "+e1.Error())
 		return
 	}
+
 	newTrs.Timestamp = fields.BlockTxTimestamp(timestamp)
 	newTrs.Fee = *feeAmt
 
@@ -117,6 +122,7 @@ func (api *RpcService) createValueTransferTx(r *http.Request, w http.ResponseWri
 		ResponseError(w, e10)
 		return
 	}
+
 	data["hash_with_fee"] = newTrs.HashWithFeeFresh().ToHex()
 	data["body"] = hex.EncodeToString(txbody)
 	data["timestamp"] = timestamp
@@ -125,8 +131,6 @@ func (api *RpcService) createValueTransferTx(r *http.Request, w http.ResponseWri
 	ResponseData(w, data)
 	return
 }
-
-/////////////////////////////////////////////////////////////
 
 /**
  * 创建一笔普通转账
@@ -139,6 +143,7 @@ func appendActionSimpleTransferHacash(r *http.Request, isUnitMei bool, allprikey
 	if len(amountStr) == 0 {
 		return fmt.Errorf("param amount must give")
 	}
+
 	var amountAmt *fields.Amount = nil
 	if isUnitMei {
 		amountAmt, err = fields.NewAmountFromMeiStringUnsafe(amountStr)
@@ -154,6 +159,7 @@ func appendActionSimpleTransferHacash(r *http.Request, isUnitMei bool, allprikey
 	if len(addrStr) == 0 {
 		return fmt.Errorf("param to_address must give")
 	}
+
 	to_addr, e8 := fields.CheckReadableAddress(addrStr)
 	if e8 != nil {
 		return e8
@@ -163,12 +169,10 @@ func appendActionSimpleTransferHacash(r *http.Request, isUnitMei bool, allprikey
 		ToAddress: *to_addr,
 		Amount:    *amountAmt,
 	}
-
 	tx.AppendAction(actObj)
 
 	// success
 	return nil
-
 }
 
 /**
@@ -186,6 +190,7 @@ func appendActionSimpleTransferSatoshi(r *http.Request, isUnitMei bool, allprike
 	if len(addrStr) == 0 {
 		return fmt.Errorf("param to_address must give")
 	}
+
 	to_addr, e8 := fields.CheckReadableAddress(addrStr)
 	if e8 != nil {
 		return e8
@@ -200,7 +205,6 @@ func appendActionSimpleTransferSatoshi(r *http.Request, isUnitMei bool, allprike
 
 	// success
 	return nil
-
 }
 
 /**
@@ -216,11 +220,13 @@ func appendActionTransferDiamond(r *http.Request, isUnitMei bool, allprikey map[
 	if len(diamondsStr) == 0 {
 		return fmt.Errorf("param diamonds must give")
 	}
+
 	var diamonds = fields.NewEmptyDiamondListMaxLen200()
 	e0 := diamonds.ParseHACDlistBySplitCommaFromString(diamondsStr)
 	if e0 != nil {
 		return e0
 	}
+
 	if diamonds.Count > 1 {
 		isMultiTrs = true // 大于一个批量转账
 	}
@@ -241,6 +247,7 @@ func appendActionTransferDiamond(r *http.Request, isUnitMei bool, allprikey map[
 			return err
 		}
 	}
+
 	// 如果不传则为主地址
 	if diamondOwnerAccount == nil {
 		diamondOwnerAccount = mainAccount
@@ -248,6 +255,7 @@ func appendActionTransferDiamond(r *http.Request, isUnitMei bool, allprikey map[
 		// 加入签名私钥
 		allprikey[string(diamondOwnerAccount.Address)] = diamondOwnerAccount.PrivateKey
 	}
+
 	if len(allprikey) > 1 {
 		isMultiTrs = true // 主地址与钻石地址不一样时，为批量转移钻石
 	}
@@ -257,6 +265,7 @@ func appendActionTransferDiamond(r *http.Request, isUnitMei bool, allprikey map[
 	if len(addrStr) == 0 {
 		return fmt.Errorf("param to_address must give")
 	}
+
 	to_addr, e8 := fields.CheckReadableAddress(addrStr)
 	if e8 != nil {
 		return e8
@@ -270,29 +279,12 @@ func appendActionTransferDiamond(r *http.Request, isUnitMei bool, allprikey map[
 			ToAddress:   *to_addr,
 			DiamondList: *diamonds,
 		}
-		//fmt.Println(diamondOwnerAccount.AddressReadable, to_addr.ToReadable(), len(realDiamonds), realDiamonds)
-		//fmt.Println( `
-		//// 批量转账
-		//actObj = &actions.Action_6_OutfeeQuantityDiamondTransfer{
-		//	FromAddress: diamondOwnerAccount.Address,
-		//	ToAddress: *to_addr,
-		//	DiamondCount: fields.VarUint1(len(realDiamonds)),
-		//	Diamonds: realDiamonds,
-		//}
-		//` )
 	} else {
 		// 单个转账
 		actObj = &actions.Action_5_DiamondTransfer{
 			Diamond:   fields.DiamondName(diamonds.Diamonds[0]),
 			ToAddress: *to_addr,
 		}
-		//fmt.Println( `
-		//// 单个转账
-		//actObj = &actions.Action_5_DiamondTransfer{
-		//	Diamond: fields.Bytes6(diamonds[0]),
-		//	Address: *to_addr,
-		//}
-		//` )
 	}
 
 	// 添加 act
@@ -300,5 +292,4 @@ func appendActionTransferDiamond(r *http.Request, isUnitMei bool, allprikey map[
 
 	// success
 	return nil
-
 }

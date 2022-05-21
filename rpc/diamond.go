@@ -12,7 +12,6 @@ import (
 
 // 查询钻石
 func (api *RpcService) diamond(r *http.Request, w http.ResponseWriter, bodybytes []byte) {
-
 	// 是否以枚为单位
 	isUnitMei := CheckParamBool(r, "unitmei", false)
 
@@ -57,7 +56,6 @@ func (api *RpcService) diamond(r *http.Request, w http.ResponseWriter, bodybytes
 	}
 
 	diamondValue = string(diamondSto.Diamond)
-
 	bidfee := diamondSto.GetApproxFeeOffer()
 
 	// data
@@ -77,6 +75,7 @@ func (api *RpcService) diamond(r *http.Request, w http.ResponseWriter, bodybytes
 		ResponseError(w, e)
 		return
 	}
+
 	if sto2 != nil {
 		retdata["current_belong_address"] = sto2.Address.ToReadable()
 	} else {
