@@ -12,6 +12,7 @@ func (api *DeprecatedApiService) readPasswordOrPriviteKeyParamBeAccount(params m
 	if !ok1 {
 		return nil, fmt.Errorf("param " + keyname + " must")
 	}
+
 	var acc *account.Account = nil
 	privatekey, e2 := hex.DecodeString(password_or_privatekey)
 	if len(password_or_privatekey) == 64 && e2 == nil {
@@ -25,5 +26,6 @@ func (api *DeprecatedApiService) readPasswordOrPriviteKeyParamBeAccount(params m
 		//fmt.Println(string(acc.AddressReadable))
 		//fmt.Println(params["from"])
 	}
+
 	return acc, nil
 }

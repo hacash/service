@@ -11,7 +11,6 @@ import (
 )
 
 func (api *DeprecatedApiService) webSocketHandler(ws *websocket.Conn) {
-
 	var err error
 	for {
 		var reply string
@@ -21,15 +20,18 @@ func (api *DeprecatedApiService) webSocketHandler(ws *websocket.Conn) {
 			ws.Close()
 			break
 		}
+
 		if strings.HasPrefix(reply, "getblocks") {
 			para := strings.Split(reply, " ")
 			if len(para) != 2 {
 				continue
 			}
+
 			start_height, e2 := strconv.ParseUint(para[1], 10, 0)
 			if e2 != nil {
 				continue
 			}
+
 			// read block data
 			height_i := start_height
 			resmaxsize := 1024 * 512
@@ -42,10 +44,12 @@ func (api *DeprecatedApiService) webSocketHandler(ws *websocket.Conn) {
 					fmt.Println(height_i, e2)
 					break
 				}
+
 				if blkbodybts == nil {
 					fmt.Println(height_i, "blkbodybts == nil")
 					break // end
 				}
+
 				//fmt.Println(height_i, blkbodybts)
 				totalsize += len(blkbodybts)
 				totaldatas.Write(blkbodybts)
@@ -54,6 +58,7 @@ func (api *DeprecatedApiService) webSocketHandler(ws *websocket.Conn) {
 					break
 				}
 			}
+
 			fmt.Println("send block data by websocket, size:", totalsize, "blocknum", start_height, "~", height_i)
 			if start_height == height_i {
 				// end
@@ -62,6 +67,7 @@ func (api *DeprecatedApiService) webSocketHandler(ws *websocket.Conn) {
 				ws.Close()
 				break
 			}
+
 			// send results
 			totalbytes := totaldatas.Bytes()
 			binary.BigEndian.PutUint32(totalbytes[0:4], uint32(len(totalbytes))-4) // put data len
@@ -70,9 +76,6 @@ func (api *DeprecatedApiService) webSocketHandler(ws *websocket.Conn) {
 				ws.Close()
 				break
 			}
-
 		}
-
 	}
-
 }

@@ -15,7 +15,6 @@ func (api *DeprecatedApiService) totalSupply(params map[string]string) map[strin
 		return result
 	}
 
-	//fmt.Println(ttspl.Serialize())
 	_, result = rpc.RenderTotalSupplyObject(ttspl, true)
 
 	// ok

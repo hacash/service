@@ -24,11 +24,13 @@ func (api *DeprecatedApiService) dexSellConfirm(params map[string]string) map[st
 		result["err"] = "params signature must."
 		return result
 	}
+
 	signhex, e := hex.DecodeString(signstr)
 	if e != nil {
 		result["err"] = "params signature format error."
 		return result
 	}
+
 	signck := fields.CreateSignCheckData("")
 	_, e = signck.Parse(signhex, 0)
 	if e != nil {
@@ -41,6 +43,7 @@ func (api *DeprecatedApiService) dexSellConfirm(params map[string]string) map[st
 		result["err"] = "params offer must."
 		return result
 	}
+
 	start_price, e := fields.NewAmountFromString(pricestr)
 	if e != nil {
 		result["err"] = fmt.Sprintf("offer amount <%s> is error.", start_price)

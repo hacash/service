@@ -49,12 +49,14 @@ func (api *DeprecatedApiService) getSystemLendingBitcoin(params map[string]strin
 	loanbei, pbi := coinbase.CalculationOfInterestBitcoinMortgageLoanAmount(rtlper)
 	result["realtime_interest_ratio"] = fmt.Sprintf("%0.2f%%", pbi/loanbei) // 实时利率
 	result["realtime_loan_ratio"] = fmt.Sprintf("%0.2f%%", loanbei*100)     // 实时可借贷倍数
+
 	// 显示归还状态
 	if stoobj.IsRansomed.Check() {
 		result["ransom_block_height"] = strconv.FormatUint(uint64(stoobj.RansomBlockHeight), 10)
 		result["ransom_amount"] = stoobj.RansomAmount.ToFinString()
 		result["ransom_address_if_public_operation"] = stoobj.RansomAddressIfPublicOperation.ShowReadableOrEmpty() // 如果存在则显示地址
 	}
+
 	// 返回
 	return result
 }

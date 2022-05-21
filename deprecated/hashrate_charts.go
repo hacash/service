@@ -17,9 +17,11 @@ func hashRateList(blockstore interfaces.BlockStoreRead, curheight uint64, allHis
 	if appendItem != nil {
 		hsti = 1
 	}
+
 	if curheight < mint.AdjustTargetDifficultyNumberOfBlocks*uint64(stepNum) {
 		return []string{}, nil
 	}
+
 	blockHeadMetaSize := uint32(blocks.BlockHeadSize + blocks.BlockMetaSizeV1)
 	// 历史三十天分布目标哈希率
 	var allDivCut = big.NewInt(1)
@@ -70,6 +72,7 @@ func hashRateList(blockstore interfaces.BlockStoreRead, curheight uint64, allHis
 		allHistoryRateStrs[idx] = showrate.String()
 		idx++
 	}
+
 	return allHistoryRateStrs, nil
 }
 
@@ -80,6 +83,7 @@ func (api *DeprecatedApiService) hashRateCharts(params map[string]string) map[st
 		result["err"] = err1.Error()
 		return result
 	}
+
 	curheight := lastest.GetHeight()
 	blockstore := api.blockchain.GetChainEngineKernel().StateRead().BlockStoreRead()
 
@@ -88,6 +92,7 @@ func (api *DeprecatedApiService) hashRateCharts(params map[string]string) map[st
 		result["err"] = e1.Error()
 		return result
 	}
+
 	days30, e2 := hashRateList(blockstore, curheight, false, nil)
 	if e2 != nil {
 		result["err"] = e2.Error()
@@ -99,5 +104,4 @@ func (api *DeprecatedApiService) hashRateCharts(params map[string]string) map[st
 
 	// 返回
 	return result
-
 }

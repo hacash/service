@@ -7,7 +7,6 @@ import (
 )
 
 //////////////////////////////////////////////////////////////
-
 func (api *DeprecatedApiService) getBalance(params map[string]string) map[string]string {
 	result := make(map[string]string)
 	addrstr, ok1 := params["address"]
@@ -64,6 +63,6 @@ func (api *DeprecatedApiService) getBalance(params map[string]string) map[string
 	result["satoshi"] = strconv.FormatUint(satoshi, 10)
 	result["diamonds"] = strings.TrimRight(diamondstrs, "|")
 	result["diamond"] = strconv.FormatUint(diamond, 10)
-	return result
 
+	return result
 }

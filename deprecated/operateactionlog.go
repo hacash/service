@@ -32,6 +32,7 @@ func (api *DeprecatedApiService) getAllOperateActionLogByBlockHeight(params map[
 		result["err"] = "param block_height must."
 		return result
 	}
+
 	block_height, err2 := strconv.ParseUint(block_height_str, 10, 0)
 	if err2 != nil {
 		result["err"] = "param block_height format error."
@@ -65,6 +66,7 @@ func (api *DeprecatedApiService) getAllOperateActionLogByBlockHeight(params map[
 		if 0 == v.Type() { // coinbase
 			continue
 		}
+
 		mainAddressString := v.GetAddress().ToReadable()
 		for _, act := range v.GetActionList() {
 			kid := act.Kind()
@@ -183,9 +185,7 @@ func (api *DeprecatedApiService) getAllOperateActionLogByBlockHeight(params map[
 					kid, tystrCloseBitcoinLending, act.LendingID,
 					mainAddressString, "-",
 					desstr)
-
 			}
-
 		}
 	}
 

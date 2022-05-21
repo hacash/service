@@ -21,6 +21,7 @@ func (api *DeprecatedApiService) getAllTransferLogByBlockHeight(params map[strin
 		result["err"] = "param block_height must."
 		return result
 	}
+
 	block_height, err2 := strconv.ParseUint(block_height_str, 10, 0)
 	if err2 != nil {
 		result["err"] = "param block_height format error."

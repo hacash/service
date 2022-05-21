@@ -29,7 +29,7 @@ func (api *DeprecatedApiService) hashRateChartsV3(params map[string]string) map[
 			return hashRateChartsV3_cachedata // 返回缓存
 		}
 	}
-	//fmt.Println("////////////////////")
+
 	hashRateChartsV3_lock.Unlock()
 
 	// 锁定
@@ -93,7 +93,6 @@ func (api *DeprecatedApiService) hashRateChartsV3(params map[string]string) map[
 
 	// ok
 	result["jsondata"] = jsondatastring
-	// `{"target":`+`,"current":`+currentHashRate.String()+`,"days30":[` + strings.Join(days30, ",") + `]}`
 
 	// 缓存
 	hashRateChartsV3_lastreqtime = &tn  // 缓存时间
@@ -101,5 +100,4 @@ func (api *DeprecatedApiService) hashRateChartsV3(params map[string]string) map[
 
 	// 返回
 	return result
-
 }

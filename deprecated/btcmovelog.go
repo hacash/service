@@ -23,7 +23,7 @@ func (api *DeprecatedApiService) getBtcMoveLogPageData(params map[string]string)
 	}
 
 	// 返回信息
-	//fmt.Println(datas)
 	result["jsondata"] = "[\"" + strings.Join(stores.SatoshiGenesisPageSerializeForShow(datas), "\",\"") + "\"]"
+
 	return result
 }
