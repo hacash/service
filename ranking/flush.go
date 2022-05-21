@@ -22,6 +22,7 @@ func (r *Ranking) flushStateToDisk() error {
 		alladdrs := make([][]string, 0)
 		cn := -1
 		ci := -1
+
 		for i, _ := range r.wait_update_address_list {
 			cn++
 			if cn%100 == 0 {
@@ -32,6 +33,7 @@ func (r *Ranking) flushStateToDisk() error {
 			alladdrstrs[ci] += "," + i
 			alladdrs[ci] = append(alladdrs[ci], i)
 		}
+
 		// 每100个地址请求一次接口
 		for k := 0; k < len(alladdrstrs); k++ {
 			addrstrs := strings.TrimLeft(alladdrstrs[k], ",")
@@ -45,6 +47,7 @@ func (r *Ranking) flushStateToDisk() error {
 				// 接口未准备好
 				return fmt.Errorf("rpc not yet")
 			}
+
 			// 依次更新余额表
 			k1 := 0
 			jsonparser.ArrayEach(resbts1, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
@@ -65,6 +68,7 @@ func (r *Ranking) flushStateToDisk() error {
 				r.hacash_balance_ranking_100 = UpdateBalanceRankingTable(r.hacash_balance_ranking_100, item3, r.balance_ranking_range)
 				k1++
 			}, "list")
+
 			// 保存余额表
 			tb1 := SerializeBalanceRankingItems(r.hacash_balance_ranking_100)
 			r.ldb.Put([]byte(DBKeyHacashBalanceRanking100), tb1, nil)
@@ -98,10 +102,12 @@ func (r *Ranking) flushStateToDisk() error {
 		it := r.hacash_balance_ranking_100[0]
 		fmt.Printf(" HAC: %f(%d)", it.GetBalance(), len(r.hacash_balance_ranking_100))
 	}
+
 	if len(r.diamond_balance_ranking_100) > 0 {
 		it := r.diamond_balance_ranking_100[0]
 		fmt.Printf(" HACD: %d(%d)", it.GetBalanceForceUint64(), len(r.diamond_balance_ranking_100))
 	}
+
 	if len(r.satoshi_balance_ranking_100) > 0 {
 		it := r.satoshi_balance_ranking_100[0]
 		fmt.Printf(" SAT: %d(%d)", it.GetBalanceForceUint64(), len(r.satoshi_balance_ranking_100))
@@ -110,5 +116,4 @@ func (r *Ranking) flushStateToDisk() error {
 
 	// 成功
 	return nil
-
 }

@@ -10,6 +10,7 @@ func HttpGetBytes(url string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	bytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err

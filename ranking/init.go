@@ -6,7 +6,6 @@ import (
 )
 
 func (r *Ranking) init() error {
-
 	// 供应量
 	e1 := r.loadTotalSupply()
 	if e1 != nil {
@@ -30,11 +29,13 @@ func (r *Ranking) init() error {
 		list1 := ParseBalanceRankingItems(v1)
 		r.hacash_balance_ranking_100 = list1
 	}
+
 	v2, e2 := r.ldb.Get([]byte(DBKeyDiamondBalanceRanking100), nil)
 	if e2 == nil && len(v2) >= 21 {
 		list2 := ParseBalanceRankingItems(v2)
 		r.diamond_balance_ranking_100 = list2
 	}
+
 	v3, e3 := r.ldb.Get([]byte(DBKeySatoshiBalanceRanking100), nil)
 	if e3 == nil && len(v3) >= 21 {
 		list3 := ParseBalanceRankingItems(v3)

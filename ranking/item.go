@@ -19,25 +19,30 @@ func NewBalanceRankingItem(addrstr string, isfloat bool) *BalanceRankingItem {
 	if isfloat {
 		isf = 1
 	}
+
 	return &BalanceRankingItem{
 		Address:       *addr,
 		BlsUseFloat64: fields.Bool(isf),
 		Balance:       fields.VarUint8(0),
 	}
 }
+
 func (b *BalanceRankingItem) GetBalance() float64 {
 	if b.BlsUseFloat64.Check() {
 		return math.Float64frombits(uint64(b.Balance))
 	}
 	return float64(b.Balance)
 }
+
 func (b *BalanceRankingItem) GetBalanceForceUint64() uint64 {
 	return uint64(b.Balance)
 }
+
 func (b *BalanceRankingItem) SetBalanceByUint64(v uint64) {
 	b.BlsUseFloat64.Set(false)
 	b.Balance = fields.VarUint8(v)
 }
+
 func (b *BalanceRankingItem) SetBalanceByFloat64(v float64) {
 	b.BlsUseFloat64.Set(true)
 	uv := math.Float64bits(v)
@@ -62,6 +67,7 @@ func ParseBalanceRankingItems(buf []byte) []*BalanceRankingItem {
 		seek += 8
 		newtable = append(newtable, &one)
 	}
+
 	return newtable
 }
 
@@ -76,6 +82,7 @@ func SerializeBalanceRankingItems(table []*BalanceRankingItem) []byte {
 		buf.Write(b2)
 		buf.Write(b3)
 	}
+
 	return buf.Bytes()
 }
 
@@ -86,10 +93,12 @@ func UpdateBalanceRankingTable(table []*BalanceRankingItem, insert *BalanceRanki
 	if tlen == 0 && !istvzore {
 		return []*BalanceRankingItem{insert}
 	}
+
 	// 去重
 	if len(table) == 1 && table[0].Address.Equal(insert.Address) {
 		return []*BalanceRankingItem{insert} // 替换
 	}
+
 	var newtable []*BalanceRankingItem = nil
 	for i := 0; i < tlen; i++ {
 		li := table[i]
@@ -101,13 +110,16 @@ func UpdateBalanceRankingTable(table []*BalanceRankingItem, insert *BalanceRanki
 			break
 		}
 	}
+
 	if newtable != nil {
 		table = newtable
 	}
+
 	// 如果值为零则直接删掉
 	if istvzore {
 		return table
 	}
+
 	// 插入
 	tlen = len(table)
 	istidx := int(-1)
@@ -123,6 +135,7 @@ func UpdateBalanceRankingTable(table []*BalanceRankingItem, insert *BalanceRanki
 			continue // 继续向上
 		}
 	}
+
 	// 插入
 	newtable = []*BalanceRankingItem{}
 	if istidx == tlen-1 {
