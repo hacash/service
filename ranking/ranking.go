@@ -16,7 +16,6 @@ const (
 )
 
 type Ranking struct {
-
 	// config
 	ldb_dir                    string
 	http_api_listen_port       int    // api 接口监听
@@ -46,7 +45,6 @@ type Ranking struct {
 }
 
 func NewRanking(cnffile *sys.Inicnf) *Ranking {
-
 	section := cnffile.Section("")
 
 	ldb_dir := section.Key("data_dir").MustString("./hacash_ranking_data")
@@ -104,5 +102,4 @@ func (r *Ranking) Start() {
 	go r.loop()
 
 	go r.scan()
-
 }

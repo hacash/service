@@ -18,7 +18,6 @@ func (api *RpcService) dealRoutes(routes map[string]func(*http.Request, http.Res
 	}
 
 	r.ParseForm()
-
 	actionName := r.FormValue("action")
 
 	if len(actionName) == 0 {

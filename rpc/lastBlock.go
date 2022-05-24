@@ -3,7 +3,6 @@ package rpc
 import "net/http"
 
 func (api *RpcService) lastBlock(r *http.Request, w http.ResponseWriter, bodybytes []byte) {
-
 	kernel := api.backend.BlockChain().GetChainEngineKernel()
 
 	// get

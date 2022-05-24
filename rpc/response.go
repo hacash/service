@@ -49,11 +49,11 @@ func ResponseData(w http.ResponseWriter, data map[string]interface{}) {
 	} else if _, ok := data["ret"]; !ok {
 		data["ret"] = 0
 	}
+
 	ResponseJSON(w, data)
 }
 
 func ResponseJSON(w http.ResponseWriter, resobj interface{}) error {
-
 	// return
 	restxt, e1 := json.Marshal(resobj)
 	if e1 != nil {
@@ -64,11 +64,11 @@ func ResponseJSON(w http.ResponseWriter, resobj interface{}) error {
 			return e2
 		}
 	}
+
 	return nil
 }
 
 func ResponseJSONbytes(w http.ResponseWriter, content []byte) error {
-
 	header := w.Header()
 	key1 := "Access-Control-Allow-Origin"
 	if "" == header.Get(key1) {
@@ -82,19 +82,20 @@ func ResponseJSONbytes(w http.ResponseWriter, content []byte) error {
 	if e2 != nil {
 		return e2
 	}
+
 	return nil
 }
-
-///////////////////////////////////////////////////////////////////////////
 
 func CheckParamBool(r *http.Request, key string, defValue bool) bool {
 	boolString := strings.Trim(r.FormValue(key), " ")
 	valen := len(boolString)
+
 	if valen == 0 || boolString == "0" || strings.ToLower(boolString) == "false" {
 		return false
 	} else if valen > 0 {
 		return true
 	}
+
 	return defValue
 }
 

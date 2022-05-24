@@ -51,6 +51,7 @@ func (api *RpcService) blockIntro(r *http.Request, w http.ResponseWriter, bodyby
 		ResponseError(w, errread)
 		return
 	}
+
 	if blkbytes == nil {
 		ResponseError(w, fmt.Errorf("block is not find"))
 		return

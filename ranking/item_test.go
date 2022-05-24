@@ -6,7 +6,6 @@ import (
 )
 
 func Test_bbb1(t *testing.T) {
-
 	i1 := NewBalanceRankingItem("15BJ2PknNChqGLZRxWG8UUFXG9odQccvko", 10)
 	i2 := NewBalanceRankingItem("1P8yzSQVkjhu1ACX6jKMrbpdnBgcjc2ATK", 8)
 	i3 := NewBalanceRankingItem("127717zvZWFjEghjEpyyRSnitEEbnMuuLn", 15)
@@ -19,5 +18,4 @@ func Test_bbb1(t *testing.T) {
 	t1 = UpdateBalanceRankingTable(t1, i4, 10)
 
 	fmt.Println(t1[0].BalanceUint64(), t1[1].BalanceUint64(), t1[2].BalanceUint64())
-
 }

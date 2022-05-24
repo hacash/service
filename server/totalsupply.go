@@ -72,9 +72,11 @@ func RenderTotalSupplyObject(totalsupply *stores.TotalSupply, isformatstring boo
 	// 计算实时流通量
 	totalAddAmountNum := block_reward + channel_interest + btcmove_subsidy                        // 总增发
 	totalSubAmountNum := burned_fee + syslend_bitcoin_burning_interest + usrlend_burning_interest // 总销毁
+
 	// 借贷相关实时流通量统计
 	totalAddAmountNum += syslend_diamond_loan_hac_count + syslend_bitcoin_loan_hac_count
 	totalSubAmountNum += syslend_diamond_repay_hac_count + syslend_bitcoin_repay_hac_count
+
 	// 实时流通量
 	current_circulation := totalAddAmountNum - totalSubAmountNum
 	appendToFloat64(object, objstr, "current_circulation", current_circulation, ifs)

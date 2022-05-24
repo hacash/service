@@ -8,11 +8,11 @@ import (
 
 // 批量创建账户
 func (api *RpcService) createAccounts(r *http.Request, w http.ResponseWriter, bodybytes []byte) {
-
 	number := int(CheckParamUint64(r, "number", 1))
 	if number < 1 {
 		number = 1
 	}
+
 	if number > 200 {
 		number = 200
 	}

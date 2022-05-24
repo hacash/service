@@ -9,7 +9,6 @@ import (
 )
 
 func (api *Ranking) startHttpApiService() {
-
 	port := api.http_api_listen_port
 	if port == 0 {
 		// 不启动服务器
@@ -44,7 +43,6 @@ func (api *Ranking) startHttpApiService() {
 }
 
 func (api *Ranking) apiHandleFunc(w http.ResponseWriter, r *http.Request) {
-
 	api.dataChangeLocker.Lock()
 	defer api.dataChangeLocker.Unlock()
 
@@ -92,7 +90,6 @@ func (api *Ranking) apiHandleFunc(w http.ResponseWriter, r *http.Request) {
 		} else {
 			ResponseError(w, fmt.Errorf("cannot find kind <%s>", kind))
 		}
-
 	} else if action == "account_diamonds" {
 
 		addrstr := CheckParamString(r, "address", "")
@@ -101,6 +98,7 @@ func (api *Ranking) apiHandleFunc(w http.ResponseWriter, r *http.Request) {
 			ResponseErrorString(w, "address format error")
 			return
 		}
+
 		// 查询账户的钻石列表
 		diatable, hav1 := api.cache_update_diamonds[addrstr]
 		if !hav1 {
@@ -111,12 +109,11 @@ func (api *Ranking) apiHandleFunc(w http.ResponseWriter, r *http.Request) {
 				diatable = v // load ok
 			}
 		}
+
 		// 列出所有钻石
 		data := ResponseCreateData("diamonds", string(diatable))
 		ResponseData(w, data) // ok
-
 	} else {
 		ResponseError(w, fmt.Errorf("cannot find action <%s>", action))
 	}
-
 }

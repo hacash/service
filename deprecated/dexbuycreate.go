@@ -66,6 +66,7 @@ func (api *DeprecatedApiService) dexBuyCreate(params map[string]string) map[stri
 		result["err"] = fmt.Sprintf("fee ratio <%s> is error.", feeratiostr)
 		return result
 	}
+
 	if feeratio < 0 || feeratio >= 1 {
 		result["err"] = fmt.Sprintf("fee ratio <%s> is error.", feeratiostr)
 		return result
@@ -82,6 +83,7 @@ func (api *DeprecatedApiService) dexBuyCreate(params map[string]string) map[stri
 		result["err"] = "params tx_fee must."
 		return result
 	}
+
 	tx_fee, e := fields.NewAmountFromString(txfeestr)
 	if e != nil {
 		result["err"] = fmt.Sprintf("tx_fee amount <%s> is error.", txfeestr)
@@ -120,6 +122,7 @@ func (api *DeprecatedApiService) dexBuyCreate(params map[string]string) map[stri
 		diamondaddr = dia.Address
 		dmaddrs[key] += 1
 	}
+
 	// 所有钻石必须属于同一个地址
 	if 1 != len(dmaddrs) {
 		result["err"] = fmt.Sprintf("all diamonds must belong to one single address.")

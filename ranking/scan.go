@@ -28,18 +28,20 @@ func (r *Ranking) scanOneBlock() error {
 	if scanHeight%1000 == 0 {
 		fmt.Printf("scan block %d.\n", scanHeight)
 	}
-	// fmt.Println("scanOneBlock:", scanHeight)
+
 	blkUrl := fmt.Sprintf("/query?action=block_intro&unitmei=1&height=%d", scanHeight)
 	resbts1, e1 := HttpGetBytes(r.node_rpc_url + blkUrl)
 	if e1 != nil {
 		// 接口未准备好
 		return fmt.Errorf("rpc not yet")
 	}
+
 	// 获取交易数量
 	txs, e2 := jsonparser.GetInt(resbts1, "transaction_count")
 	if e2 != nil {
 		return fmt.Errorf("rpc not yet")
 	}
+
 	rwdaddrstr, _ := jsonparser.GetString(resbts1, "coinbase", "address")
 	if txs == 0 {
 		// 空区块，没有交易
@@ -57,10 +59,12 @@ func (r *Ranking) scanOneBlock() error {
 		if e1 != nil {
 			return fmt.Errorf("rpc not yet") // 错误
 		}
+
 		mainAddrStr, e3 := jsonparser.GetString(resbts, "address")
 		if e3 != nil {
 			return fmt.Errorf("rpc not yet") // 错误
 		}
+
 		r.addWaitUpdateAddressUnsafe(mainAddrStr) // 待更新地址
 		// actions
 		jsonparser.ArrayEach(resbts, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
@@ -81,6 +85,7 @@ func (r *Ranking) scanOneBlock() error {
 			if len(v3) > 0 {
 				v4 = v3
 			}
+
 			if len(v4) > 0 {
 				// 写入钻石更新
 				if len(v2) > 0 {

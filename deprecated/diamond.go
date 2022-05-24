@@ -45,16 +45,19 @@ func (api *DeprecatedApiService) showDiamondCreateTxs(params map[string]string) 
 			}
 		}
 	}
+
 	perhei := 0
 	lastest, _, _ := api.backend.BlockChain().GetChainEngineKernel().LatestBlock()
 	if lastest != nil {
 		perhei = (int(lastest.GetHeight()) + 5) / 5 * 5
 	}
+
 	liststr := strings.Join(jsondata, "],[")
 	if len(liststr) > 0 {
 		liststr = "[" + liststr + "]"
 	}
 	result["jsondata"] = `{"period":` + strconv.Itoa(perhei) + `,"number":` + strconv.Itoa(number) + `,"datas":[` + liststr + `]}`
+
 	return result
 }
 
@@ -102,10 +105,12 @@ func (api *DeprecatedApiService) getDiamond(params map[string]string) map[string
 		}
 		store, _ = blockstore.ReadDiamond(fields.DiamondName(dmstr))
 	}
+
 	if store == nil {
 		result["fail"] = "not find."
 		return result
 	}
+
 	dmstr = string(store.Diamond)
 	// get current belong
 	sto2, _ := state.Diamond(fields.DiamondName(dmstr))
@@ -114,6 +119,7 @@ func (api *DeprecatedApiService) getDiamond(params map[string]string) map[string
 	} else {
 		result["address"] = store.MinerAddress.ToReadable()
 	}
+
 	// ok
 	//source_hash, _ := x16rs.Diamond(uint32(store.Number), store.PrevContainBlockHash, store.Nonce, store.MinerAddress, store.GetRealCustomMessage())
 	result["name"] = dmstr
@@ -129,6 +135,7 @@ func (api *DeprecatedApiService) getDiamond(params map[string]string) map[string
 	result["approx_fee_offer"] = store.GetApproxFeeOffer().ToFinString()
 	result["average_burn_price"] = "ㄜ" + strconv.FormatUint(uint64(store.AverageBidBurnPrice), 10) + ":248"
 	result["visual_gene"] = store.VisualGene.ToHex()
+
 	return result
 }
 
@@ -243,12 +250,11 @@ func (api *DeprecatedApiService) getDiamondVisualGeneList(params map[string]stri
 	jsondata += strings.Join(dtlist, ",")
 	jsondata += `]}`
 	result["jsondata"] = jsondata
-	return result
 
+	return result
 }
 
 func (api *DeprecatedApiService) transferDiamondMultiple(params map[string]string) map[string]string {
-
 	result := make(map[string]string)
 
 	feeAcc, err := api.readPasswordOrPriviteKeyParamBeAccount(params, "fee_password")
@@ -313,7 +319,6 @@ func (api *DeprecatedApiService) transferDiamondMultiple(params map[string]strin
 	allPrivateKeyBytes := make(map[string][]byte)
 	allPrivateKeyBytes[string(feeAcc.Address)] = feeAcc.PrivateKey
 	allPrivateKeyBytes[string(diamondAcc.Address)] = diamondAcc.PrivateKey
-	//fmt.Println(allPrivateKeyBytes)
 
 	e9 := tx.FillNeedSigns(allPrivateKeyBytes, nil)
 	if e9 != nil {
@@ -331,5 +336,4 @@ func (api *DeprecatedApiService) transferDiamondMultiple(params map[string]strin
 	// ok
 	result["status"] = "ok"
 	return result
-
 }

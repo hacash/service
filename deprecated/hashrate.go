@@ -14,6 +14,7 @@ func (api *DeprecatedApiService) hashRate(params map[string]string) map[string]s
 		result["err"] = err1.Error()
 		return result
 	}
+
 	curheight := lastest.GetHeight()
 	targetHashWorth := difficulty.CalculateDifficultyWorth(lastest.GetDifficulty())
 
@@ -49,5 +50,4 @@ func (api *DeprecatedApiService) hashRate(params map[string]string) map[string]s
 
 	// 返回
 	return result
-
 }

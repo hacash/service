@@ -19,9 +19,7 @@ func NewEmptyRpcConfig() *RpcConfig {
 
 func NewRpcConfig(inicnf *sys.Inicnf) *RpcConfig {
 	cnf := NewEmptyRpcConfig()
-
 	section := inicnf.Section("service")
-
 	cnf.HttpListenPort = section.Key("rpc_listen_port").MustInt(0)
 
 	return cnf
@@ -58,9 +56,11 @@ func (api *RpcService) Start() error {
 	if api.backend == nil {
 		return fmt.Errorf("api.backend not be set.")
 	}
+
 	if api.txpool == nil {
 		return fmt.Errorf("api.txpool not be set.")
 	}
+
 	// start
 	api.RunHttpRpcService(api.config.HttpListenPort)
 	return nil

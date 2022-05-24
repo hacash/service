@@ -49,11 +49,11 @@ func ResponseData(w http.ResponseWriter, data map[string]interface{}) {
 	} else if _, ok := data["ret"]; !ok {
 		data["ret"] = 0
 	}
+
 	ResponseJSON(w, data)
 }
 
 func ResponseJSON(w http.ResponseWriter, resobj interface{}) error {
-
 	// return
 	restxt, e1 := json.Marshal(resobj)
 	if e1 != nil {
@@ -64,11 +64,11 @@ func ResponseJSON(w http.ResponseWriter, resobj interface{}) error {
 			return e2
 		}
 	}
+
 	return nil
 }
 
 func ResponseJSONbytes(w http.ResponseWriter, content []byte) error {
-
 	header := w.Header()
 	key1 := "Access-Control-Allow-Origin"
 	if "" == header.Get(key1) {
@@ -82,10 +82,9 @@ func ResponseJSONbytes(w http.ResponseWriter, content []byte) error {
 	if e2 != nil {
 		return e2
 	}
+
 	return nil
 }
-
-///////////////////////////////////////////////////////////////////////////
 
 func CheckParamBool(r *http.Request, key string, defValue bool) bool {
 	boolString := strings.Trim(r.FormValue(key), " ")
@@ -95,6 +94,7 @@ func CheckParamBool(r *http.Request, key string, defValue bool) bool {
 	} else if valen > 0 {
 		return true
 	}
+
 	return defValue
 }
 
@@ -105,6 +105,7 @@ func CheckParamUint64(r *http.Request, key string, defValue uint64) uint64 {
 			value = i
 		}
 	}
+
 	return value
 }
 
@@ -112,6 +113,7 @@ func CheckParamString(r *http.Request, key string, defValue string) string {
 	if v := r.FormValue(key); len(v) > 0 {
 		return v
 	}
+
 	return defValue
 }
 
@@ -124,6 +126,7 @@ func CheckParamHex(r *http.Request, key string, defv []byte) []byte {
 		}
 		return hexdts // ok
 	}
+
 	return defv
 }
 
@@ -139,6 +142,7 @@ func CheckParamHexMustLen(r *http.Request, key string, mustLen int) []byte {
 		}
 		return hexdts // ok
 	}
+
 	return nil
 }
 
@@ -155,5 +159,6 @@ func CheckParamUint64Must(r *http.Request, w http.ResponseWriter, key string) (u
 		ResponseErrorString(w, "param <"+key+"> must give.")
 		return 0, false
 	}
+
 	return value, true
 }

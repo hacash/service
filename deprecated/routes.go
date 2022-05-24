@@ -53,7 +53,6 @@ func (api *DeprecatedApiService) initRoutes() {
 	queryRoutes["dexbuycreate"] = api.dexBuyCreate     // 创建买单
 	queryRoutes["dexbuyconfirm"] = api.dexBuyConfirm   // 确认买单
 	queryRoutes["dexsellconfirm"] = api.dexSellConfirm // 确认卖单
-
 }
 
 func routeQueryRequest(action string, params map[string]string, w http.ResponseWriter, r *http.Request) {
@@ -87,5 +86,3 @@ func (api *DeprecatedApiService) routeOperateRequest(w http.ResponseWriter, opco
 		w.Write([]byte(fmt.Sprint("not find opcode %d", opcode)))
 	}
 }
-
-//////////////////////////////////////////////////////////////

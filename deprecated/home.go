@@ -27,7 +27,6 @@ func (api *DeprecatedApiService) dealHome(response http.ResponseWriter, request 
 	dealHomePrintCacheTime = time.Now()
 
 	kernel := api.blockchain.GetChainEngineKernel()
-	//store := state.BlockStore()
 
 	lastest, _, err := kernel.LatestBlock()
 	if err != nil {
@@ -119,6 +118,7 @@ func (api *DeprecatedApiService) dealHome(response http.ResponseWriter, request 
 		cost288miao, mint_eachtime,
 		(float32(cost288miao)/mint_eachtime_f),
 	))
+
 	// 交易池信息
 	txpool := api.txpool
 	if pool, ok := txpool.(*memtxpool.MemTxPool); ok {

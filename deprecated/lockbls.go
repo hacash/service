@@ -21,6 +21,7 @@ func (api *DeprecatedApiService) getLockBlsInfo(params map[string]string) map[st
 		result["err"] = "param lockbls_id format error."
 		return result
 	}
+
 	if len(lockbls_key) != stores.LockblsIdLength {
 		result["err"] = "param lockbls_id length error."
 		return result

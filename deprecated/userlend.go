@@ -8,7 +8,6 @@ import (
 )
 
 //////////////////////////////////////////////////////////////
-
 func (api *DeprecatedApiService) getUserLending(params map[string]string) map[string]string {
 	result := make(map[string]string)
 	idstr, ok1 := params["id"]
@@ -56,6 +55,7 @@ func (api *DeprecatedApiService) getUserLending(params map[string]string) map[st
 		result["ransom_amount"] = stoobj.RansomAmount.ToFinString()
 		result["ransom_address"] = stoobj.RansomAddress.ToReadable() // 显示地址
 	}
+
 	// 返回
 	return result
 }

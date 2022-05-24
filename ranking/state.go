@@ -8,7 +8,6 @@ import (
 )
 
 func (r *Ranking) loadTotalSupply() error {
-
 	resbts1, e1 := HttpGetBytes(r.node_rpc_url + "/query?action=total_supply")
 	if e1 != nil {
 		fmt.Println(e1)
@@ -28,10 +27,12 @@ func (r *Ranking) loadTotalSupply() error {
 func (r *Ranking) changeDiamondsUnsafe(addrstr string, diamonds string, addOrSub bool) {
 	alldiamonds := strings.Split(diamonds, ",")
 	havdias := make(map[string]bool)
+
 	for i := 0; i < len(alldiamonds); i++ {
 		//fmt.Print(alldiamonds[i]+" ")
 		havdias[alldiamonds[i]] = true
 	}
+
 	diatable, hav1 := r.cache_update_diamonds[addrstr]
 	if !hav1 {
 		// 从 磁盘加载
@@ -40,7 +41,7 @@ func (r *Ranking) changeDiamondsUnsafe(addrstr string, diamonds string, addOrSub
 			diatable = v // load ok
 		}
 	}
-	//fmt.Print(" 0:", string(diatable))
+
 	// 更新
 	newdiabts := bytes.NewBuffer([]byte{})
 	for i := 0; i+6 <= len(diatable); i += 6 {
@@ -53,16 +54,15 @@ func (r *Ranking) changeDiamondsUnsafe(addrstr string, diamonds string, addOrSub
 		// 本来的
 		newdiabts.Write(dian)
 	}
-	//fmt.Print(" 1:", string(newdiabts.Bytes()))
+
 	// 再添加回去
 	if addOrSub {
 		for i := 0; i < len(alldiamonds); i++ {
 			newdiabts.Write([]byte(alldiamonds[i]))
 		}
 	}
-	//fmt.Print(" 2:", string(newdiabts.Bytes()))
+
 	// 更新
-	//fmt.Println("r.cache_update_diamonds[addrstr] = newdiabts.Bytes()", addrstr, len(newdiabts.Bytes())/6)
 	r.cache_update_diamonds[addrstr] = newdiabts.Bytes()
 	// ok
 }

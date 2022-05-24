@@ -12,8 +12,6 @@ import (
 func (api *RpcService) raiseTxFee(r *http.Request, w http.ResponseWriter, bodybytes []byte) {
 	var err error
 
-	// mei
-
 	// address
 	feePrikeyStr := strings.TrimPrefix(CheckParamString(r, "fee_prikey", ""), "0x")
 	feePrikeyStr = strings.TrimPrefix(feePrikeyStr, "0X")
@@ -21,15 +19,19 @@ func (api *RpcService) raiseTxFee(r *http.Request, w http.ResponseWriter, bodyby
 		ResponseErrorString(w, "param fee_prikey must give")
 		return
 	}
+
+	// if feePrikeyStr size is not ok
 	if len(feePrikeyStr) != 64 {
 		ResponseErrorString(w, "param fee_prikey length error")
 		return
 	}
+
 	var prikeybts []byte
 	if prikeybts, err = hex.DecodeString(feePrikeyStr); err != nil {
 		ResponseErrorString(w, "param fee_prikey format error")
 		return
 	}
+
 	feeAccount, err := account.GetAccountByPriviteKey(prikeybts)
 
 	// fee
@@ -38,6 +40,7 @@ func (api *RpcService) raiseTxFee(r *http.Request, w http.ResponseWriter, bodyby
 		ResponseErrorString(w, "param fee must give")
 		return
 	}
+
 	var feeAmt *fields.Amount = nil
 	feeAmt, err = fields.NewAmountFromString(feeStr)
 	if err != nil {
@@ -89,5 +92,4 @@ func (api *RpcService) raiseTxFee(r *http.Request, w http.ResponseWriter, bodyby
 
 	// return: status = success
 	ResponseData(w, ResponseCreateData("status", "success"))
-
 }

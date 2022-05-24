@@ -13,7 +13,6 @@ func (api *DeprecatedApiService) dexBuyConfirm(params map[string]string) map[str
 	result := make(map[string]string)
 
 	state := api.blockchain.GetChainEngineKernel().StateRead()
-	//blockstore := state.BlockStoreRead()
 
 	// 是否检查所有签名
 	ckallsg, _ := params["check_all_sign"]
@@ -24,23 +23,27 @@ func (api *DeprecatedApiService) dexBuyConfirm(params map[string]string) map[str
 		result["err"] = "params tx_body_signed must."
 		return result
 	}
+
 	txbody, e := hex.DecodeString(txbodystr)
 	if e != nil {
 		result["err"] = "tx_body_signed data error."
 		return result
 	}
+
 	// parse tx
 	tx, _, e := transactions.ParseTransaction(txbody, 0)
 	if e != nil {
 		result["err"] = "ParseTransaction error."
 		return result
 	}
+
 	actionlist := tx.GetActionList()
 	actlen := len(actionlist)
 	if actlen != 2 && actlen != 3 {
 		result["err"] = "Action length error."
 		return result
 	}
+
 	// 检查余额
 	minbalance := tx.GetFee().Copy()
 
@@ -75,6 +78,7 @@ func (api *DeprecatedApiService) dexBuyConfirm(params map[string]string) map[str
 			return result
 		}
 	}
+
 	// 检查买卖方地址匹配
 	if seller1 == nil || seller2 == nil || seller1.NotEqual(seller2) {
 		result["err"] = "seller address not match."

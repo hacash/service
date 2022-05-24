@@ -17,11 +17,13 @@ func (api *DeprecatedApiService) getChannel(params map[string]string) map[string
 		result["err"] = "params ids must."
 		return result
 	}
+
 	idlist := strings.Split(idstr, ",")
 	if len(idlist) == 0 {
 		result["err"] = "params ids must."
 		return result
 	}
+
 	total_amount := fields.NewEmptyAmount()
 	for i := 0; i < len(idlist); i++ {
 		idstr := idlist[i]
@@ -30,6 +32,7 @@ func (api *DeprecatedApiService) getChannel(params map[string]string) map[string
 			result["fail"] = "id format error."
 			return result
 		}
+
 		chanid, e0 := hex.DecodeString(idstr)
 		if e0 != nil {
 			result["fail"] = "id format error."
@@ -37,14 +40,16 @@ func (api *DeprecatedApiService) getChannel(params map[string]string) map[string
 		}
 
 		state := api.blockchain.GetChainEngineKernel().StateRead()
-
 		store, _ := state.Channel(fields.ChannelId(chanid))
+
 		if store == nil {
 			result["fail"] = "not find."
 			return result
 		}
+
 		totalamt, _ := store.LeftAmount.Add(&store.RightAmount)
 		totalsat := store.LeftSatoshi.GetRealSatoshi() + store.RightSatoshi.GetRealSatoshi()
+
 		if len(idlist) == 1 {
 			// 只有一条数据则返回详情
 			iabtrs := map[uint8]string{
@@ -92,8 +97,10 @@ func (api *DeprecatedApiService) getChannel(params map[string]string) map[string
 			total_amount, _ = total_amount.Add(totalamt)
 		}
 	}
+
 	// 返回总计
 	result["total"] = strconv.Itoa(len(idlist))
 	result["total_amount"] = total_amount.ToFinString()
+
 	return result
 }

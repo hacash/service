@@ -12,13 +12,13 @@ import (
 
 // 修改交易池内的手续费报价
 func (api *DeprecatedApiService) quoteFee(params map[string]string) map[string]string {
-
 	result := make(map[string]string)
 	trsid, ok1 := params["txhash"]
 	if !ok1 {
 		result["err"] = "Param txhash must."
 		return result
 	}
+
 	var trshx []byte
 	if txhx, e := hex.DecodeString(trsid); e == nil && len(txhx) == 32 {
 		trshx = txhx
@@ -26,29 +26,34 @@ func (api *DeprecatedApiService) quoteFee(params map[string]string) map[string]s
 		result["err"] = "Transaction hash error."
 		return result
 	}
+
 	// 查询交易
 	tx, ok := api.txpool.CheckTxExistByHash(trshx)
 	if !ok || tx == nil {
 		result["err"] = "Not find transaction in txpool."
 		return result
 	}
+
 	// fee
 	feestr, ok2 := params["fee"]
 	if !ok2 {
 		result["err"] = "Param fee must."
 		return result
 	}
+
 	feeamt, e2 := fields.NewAmountFromFinString(feestr)
 	if e2 != nil {
 		result["err"] = "Param fee format error."
 		return result
 	}
+
 	// password
 	password_or_privatekey, ok3 := params["password"]
 	if !ok3 {
 		result["err"] = "param password must."
 		return result
 	}
+
 	var acc *account.Account = nil
 	privatekey, e2 := hex.DecodeString(password_or_privatekey)
 	if len(password_or_privatekey) == 64 && e2 == nil {
@@ -60,33 +65,38 @@ func (api *DeprecatedApiService) quoteFee(params map[string]string) map[string]s
 	} else {
 		acc = account.CreateAccountByPassword(password_or_privatekey)
 	}
+
 	// check
 	if fields.Address(acc.Address).NotEqual(tx.GetAddress()) {
 		result["err"] = "Tx fee address password error."
 		return result
 	}
+
 	// change fee
 	tx = tx.Clone()
 	tx.SetFee(feeamt)
+
 	// 私钥
 	allPrivateKeyBytes := make(map[string][]byte, 1)
 	allPrivateKeyBytes[string(acc.Address)] = acc.PrivateKey
+
 	// do sign
 	err3 := tx.FillNeedSigns(allPrivateKeyBytes, nil)
 	if err3 != nil {
 		result["err"] = err3.Error()
 		return result
 	}
+
 	// add to pool
 	err4 := api.txpool.AddTx(tx)
 	if err4 != nil {
 		result["err"] = err4.Error()
 		return result
 	}
+
 	// ok
 	result["status"] = "ok"
 	return result
-
 }
 
 // 通过 hx 获取交易简介
@@ -100,6 +110,7 @@ func (api *DeprecatedApiService) getTransactionIntro(params map[string]string) m
 		result["err"] = "param id must."
 		return result
 	}
+
 	var trshx []byte
 	if txhx, e := hex.DecodeString(trsid); e == nil && len(txhx) == 32 {
 		trshx = txhx
@@ -107,8 +118,8 @@ func (api *DeprecatedApiService) getTransactionIntro(params map[string]string) m
 		result["err"] = "transaction hash error."
 		return result
 	}
-	// 查询交易
 
+	// 查询交易
 	blkhei, trsresbytes, err := api.blockchain.GetChainEngineKernel().StateRead().ReadTransactionBytesByHash(trshx)
 	if err != nil {
 		result["err"] = err.Error()
@@ -274,6 +285,7 @@ func (api *DeprecatedApiService) getTransactionIntro(params map[string]string) m
 		actions_ary = append(actions_ary, actstr)
 	}
 	actions_strings = strings.Join(actions_ary, ",")
+
 	// 交易返回数据
 	txaddr := fields.Address(trsres.GetAddress())
 	var txfee = trsres.GetFee()

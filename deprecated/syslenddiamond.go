@@ -28,8 +28,8 @@ func (api *DeprecatedApiService) getSystemLendingDiamond(params map[string]strin
 		result["fail"] = "id length error."
 		return result
 	}
-	state := api.blockchain.GetChainEngineKernel().StateRead()
 
+	state := api.blockchain.GetChainEngineKernel().StateRead()
 	stoobj, _ := state.DiamondSystemLending(fields.DiamondSyslendId(dataid))
 	if stoobj == nil {
 		result["fail"] = "not find."
@@ -45,12 +45,14 @@ func (api *DeprecatedApiService) getSystemLendingDiamond(params map[string]strin
 	result["mortgage_time"] = fmt.Sprintf("%.1f days", float64(stoobj.BorrowPeriod)*10000/288)
 	result["diamonds"] = stoobj.MortgageDiamondList.SerializeHACDlistToCommaSplitString() // 钻石列表
 	result["loan_amount"] = fmt.Sprintf("ㄜ%d:248", stoobj.LoanTotalAmountMei)
+
 	// 显示归还状态
 	if stoobj.IsRansomed.Check() {
 		result["ransom_block_height"] = strconv.FormatUint(uint64(stoobj.RansomBlockHeight), 10)
 		result["ransom_amount"] = stoobj.RansomAmount.ToFinString()
 		result["ransom_address_if_public_operation"] = stoobj.RansomAddressIfPublicOperation.ShowReadableOrEmpty() // 如果存在则显示地址
 	}
+
 	// 返回
 	return result
 }
