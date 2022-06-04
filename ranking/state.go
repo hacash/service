@@ -35,53 +35,53 @@ func (r *Ranking) changeDiamondsUnsafe(addrstr string, diamonds string, addOrSub
 
 	diatable, hav1 := r.cache_update_diamonds[addrstr]
 	if !hav1 {
-		// 从 磁盘加载
+		// Load from disk
 		v, e := r.ldb.Get([]byte("ds"+addrstr), nil)
 		if e == nil {
 			diatable = v // load ok
 		}
 	}
 
-	// 更新
+	// to update
 	newdiabts := bytes.NewBuffer([]byte{})
 	for i := 0; i+6 <= len(diatable); i += 6 {
 		dian := diatable[i : i+6]
 		_, ishav := havdias[string(dian)]
 		if ishav {
-			// 先删掉
+			// Delete first
 			continue
 		}
-		// 本来的
+		// Original
 		newdiabts.Write(dian)
 	}
 
-	// 再添加回去
+	// Add back
 	if addOrSub {
 		for i := 0; i < len(alldiamonds); i++ {
 			newdiabts.Write([]byte(alldiamonds[i]))
 		}
 	}
 
-	// 更新
+	// to update
 	r.cache_update_diamonds[addrstr] = newdiabts.Bytes()
 	// ok
 }
 
-// 添加一个待更新地址
+// Add an address to be updated
 func (r *Ranking) addWaitUpdateAddressUnsafe(addrstr string) {
 	if len(addrstr) == 0 {
 		return
 	}
 	if _, have := r.wait_update_address_list[addrstr]; have {
-		return // 已经存在
+		return // Already exists
 	}
 	r.wait_update_address_num += 1
 	r.wait_update_address_list[addrstr] = true
-	// 是否通知更新
+	// Notify update
 	if r.wait_update_address_num == 50 {
 		if len(r.flushStateToDiskNotifyCh) == 0 {
 			go func() {
-				r.flushStateToDiskNotifyCh <- true // 通知
+				r.flushStateToDiskNotifyCh <- true // notice
 			}()
 		}
 	}

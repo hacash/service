@@ -7,82 +7,82 @@ import (
 	"strings"
 )
 
-// 输出 total supply 接口对象
+// Output total supply interface object
 func RenderTotalSupplyObject(totalsupply *stores.TotalSupply, isformatstring bool) (map[string]interface{}, map[string]string) {
 	var ifs = isformatstring
 	var object = make(map[string]interface{})
 	var objstr = make(map[string]string)
 
-	// 状态统计
+	// Status statistics
 	appendToUint64(object, objstr, "minted_diamond", uint64(totalsupply.Get(stores.TotalSupplyStoreTypeOfDiamond)), ifs)
 	appendToUint64(object, objstr, "transferred_bitcoin", uint64(totalsupply.Get(stores.TotalSupplyStoreTypeOfTransferBitcoin)), ifs)
-	// 钻石系统借贷，实时抵押中的钻石数量
+	// Diamond system loan, real-time mortgage of diamond quantity
 	appendToUint64(object, objstr, "syslend_diamond_in_pledge", uint64(totalsupply.Get(stores.TotalSupplyStoreTypeOfSystemLendingDiamondCurrentMortgageCount)), ifs)
-	// 比特币系统借贷，实时抵押中的比特币数量（统计数据为份数，一份 = 0.01BTC），转换成比特币数量
+	// Bitcoin system lending, the number of bitcoins in real-time mortgage (the statistical data is the number of copies, one copy = 0.01btc), converted into the number of bitcoins
 	appendToFloat64(object, objstr, "syslend_bitcoin_in_pledge", totalsupply.Get(stores.TotalSupplyStoreTypeOfSystemLendingBitcoinPortionCurrentMortgageCount)/100, ifs)
-	// 用户间借贷抵押钻石数量流水累计
+	// Daily accumulation of inter user loan mortgage diamond quantity
 	appendToUint64(object, objstr, "usrlend_mortgage_diamond_count", uint64(totalsupply.Get(stores.TotalSupplyStoreTypeOfUsersLendingCumulationDiamond)), ifs)
-	// 用户间借贷抵押比特币数量流水累计
+	// Daily accumulation of inter user loan mortgage bitcoin quantity
 	appendToUint64(object, objstr, "usrlend_mortgage_bitcoin_count", uint64(totalsupply.Get(stores.TotalSupplyStoreTypeOfUsersLendingCumulationBitcoin)), ifs)
-	// 用户间借贷借出HAC流水累计
+	// HAC flow accumulation of inter user loan and borrowing
 	appendToFloat64(object, objstr, "usrlend_loan_hac_count", totalsupply.Get(stores.TotalSupplyStoreTypeOfUsersLendingCumulationHacAmount), ifs)
 
-	// 统计 HAC 增发
+	// Statistical HAC additional issuance
 	block_reward,
 		channel_interest,
 		btcmove_subsidy,
 		syslend_diamond_loan_hac_count,
 		syslend_bitcoin_loan_hac_count :=
-		// 挖矿 + 通道利息 + 比特币转移增发
+		// Mining + channel interest + bitcoin transfer and issuance
 		totalsupply.Get(stores.TotalSupplyStoreTypeOfBlockReward),
 		totalsupply.Get(stores.TotalSupplyStoreTypeOfChannelInterest),
 		totalsupply.Get(stores.TotalSupplyStoreTypeOfBitcoinTransferUnlockSuccessed),
-		// 统计借贷相关增发
-		totalsupply.Get(stores.TotalSupplyStoreTypeOfSystemLendingDiamondCumulationLoanHacAmount), // 钻石系统借贷累计借出
-		totalsupply.Get(stores.TotalSupplyStoreTypeOfSystemLendingBitcoinPortionCumulationLoanHacAmount) // 比特币系统借贷累计借出
+		// Statistics of additional issuance related to lending
+		totalsupply.Get(stores.TotalSupplyStoreTypeOfSystemLendingDiamondCumulationLoanHacAmount), // Cumulative lending of diamond system loans
+		totalsupply.Get(stores.TotalSupplyStoreTypeOfSystemLendingBitcoinPortionCumulationLoanHacAmount) // Cumulative lending of debit and credit in bitcoin system
 
-	// 统计 HAC 减扣
+	// Statistical HAC deduction
 	syslend_diamond_repay_hac_count,
 		syslend_bitcoin_repay_hac_count :=
-		totalsupply.Get(stores.TotalSupplyStoreTypeOfSystemLendingDiamondCumulationRansomHacAmount), // 钻石系统借贷累计赎回
-		totalsupply.Get(stores.TotalSupplyStoreTypeOfSystemLendingBitcoinPortionCumulationRansomHacAmount) // 比特币系统借贷累计赎回
+		totalsupply.Get(stores.TotalSupplyStoreTypeOfSystemLendingDiamondCumulationRansomHacAmount), // Cumulative redemption of diamond system loans
+		totalsupply.Get(stores.TotalSupplyStoreTypeOfSystemLendingBitcoinPortionCumulationRansomHacAmount) // Cumulative redemption of debit and credit in bitcoin system
 
-	// 统计 HAC 销毁
+	// Statistical HAC destruction
 	burned_fee,
 		syslend_bitcoin_burning_interest,
 		usrlend_burning_interest :=
 		totalsupply.Get(stores.TotalSupplyStoreTypeOfBurningFee),
-		totalsupply.Get(stores.TotalSupplyStoreTypeOfSystemLendingBitcoinPortionBurningInterestHacAmount), // 比特币系统借贷销毁利息
-		totalsupply.Get(stores.TotalSupplyStoreTypeOfUsersLendingBurningOnePercentInterestHacAmount) // 用户借贷销毁1%利息
+		totalsupply.Get(stores.TotalSupplyStoreTypeOfSystemLendingBitcoinPortionBurningInterestHacAmount), // Bitcoin system loan destruction interest
+		totalsupply.Get(stores.TotalSupplyStoreTypeOfUsersLendingBurningOnePercentInterestHacAmount) // User loan destroyed 1% interest
 
-	// 增发
+	// Additional issue
 	appendToFloat64(object, objstr, "block_reward", block_reward, ifs)
 	appendToFloat64(object, objstr, "channel_interest", channel_interest, ifs)
 	appendToFloat64(object, objstr, "btcmove_subsidy", btcmove_subsidy, ifs)
-	appendToFloat64(object, objstr, "syslend_diamond_loan_hac_count", syslend_diamond_loan_hac_count, ifs)   // 钻石系统借贷借出HAC累计
-	appendToFloat64(object, objstr, "syslend_diamond_repay_hac_count", syslend_diamond_repay_hac_count, ifs) // 钻石系统借贷赎回HAC累计
-	appendToFloat64(object, objstr, "syslend_bitcoin_loan_hac_count", syslend_bitcoin_loan_hac_count, ifs)   // 比特币系统借贷借出HAC累计
-	appendToFloat64(object, objstr, "syslend_bitcoin_repay_hac_count", syslend_bitcoin_repay_hac_count, ifs) // 比特币系统借贷赎回HAC累计
+	appendToFloat64(object, objstr, "syslend_diamond_loan_hac_count", syslend_diamond_loan_hac_count, ifs)   // HAC accumulation of diamond system lending and borrowing
+	appendToFloat64(object, objstr, "syslend_diamond_repay_hac_count", syslend_diamond_repay_hac_count, ifs) // HAC accumulation of diamond system loan redemption
+	appendToFloat64(object, objstr, "syslend_bitcoin_loan_hac_count", syslend_bitcoin_loan_hac_count, ifs)   // HAC accumulation of debit and credit in bitcoin system
+	appendToFloat64(object, objstr, "syslend_bitcoin_repay_hac_count", syslend_bitcoin_repay_hac_count, ifs) // HAC accumulation of debit and credit redemption in bitcoin system
 
-	// 销毁
+	// Destruction
 	appendToFloat64(object, objstr, "burned_fee", burned_fee, ifs)
 	appendToFloat64(object, objstr, "syslend_bitcoin_burning_interest", syslend_bitcoin_burning_interest, ifs)
 	appendToFloat64(object, objstr, "usrlend_burning_interest", usrlend_burning_interest, ifs)
 
-	// 计算实时流通量
+	// Calculate real-time circulation
 	totalAddAmountNum := block_reward + channel_interest + btcmove_subsidy                        // 总增发
 	totalSubAmountNum := burned_fee + syslend_bitcoin_burning_interest + usrlend_burning_interest // 总销毁
 
-	// 借贷相关实时流通量统计
+	// Loan related real-time Circulation Statistics
 	totalAddAmountNum += syslend_diamond_loan_hac_count + syslend_bitcoin_loan_hac_count
 	totalSubAmountNum += syslend_diamond_repay_hac_count + syslend_bitcoin_repay_hac_count
 
-	// 实时流通量
+	// Real time circulation
 	current_circulation := totalAddAmountNum - totalSubAmountNum
 	appendToFloat64(object, objstr, "current_circulation", current_circulation, ifs)
 
-	// 统计
-	// 位于通道链中的HAC
+	// Statistics
+	// HAC in channel chain
 	located_in_channel := totalsupply.Get(stores.TotalSupplyStoreTypeOfLocatedHACInChannel)
 	channel_of_opening := totalsupply.Get(stores.TotalSupplyStoreTypeOfChannelOfOpening)
 	if located_in_channel < 0.00000001 {
@@ -91,11 +91,11 @@ func RenderTotalSupplyObject(totalsupply *stores.TotalSupply, isformatstring boo
 	appendToFloat64(object, objstr, "located_in_channel", located_in_channel, ifs)
 	appendToUint64(object, objstr, "channel_of_opening", uint64(channel_of_opening), ifs)
 
-	// 返回
+	// return
 	return object, objstr
 }
 
-// 输出格式
+// Output format
 func appendToUint64(object map[string]interface{}, objectString map[string]string, key string, num uint64, isformatstring bool) {
 	if isformatstring {
 		numstr := fmt.Sprintf("%d", num)
@@ -105,7 +105,7 @@ func appendToUint64(object map[string]interface{}, objectString map[string]strin
 	}
 }
 
-// 输出格式
+// Output format
 func appendToFloat64(object map[string]interface{}, objectString map[string]string, key string, num float64, isformatstring bool) {
 	if isformatstring {
 		numstr := strings.TrimSuffix(fmt.Sprintf("%.4f", num), ".0000")

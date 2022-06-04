@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-// 修改交易池内的手续费报价
+// Modify the service charge quotation in the trading pool
 func (api *DeprecatedApiService) quoteFee(params map[string]string) map[string]string {
 	result := make(map[string]string)
 	trsid, ok1 := params["txhash"]
@@ -27,7 +27,7 @@ func (api *DeprecatedApiService) quoteFee(params map[string]string) map[string]s
 		return result
 	}
 
-	// 查询交易
+	// Query transaction
 	tx, ok := api.txpool.CheckTxExistByHash(trshx)
 	if !ok || tx == nil {
 		result["err"] = "Not find transaction in txpool."
@@ -76,7 +76,7 @@ func (api *DeprecatedApiService) quoteFee(params map[string]string) map[string]s
 	tx = tx.Clone()
 	tx.SetFee(feeamt)
 
-	// 私钥
+	// Private key
 	allPrivateKeyBytes := make(map[string][]byte, 1)
 	allPrivateKeyBytes[string(acc.Address)] = acc.PrivateKey
 
@@ -99,7 +99,7 @@ func (api *DeprecatedApiService) quoteFee(params map[string]string) map[string]s
 	return result
 }
 
-// 通过 hx 获取交易简介
+// Get a brief introduction to the transaction through HX
 func (api *DeprecatedApiService) getTransactionIntro(params map[string]string) map[string]string {
 	result := make(map[string]string)
 
@@ -119,7 +119,7 @@ func (api *DeprecatedApiService) getTransactionIntro(params map[string]string) m
 		return result
 	}
 
-	// 查询交易
+	// Query transaction
 	blkhei, trsresbytes, err := api.blockchain.GetChainEngineKernel().StateRead().ReadTransactionBytesByHash(trshx)
 	if err != nil {
 		result["err"] = err.Error()
@@ -130,7 +130,7 @@ func (api *DeprecatedApiService) getTransactionIntro(params map[string]string) m
 		return result
 	}
 
-	// 是否仅仅判断是否存在
+	// Whether to just judge whether it exists
 	if is_only_check_exist && len(trsresbytes) > 0 {
 		result["ret"] = "0"
 		result["exist"] = "yes"
@@ -143,7 +143,7 @@ func (api *DeprecatedApiService) getTransactionIntro(params map[string]string) m
 		return result
 	}
 
-	// 解析 actions
+	// Resolve actions
 	var allactions = trsres.GetActionList()
 	var actions_ary []string
 	var actions_strings = ""
@@ -286,7 +286,7 @@ func (api *DeprecatedApiService) getTransactionIntro(params map[string]string) m
 	}
 	actions_strings = strings.Join(actions_ary, ",")
 
-	// 交易返回数据
+	// Transaction return data
 	txaddr := fields.Address(trsres.GetAddress())
 	var txfee = trsres.GetFee()
 	var txfeeminergot = trsres.GetFeeOfMinerRealReceived()
@@ -295,7 +295,7 @@ func (api *DeprecatedApiService) getTransactionIntro(params map[string]string) m
 		blkhei,
 		trsres.GetTimestamp(),
 		trsres.Type(),
-		txaddr.ToReadable(), // 主地址
+		txaddr.ToReadable(), // Primary address
 		txfee.ToFinString(),
 		txfeeminergot.ToFinString(),
 		trsres.GetTimestamp(),
@@ -308,7 +308,7 @@ func (api *DeprecatedApiService) getTransactionIntro(params map[string]string) m
 			hex.EncodeToString(trsresbytes))
 	}
 
-	// 收尾并返回
+	// Wrap up and return
 	result["jsondata"] += "}"
 	return result
 }

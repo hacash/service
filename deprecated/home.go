@@ -34,11 +34,11 @@ func (api *DeprecatedApiService) dealHome(response http.ResponseWriter, request 
 		return
 	}
 
-	// 矿工状态
+	// Miner status
 	var responseStrAry = []string{}
 
 	curheight := lastest.GetHeight()
-	// 出块统计
+	// Block out statistics
 	mint_num288dj := uint64(mint.AdjustTargetDifficultyNumberOfBlocks)
 	mint_eachtime := mint.EachBlockRequiredTargetTime
 	mint_eachtime_f := float32(mint_eachtime)
@@ -119,7 +119,7 @@ func (api *DeprecatedApiService) dealHome(response http.ResponseWriter, request 
 		(float32(cost288miao)/mint_eachtime_f),
 	))
 
-	// 交易池信息
+	// Transaction pool information
 	txpool := api.txpool
 	if pool, ok := txpool.(*memtxpool.MemTxPool); ok {
 		diamonds := ""

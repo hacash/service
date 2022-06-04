@@ -6,14 +6,14 @@ import (
 	"time"
 )
 
-// 扫描 rpc 接口
+// Scan RPC interface
 func (r *Ranking) scan() {
-	time.Sleep(time.Second * 3) // 3秒后开始扫描
-	// 循环扫描
+	time.Sleep(time.Second * 3) // Start scanning in 3 seconds
+	// Cyclic scanning
 	for {
 		err := r.scanOneBlock()
 		if err != nil {
-			// 接口返回错误，等待十秒
+			// The interface returns an error. Wait for 10 seconds
 			time.Sleep(time.Second * 10)
 		}
 	}
@@ -23,7 +23,7 @@ func (r *Ranking) scanOneBlock() error {
 	r.dataChangeLocker.Lock()
 	defer r.dataChangeLocker.Unlock()
 
-	// 开始更新
+	// Start update
 	var scanHeight = r.finish_scan_block_height + 1
 	if scanHeight%1000 == 0 {
 		fmt.Printf("scan block %d.\n", scanHeight)
@@ -32,11 +32,11 @@ func (r *Ranking) scanOneBlock() error {
 	blkUrl := fmt.Sprintf("/query?action=block_intro&unitmei=1&height=%d", scanHeight)
 	resbts1, e1 := HttpGetBytes(r.node_rpc_url + blkUrl)
 	if e1 != nil {
-		// 接口未准备好
+		// Interface not ready
 		return fmt.Errorf("rpc not yet")
 	}
 
-	// 获取交易数量
+	// Get transaction quantity
 	txs, e2 := jsonparser.GetInt(resbts1, "transaction_count")
 	if e2 != nil {
 		return fmt.Errorf("rpc not yet")
@@ -44,28 +44,28 @@ func (r *Ranking) scanOneBlock() error {
 
 	rwdaddrstr, _ := jsonparser.GetString(resbts1, "coinbase", "address")
 	if txs == 0 {
-		// 空区块，没有交易
+		// Empty block, no transaction
 		r.addWaitUpdateAddressUnsafe(rwdaddrstr)
-		// 标记本区块已经完成扫描
+		// Mark that this block has been scanned
 		r.finish_scan_block_height = scanHeight
-		return nil // 成功返回
+		return nil // Successful return
 	}
 
-	// 扫描交易
+	// Scan transactions
 	for txposi := 0; txposi < int(txs); txposi++ {
-		// 扫描HAC转账、BTC转账、钻石挖矿、钻石转账及钻石借贷相关的action
+		// Scan HAC transfer, BTC transfer, diamond mining, diamond transfer and diamond lending related actions
 		scanUrl := fmt.Sprintf("/query?action=scan_value_transfers&unitmei=1&height=%d&txposi=%d&kind=hsdl", scanHeight, txposi)
 		resbts, e1 := HttpGetBytes(r.node_rpc_url + scanUrl)
 		if e1 != nil {
-			return fmt.Errorf("rpc not yet") // 错误
+			return fmt.Errorf("rpc not yet") // error
 		}
 
 		mainAddrStr, e3 := jsonparser.GetString(resbts, "address")
 		if e3 != nil {
-			return fmt.Errorf("rpc not yet") // 错误
+			return fmt.Errorf("rpc not yet") // error
 		}
 
-		r.addWaitUpdateAddressUnsafe(mainAddrStr) // 待更新地址
+		r.addWaitUpdateAddressUnsafe(mainAddrStr) // Address to be updated
 		// actions
 		jsonparser.ArrayEach(resbts, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 			a1, _ := jsonparser.GetString(value, "from")
@@ -87,32 +87,32 @@ func (r *Ranking) scanOneBlock() error {
 			}
 
 			if len(v4) > 0 {
-				// 写入钻石更新
+				// Write diamond update
 				if len(v2) > 0 {
-					r.changeDiamondsUnsafe(v2, v4, true) // 挖到
+					r.changeDiamondsUnsafe(v2, v4, true) // Dig to
 				} else if len(l1) > 0 {
-					r.changeDiamondsUnsafe(l1, v4, false) // 抵押
+					r.changeDiamondsUnsafe(l1, v4, false) // mortgage
 				} else if len(l2) > 0 {
-					r.changeDiamondsUnsafe(l2, v4, true) // 赎回
+					r.changeDiamondsUnsafe(l2, v4, true) // redeem
 				} else {
 					from := mainAddrStr
 					if len(a1) > 0 {
 						from = a1
 					}
-					r.changeDiamondsUnsafe(from, v4, false) // 转出
+					r.changeDiamondsUnsafe(from, v4, false) // Transfer out
 					to := mainAddrStr
 					if len(a2) > 0 {
 						to = a2
 					}
-					r.changeDiamondsUnsafe(to, v4, true) // 收到
+					r.changeDiamondsUnsafe(to, v4, true) // received
 				}
 			}
 		}, "effective_actions")
 	}
 
-	// 标记本区块已经完成扫描
+	// Mark that this block has been scanned
 	r.finish_scan_block_height = scanHeight
 
-	// 成功返回
+	// Successful return
 	return nil
 }

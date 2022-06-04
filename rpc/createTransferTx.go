@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-// 创建价值转移交易
+// Create value transfer transaction
 func (api *RpcService) createValueTransferTx(r *http.Request, w http.ResponseWriter, bodybytes []byte) {
 	var err error
 
@@ -91,13 +91,13 @@ func (api *RpcService) createValueTransferTx(r *http.Request, w http.ResponseWri
 	var kinderr error
 	switch transferKind {
 	case "hacash":
-		// 转账 hac
+		// Transfer HAC
 		kinderr = appendActionSimpleTransferHacash(r, isUnitMei, allPrivateKeyBytes, mainAccount, newTrs)
 	case "satoshi":
-		// 转账 btc
+		// Transfer BTC
 		kinderr = appendActionSimpleTransferSatoshi(r, isUnitMei, allPrivateKeyBytes, mainAccount, newTrs)
 	case "diamond":
-		// 转账 diamond
+		// Transfer diamond
 		kinderr = appendActionTransferDiamond(r, isUnitMei, allPrivateKeyBytes, mainAccount, newTrs)
 	default:
 		kinderr = fmt.Errorf("not find transfer_kind <%s>", transferKind)
@@ -228,7 +228,7 @@ func appendActionTransferDiamond(r *http.Request, isUnitMei bool, allprikey map[
 	}
 
 	if diamonds.Count > 1 {
-		isMultiTrs = true // 大于一个批量转账
+		isMultiTrs = true // More than one batch transfer
 	}
 	var diamondOwnerAccount *account.Account = nil
 	// address
@@ -248,16 +248,16 @@ func appendActionTransferDiamond(r *http.Request, isUnitMei bool, allprikey map[
 		}
 	}
 
-	// 如果不传则为主地址
+	// If not, it will be the primary address
 	if diamondOwnerAccount == nil {
 		diamondOwnerAccount = mainAccount
 	} else {
-		// 加入签名私钥
+		// Add signature private key
 		allprikey[string(diamondOwnerAccount.Address)] = diamondOwnerAccount.PrivateKey
 	}
 
 	if len(allprikey) > 1 {
-		isMultiTrs = true // 主地址与钻石地址不一样时，为批量转移钻石
+		isMultiTrs = true // When the main address is different from the diamond address, the diamonds are transferred in batches
 	}
 
 	// to address
@@ -273,21 +273,21 @@ func appendActionTransferDiamond(r *http.Request, isUnitMei bool, allprikey map[
 
 	var actObj interfacev2.Action = nil
 	if isMultiTrs {
-		// 批量转账
+		// Batch transfer
 		actObj = &actions.Action_6_OutfeeQuantityDiamondTransfer{
 			FromAddress: diamondOwnerAccount.Address,
 			ToAddress:   *to_addr,
 			DiamondList: *diamonds,
 		}
 	} else {
-		// 单个转账
+		// Single transfer
 		actObj = &actions.Action_5_DiamondTransfer{
 			Diamond:   fields.DiamondName(diamonds.Diamonds[0]),
 			ToAddress: *to_addr,
 		}
 	}
 
-	// 添加 act
+	// Add act
 	tx.AppendAction(actObj)
 
 	// success

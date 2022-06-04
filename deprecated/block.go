@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-// 通过 高度 或 hx 获取区块简介
+// Obtain block profile by height or HX
 func (api *DeprecatedApiService) changeBlockReferHeight(params map[string]string) map[string]string {
 	result := make(map[string]string)
 
@@ -46,7 +46,7 @@ func (api *DeprecatedApiService) changeBlockReferHeight(params map[string]string
 		return result
 	}
 
-	// 更新
+	// to update
 	state := api.blockchain.GetChainEngineKernel().CurrentState().BlockStore()
 	err := state.UpdateSetBlockHashReferToHeight(tarblock.GetHeight(), tarblock.Hash())
 	if err != nil {
@@ -60,10 +60,10 @@ func (api *DeprecatedApiService) changeBlockReferHeight(params map[string]string
 
 }
 
-// 通过 高度 或 hx 获取区块简介
+// Obtain block profile by height or HX
 func (api *DeprecatedApiService) getBlockIntro(params map[string]string) map[string]string {
 	result := make(map[string]string)
-	var isgettxhxs = false // 是否获取区块交易hash列表
+	var isgettxhxs = false // Whether to obtain block transaction Hash list
 	if _, ok0 := params["gettrshxs"]; ok0 {
 		isgettxhxs = true
 	}
@@ -98,7 +98,7 @@ func (api *DeprecatedApiService) getBlockIntro(params map[string]string) map[str
 		result["ret"] = "1"
 		return result
 	}
-	// 解析区块
+	// Parsing block
 	var tarblock interfaces.Block
 	if isgettxhxs {
 		tarblock, _, err = blocks.ParseBlock(blockbytes, 0)
@@ -109,7 +109,7 @@ func (api *DeprecatedApiService) getBlockIntro(params map[string]string) map[str
 		result["err"] = err.Error()
 		return result
 	}
-	// 区块返回数据
+	// Block return data
 	result["jsondata"] = fmt.Sprintf(
 		`{"hash":"%s","height":%d,"prevhash":"%s","mrklroot":"%s","timestamp":%d,"txcount":%d,"reward":"%s"`,
 		hex.EncodeToString(blockhx),
@@ -118,13 +118,13 @@ func (api *DeprecatedApiService) getBlockIntro(params map[string]string) map[str
 		hex.EncodeToString(tarblock.GetMrklRoot()),
 		tarblock.GetTimestamp(),
 		tarblock.GetTransactionCount(),
-		coinbase.BlockCoinBaseReward(tarblock.GetHeight()).ToFinString(), // 奖励数量
+		coinbase.BlockCoinBaseReward(tarblock.GetHeight()).ToFinString(), // Number of awards
 	)
-	// 区块hx列表
+	// Block HX list
 	if isgettxhxs {
 		var blktxhxsary []string
 		var blktxhxsstr = ""
-		var rwdaddr fields.Address // 奖励地址
+		var rwdaddr fields.Address // Reward address
 		var rwdmsg string
 		for i, trs := range tarblock.GetTrsList() {
 			if i == 0 {
@@ -148,12 +148,12 @@ func (api *DeprecatedApiService) getBlockIntro(params map[string]string) map[str
 			blktxhxsstr,
 		)
 	}
-	// 收尾并返回
+	// Wrap up and return
 	result["jsondata"] += "}"
 	return result
 }
 
-// 获取最新区块高度
+// Get the latest block height
 func (api *DeprecatedApiService) getLastBlockHeight(params map[string]string) map[string]string {
 	result := make(map[string]string)
 
@@ -172,7 +172,7 @@ func (api *DeprecatedApiService) getLastBlockHeight(params map[string]string) ma
 	return result
 }
 
-// 获取区块摘要信息
+// Get block summary information
 func (api *DeprecatedApiService) getBlockAbstractList(params map[string]string) map[string]string {
 	result := make(map[string]string)
 	start, ok1 := params["start_height"]
@@ -191,7 +191,7 @@ func (api *DeprecatedApiService) getBlockAbstractList(params map[string]string) 
 		result["err"] = "start_height - end_height cannot more than 100"
 		return result
 	}
-	// 查询区块信息
+	// Query block information
 
 	store := api.blockchain.GetChainEngineKernel().StateRead().BlockStoreRead()
 
@@ -214,13 +214,13 @@ func (api *DeprecatedApiService) getBlockAbstractList(params map[string]string) 
 			result["err"] = e2.Error()
 			return result
 		}
-		// 解析矿工信息
+		// Analyze miner information
 		cbtx, _, e := transactions.ParseTransaction(blkbytes, coinbase_start_pos)
 		if e != nil {
 			result["err"] = e.Error()
 			return result
 		}
-		// 返回
+		// return
 		msg := cbtx.GetMessage().ValueShow()
 		jsondata = append(jsondata, fmt.Sprintf(
 			`{"hash":"%s","txs":%d,"time":%d,"height":%d,"nonce":%d,"bits":%d,"rewards":{"amount":"%s","address":"%s","message":"%s"}}`,
@@ -238,7 +238,7 @@ func (api *DeprecatedApiService) getBlockAbstractList(params map[string]string) 
 		//fmt.Println([]byte(coinbase.Message))
 		//fmt.Println(i, cbtx.GetAddress().ToReadable())
 	}
-	// 返回
+	// return
 	result["jsondata"] = `{"datas":[` + strings.Join(jsondata, ",") + `]}`
 	return result
 }

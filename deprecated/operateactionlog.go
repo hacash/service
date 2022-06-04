@@ -24,7 +24,7 @@ const (
 	tystrOpenLockbls = "lockbls open"
 )
 
-// 扫描区块 获取所有通道开启交易
+// Scan the block to obtain all channel opening transactions
 func (api *DeprecatedApiService) getAllOperateActionLogByBlockHeight(params map[string]string) map[string]string {
 	result := make(map[string]string)
 	block_height_str, ok1 := params["block_height"]
@@ -45,21 +45,21 @@ func (api *DeprecatedApiService) getAllOperateActionLogByBlockHeight(params map[
 		return result
 	}
 
-	// 判断区块高度
+	// Judge block height
 	if block_height <= 0 || block_height > lastest.GetHeight() {
 		result["err"] = "block height not find."
-		result["ret"] = "1" // 返回错误码
+		result["ret"] = "1" // Return error code
 		return result
 	}
 
-	// 查询区块
+	// Query block
 	tarblock, e := rpc.LoadBlockWithCache(api.backend.BlockChain().GetChainEngineKernel(), block_height)
 	if e != nil {
 		result["err"] = "read block data error."
 		return result
 	}
 
-	// 开始扫描区块
+	// Start scanning block
 	allOperateLogs := make([]string, 0, 4)
 	transactions := tarblock.GetTrsList()
 	for _, v := range transactions {
@@ -70,8 +70,8 @@ func (api *DeprecatedApiService) getAllOperateActionLogByBlockHeight(params map[
 		mainAddressString := v.GetAddress().ToReadable()
 		for _, act := range v.GetActionList() {
 			kid := act.Kind()
-			// 通道相关
-			if 2 == kid { // 开启通道
+			// Channel correlation
+			if 2 == kid { // Open channel
 				act := act.(*actions.Action_2_OpenPaymentChannel)
 				desstr := act.LeftAmount.ToFinString() +
 					"," + act.RightAmount.ToFinString()
@@ -80,13 +80,13 @@ func (api *DeprecatedApiService) getAllOperateActionLogByBlockHeight(params map[
 					act.LeftAddress, act.RightAddress,
 					desstr)
 
-			} else if 3 == kid { // 关闭通道
+			} else if 3 == kid { // Close channel
 				act := act.(*actions.Action_3_ClosePaymentChannel)
 				appendOperateActionLogEx(&allOperateLogs,
 					kid, tystrCloseClannel, act.ChannelId,
 					mainAddressString, "-", "")
 
-			} else if 12 == kid { // 关闭通道
+			} else if 12 == kid { // Close channel
 				act := act.(*actions.Action_12_ClosePaymentChannelBySetupAmount)
 				desstr := act.LeftAmount.ToFinString() +
 					"," + act.RightAmount.ToFinString()
@@ -95,8 +95,8 @@ func (api *DeprecatedApiService) getAllOperateActionLogByBlockHeight(params map[
 					act.LeftAddress, act.RightAddress,
 					desstr)
 			}
-			// 比特币转移和锁仓
-			if 7 == kid { // 比特币转移
+			// Bitcoin transfer and lock up
+			if 7 == kid { // Bitcoin transfer
 				act := act.(*actions.Action_7_SatoshiGenesis)
 				dataID := actions.GainLockblsIdByBtcMove(uint32(act.TransferNo))
 				desstr := fmt.Sprintf("move: %d BTC, reward: ㄜ%d:248",
@@ -107,7 +107,7 @@ func (api *DeprecatedApiService) getAllOperateActionLogByBlockHeight(params map[
 					act.OriginAddress.ToReadable(), "-",
 					desstr)
 
-			} else if 9 == kid { // 线性锁仓，创建
+			} else if 9 == kid { // Linear lock, creating
 				act := act.(*actions.Action_9_LockblsCreate)
 				desstr := fmt.Sprintf("lock: %s, release: %s, step: %d",
 					act.TotalStockAmount.ToFinString(),
@@ -118,8 +118,8 @@ func (api *DeprecatedApiService) getAllOperateActionLogByBlockHeight(params map[
 					act.PaymentAddress, act.MasterAddress,
 					desstr)
 			}
-			// 借贷相关
-			if 19 == kid { // 用户间借贷
+			// Loan related
+			if 19 == kid { // Inter user credit
 				act := act.(*actions.Action_19_UsersLendingCreate)
 				desstrs := make([]string, 0, 2)
 				if act.MortgageBitcoin.NotEmpty.Check() {
@@ -135,7 +135,7 @@ func (api *DeprecatedApiService) getAllOperateActionLogByBlockHeight(params map[
 					act.MortgagorAddress, act.LenderAddress,
 					"collateral: "+strings.Join(desstrs, ", "))
 
-			} else if 20 == kid { // 赎回或清算用户间借贷
+			} else if 20 == kid { // Redemption or liquidation of inter user loans
 				act := act.(*actions.Action_20_UsersLendingRansom)
 				desstr := fmt.Sprintf("redeem: %s", act.RansomAmount.ToFinString())
 				if act.RansomAmount.IsEmpty() {
@@ -146,7 +146,7 @@ func (api *DeprecatedApiService) getAllOperateActionLogByBlockHeight(params map[
 					mainAddressString, "-",
 					desstr)
 
-			} else if 15 == kid { // 钻石系统借贷 开启
+			} else if 15 == kid { // Diamond system loan on
 				act := act.(*actions.Action_15_DiamondsSystemLendingCreate)
 				desstr := fmt.Sprintf("mortgage: %d HACD, loan: %s, interest: %.1f%%",
 					act.MortgageDiamondList.Count,
@@ -157,7 +157,7 @@ func (api *DeprecatedApiService) getAllOperateActionLogByBlockHeight(params map[
 					mainAddressString, "-",
 					desstr)
 
-			} else if 16 == kid { // 钻石系统借贷 赎回
+			} else if 16 == kid { // Diamond system loan redemption
 				act := act.(*actions.Action_16_DiamondsSystemLendingRansom)
 				desstr := fmt.Sprintf("redeem: %s",
 					act.RansomAmount.ToFinString())
@@ -166,7 +166,7 @@ func (api *DeprecatedApiService) getAllOperateActionLogByBlockHeight(params map[
 					mainAddressString, "-",
 					desstr)
 
-			} else if 17 == kid { // 比特币系统借贷 开启
+			} else if 17 == kid { // Bitcoin system loan enabled
 				act := act.(*actions.Action_17_BitcoinsSystemLendingCreate)
 				desstr := fmt.Sprintf("mortgage:%.2f BTC, loan: %s, interest: %s",
 					float64(act.MortgageBitcoinPortion)/100,
@@ -177,7 +177,7 @@ func (api *DeprecatedApiService) getAllOperateActionLogByBlockHeight(params map[
 					mainAddressString, "-",
 					desstr)
 
-			} else if 18 == kid { // 比特币系统借贷 赎回
+			} else if 18 == kid { // Bitcoin system loan redemption
 				act := act.(*actions.Action_18_BitcoinsSystemLendingRansom)
 				desstr := fmt.Sprintf("redeem: %s",
 					act.RansomAmount.ToFinString())
@@ -194,12 +194,12 @@ func (api *DeprecatedApiService) getAllOperateActionLogByBlockHeight(params map[
 		datasstr = "\"" + datasstr + "\""
 	}
 
-	// 返回
+	// return
 	result["jsondata"] = `{"timestamp":` + strconv.FormatUint(tarblock.GetTimestamp(), 10) + `,"datas":[` + datasstr + `]}`
 	return result
 }
 
-// 添加日志条目
+// Add log entry
 func appendOperateActionLog(logary *[]string, kid uint16, tystr string, dataid []byte, addr1 fields.Address, addr2 fields.Address, describe string) {
 	appendOperateActionLogEx(logary, kid, tystr, dataid, addr1.ToReadable(), addr2.ToReadable(), describe)
 }

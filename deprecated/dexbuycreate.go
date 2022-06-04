@@ -100,7 +100,7 @@ func (api *DeprecatedApiService) dexBuyCreate(params map[string]string) map[stri
 	dmslist := strings.Split(dmstr, ",")
 	dmaddrs := make(map[string]int)
 	var diamondaddr fields.Address = nil
-	// 查询钻石列表
+	// Query diamond list
 	for _, v := range dmslist {
 		if false == x16rs.IsDiamondValueString(v) {
 			result["err"] = fmt.Sprintf("<%s> is not a diamond name.", v)
@@ -123,39 +123,39 @@ func (api *DeprecatedApiService) dexBuyCreate(params map[string]string) map[stri
 		dmaddrs[key] += 1
 	}
 
-	// 所有钻石必须属于同一个地址
+	// All diamonds must belong to the same address
 	if 1 != len(dmaddrs) {
 		result["err"] = fmt.Sprintf("all diamonds must belong to one single address.")
 		return result
 	}
 
-	// 创建点对点交易
+	// Create point-to-point transactions
 	tx, e := transactions.NewEmptyTransaction_2_Simple(*buyer)
 	if e != nil {
 		result["err"] = fmt.Sprintf("tx create error: ", e.Error())
 		return result
 	}
 	tx.SetFee(tx_fee)
-	// 平台手续费
+	// Platform service charge
 	if fee.IsNotEmpty() {
 		tx.AddAction(&actions.Action_1_SimpleToTransfer{
 			ToAddress: *feeaddr,
 			Amount:    *fee,
 		})
 	}
-	// 买钻付款
+	// Payment for purchase of drill
 	tx.AddAction(&actions.Action_1_SimpleToTransfer{
 		ToAddress: diamondaddr,
 		Amount:    *offer,
 	})
-	// 获得钻石
+	// Get diamonds
 	tx.AddAction(&actions.Action_6_OutfeeQuantityDiamondTransfer{
 		FromAddress: diamondaddr,
 		ToAddress:   *buyer,
 		DiamondList: *dm200list,
 	})
 
-	// 返回交易内容
+	// Return transaction content
 	txbody, e := tx.Serialize()
 	if e != nil {
 		result["err"] = fmt.Sprintf("tx Serialize error: ", e.Error())

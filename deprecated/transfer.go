@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-// 创建一普通转账交易
+// Create a common transfer transaction
 func (api *DeprecatedApiService) transferSimple(params map[string]string) map[string]string {
 	result := make(map[string]string)
 	password_or_privatekey, ok1 := params["password"]
@@ -38,7 +38,7 @@ func (api *DeprecatedApiService) transferSimple(params map[string]string) map[st
 		return result
 	}
 
-	// 私钥
+	// Private key
 	allPrivateKeyBytes := make(map[string][]byte, 1)
 	allPrivateKeyBytes[string(acc.Address)] = acc.PrivateKey
 	to_addr, e8 := fields.CheckReadableAddress(params["to"])
@@ -47,7 +47,7 @@ func (api *DeprecatedApiService) transferSimple(params map[string]string) map[st
 		return result
 	}
 
-	// 金额转换
+	// Amount conversion
 	amount, e6 := fields.NewAmountFromFinString(params["amount"])
 	if e6 != nil {
 		result["err"] = e6.Error()
@@ -59,7 +59,7 @@ func (api *DeprecatedApiService) transferSimple(params map[string]string) map[st
 		return result
 	}
 
-	// 创建普通转账交易
+	// Create a general transfer transaction
 	newTrs, e5 := transactions.NewEmptyTransaction_2_Simple(acc.Address)
 	if e5 != nil {
 		result["err"] = e5.Error()
@@ -75,7 +75,7 @@ func (api *DeprecatedApiService) transferSimple(params map[string]string) map[st
 		}
 		curtime = time.Unix(timebig.Int64(), 0)
 	}
-	newTrs.Timestamp = fields.BlockTxTimestamp(curtime.Unix()) // 使用当前时间戳
+	newTrs.Timestamp = fields.BlockTxTimestamp(curtime.Unix()) // Use current timestamp
 	newTrs.Fee = *fee                                          // set fee
 	tranact := actions.NewAction_1_SimpleToTransfer(*to_addr, amount)
 	newTrs.AppendAction(tranact)
@@ -87,7 +87,7 @@ func (api *DeprecatedApiService) transferSimple(params map[string]string) map[st
 		return result
 	}
 
-	// 返回交易
+	// Return transaction
 	result["txhash"] = hex.EncodeToString(newTrs.HashFresh())
 	txbody, e10 := newTrs.Serialize()
 	if e10 != nil {
@@ -99,12 +99,12 @@ func (api *DeprecatedApiService) transferSimple(params map[string]string) map[st
 	return result
 }
 
-// 查询交易确认状态
+// Query transaction confirmation status
 func (api *DeprecatedApiService) txStatus(params map[string]string) map[string]string {
 	result := make(map[string]string)
-	result["status"] = "" // 表示状态
+	result["status"] = "" // Indicates status
 
-	// 交易哈希
+	// Transaction hash
 	txhashstr, ok1 := params["txhash"]
 	if !ok1 {
 		result["err"] = "txhash must"
@@ -120,15 +120,15 @@ func (api *DeprecatedApiService) txStatus(params map[string]string) map[string]s
 	state := kernel.StateRead()
 	store := state.BlockStoreRead()
 
-	// 从交易池中读取
+	// Read from transaction pool
 	_, ok2 := api.txpool.CheckTxExistByHash(txhash)
 	if ok2 {
-		// 交易正在交易池内
-		result["status"] = "txpool" // 表示正在交易池
+		// Transaction is in the trading pool
+		result["status"] = "txpool" // Indicates that the transaction pool is in progress
 		return result
 	}
 
-	// 从区块数据中查询
+	// Query from block data
 	blkhei, txbody, e3 := state.ReadTransactionBytesByHash(txhash)
 	if e3 != nil {
 		result["err"] = e3.Error()
@@ -136,12 +136,12 @@ func (api *DeprecatedApiService) txStatus(params map[string]string) map[string]s
 	}
 
 	if txbody == nil {
-		result["status"] = "notfind" // 表示不存在
+		result["status"] = "notfind" // Indicates that does not exist
 		return result
 	}
 
-	// 存在并返回
-	result["status"] = "confirm" // 表示不存在
+	// Exist and return
+	result["status"] = "confirm" // Indicates that does not exist
 
 	lastest, _, e4 := kernel.LatestBlock()
 	if e4 != nil {
@@ -149,7 +149,7 @@ func (api *DeprecatedApiService) txStatus(params map[string]string) map[string]s
 		return result
 	}
 
-	// 查询区块hash
+	// Query block hash
 	tarblkhash, e5 := store.ReadBlockHashByHeight(uint64(blkhei))
 	if e5 != nil {
 		result["err"] = e5.Error()
@@ -157,9 +157,9 @@ func (api *DeprecatedApiService) txStatus(params map[string]string) map[string]s
 	}
 
 	confirm_height := lastest.GetHeight() - uint64(blkhei)
-	result["confirm_height"] = strconv.Itoa(int(confirm_height))    // 确认区块数
-	result["block_height"] = strconv.FormatUint(uint64(blkhei), 10) // 所属区块高度
-	result["block_hash"] = tarblkhash.ToHex()                       // 所属区块hash
+	result["confirm_height"] = strconv.Itoa(int(confirm_height))    // Confirm the number of blocks
+	result["block_height"] = strconv.FormatUint(uint64(blkhei), 10) // Block height
+	result["block_hash"] = tarblkhash.ToHex()                       // Block hash
 
 	return result
 }

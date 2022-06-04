@@ -33,7 +33,7 @@ func (api *DeprecatedApiService) showDiamondCreateTxs(params map[string]string) 
 				feeaddramt, _ := api.blockchain.GetChainEngineKernel().StateRead().Balance(tx.GetAddress())
 				status_code := 0 // ok
 				if feeaddramt == nil || feeaddramt.Hacash.LessThan(fee) {
-					status_code = 1 // 余额不足以支付手续费
+					status_code = 1 // The balance is insufficient to pay the service charge
 				}
 				number = int(dcact.Number)
 				jsondata = append(jsondata, fmt.Sprintf(`%d,"%s","%s","%s","%s","%s",%d`, i+1, tx.Hash().ToHex(), tx.GetAddress().ToReadable(),
@@ -69,7 +69,7 @@ func (api *DeprecatedApiService) getDiamond(params map[string]string) map[string
 		return result
 	}
 
-	// 迟确认
+	// Late confirmation
 	delayckn := uint32(0)
 	dcnstr, ok2 := params["delay_confirm"]
 	if ok2 {
@@ -84,7 +84,7 @@ func (api *DeprecatedApiService) getDiamond(params map[string]string) map[string
 	blockstore := state.BlockStoreRead()
 
 	if delayckn > 0 {
-		// 延迟检查
+		// Delay check
 		if dmnum, e := strconv.Atoi(dmstr); e == nil {
 			s1, _ := blockstore.ReadDiamondNameByNumber(uint32(dmnum) + delayckn)
 			if len(s1) != fields.DiamondNameSize {
@@ -142,7 +142,7 @@ func (api *DeprecatedApiService) getDiamond(params map[string]string) map[string
 func (api *DeprecatedApiService) getDiamondVisualGeneList(params map[string]string) map[string]string {
 	result := make(map[string]string)
 
-	// 查询
+	// query
 	state := api.blockchain.GetChainEngineKernel().StateRead()
 	blockstore := state.BlockStoreRead()
 
@@ -155,7 +155,7 @@ func (api *DeprecatedApiService) getDiamondVisualGeneList(params map[string]stri
 		limit_num = lmt
 	}
 	if limit_num > 50 {
-		limit_num = 50 // 最多50枚
+		limit_num = 50 // Up to 50
 	}
 
 	jsondata := `{"list":[`
@@ -186,7 +186,7 @@ func (api *DeprecatedApiService) getDiamondVisualGeneList(params map[string]stri
 
 	if ok0 && len(dianamestr) >= 6 {
 
-		// 按名称列表查询
+		// Query by name list
 		diamonds := strings.Split(dianamestr, ",")
 		dianum := 0
 		for _, v := range diamonds {
@@ -198,14 +198,14 @@ func (api *DeprecatedApiService) getDiamondVisualGeneList(params map[string]stri
 				appendOne(store)
 				dianum++
 				if dianum >= 50 {
-					break // 最多50枚
+					break // Up to 50
 				}
 			}
 		}
 
 	} else if ok1 && len(start_number) > 0 {
 
-		// 按翻页查询
+		// Query by page
 		start_number, ok1 = params["start_number"]
 		if !ok1 {
 			result["err"] = "params <start_number> must."

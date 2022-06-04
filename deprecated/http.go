@@ -85,7 +85,7 @@ func (api *DeprecatedApiService) RunHttpRpcService(port int) {
 	mux.HandleFunc("/operatehex", api.dealOperateHex) //设置访问的路由
 	portstr := strconv.Itoa(port)
 
-	// 设置监听的端口
+	// Set listening port
 	server := &http.Server{
 		Addr:    ":" + portstr,
 		Handler: mux,

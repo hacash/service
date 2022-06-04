@@ -12,7 +12,7 @@ import (
 
 func hashRateList(blockstore interfaces.BlockStoreRead, curheight uint64, allHistoryOr300Days bool, appendItem *big.Int) ([]string, error) {
 	var stepNum = 300
-	// 第一个附加
+	// First additional
 	var hsti = 0
 	if appendItem != nil {
 		hsti = 1
@@ -23,7 +23,7 @@ func hashRateList(blockstore interfaces.BlockStoreRead, curheight uint64, allHis
 	}
 
 	blockHeadMetaSize := uint32(blocks.BlockHeadSize + blocks.BlockMetaSizeV1)
-	// 历史三十天分布目标哈希率
+	// Historical 30 day distribution target hash rate
 	var allDivCut = big.NewInt(1)
 	var allMaxRate = big.NewInt(1)
 	var allHistoryRateStrs = make([]string, stepNum+hsti)
@@ -33,13 +33,13 @@ func hashRateList(blockstore interfaces.BlockStoreRead, curheight uint64, allHis
 		stepBlkHei = curheight/uint64(stepNum) - 1
 	}
 
-	// 第一个附加
+	// First additional
 	if appendItem != nil {
 		allMaxRate = appendItem
 		allHistoryRates[0] = appendItem
 	}
 
-	// 读取的
+	// Read
 	for i := 0; i < stepNum; i++ {
 		tarhei := curheight - (stepBlkHei * uint64(i))
 		//_, headbytes, err2 := blockstore.ReadBlockBytesLengthByHeight(tarhei, blockHeadMetaSize)
@@ -63,7 +63,7 @@ func hashRateList(blockstore interfaces.BlockStoreRead, curheight uint64, allHis
 		allHistoryRates[i+hsti] = targetHashWorth
 	}
 
-	// 截取计算，倒序
+	// Intercept calculation, reverse order
 	var idx = 0
 	for i := stepNum + hsti - 1; i >= 0; i-- {
 		rlrt := allHistoryRates[i]
@@ -102,6 +102,6 @@ func (api *DeprecatedApiService) hashRateCharts(params map[string]string) map[st
 	// ok
 	result["jsondata"] = `{"historys":[` + strings.Join(allHistory, ",") + `],"days30":[` + strings.Join(days30, ",") + `]}`
 
-	// 返回
+	// return
 	return result
 }

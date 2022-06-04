@@ -8,14 +8,14 @@ import (
 	"strings"
 )
 
-// 扫描区块 获取所有转账信息
+// Scan the block to obtain all transfer information
 func (api *DeprecatedApiService) getAllTransferLogByBlockHeight(params map[string]string) map[string]string {
 	result := make(map[string]string)
 
 	is_include_btc_hacd := false // 是否返回 btc 和 hacd 转账
 	_, is_include_btc_hacd = params["include_btc_hacd"]
 
-	// 扫描的区块高度
+	// Scanned block height
 	block_height_str, ok1 := params["block_height"]
 	if !ok1 {
 		result["err"] = "param block_height must."
@@ -34,21 +34,21 @@ func (api *DeprecatedApiService) getAllTransferLogByBlockHeight(params map[strin
 		return result
 	}
 
-	// 判断区块高度
+	// Judge block height
 	if block_height <= 0 || block_height > lastest.GetHeight() {
 		result["err"] = "block height not find."
-		result["ret"] = "1" // 返回错误码
+		result["ret"] = "1" // Return error code
 		return result
 	}
 
-	// 查询区块
+	// Query block
 	tarblock, e := rpc.LoadBlockWithCache(api.backend.BlockChain().GetChainEngineKernel(), block_height)
 	if e != nil {
 		result["err"] = "read block data error."
 		return result
 	}
 
-	// 开始扫描区块
+	// Start scanning block
 	allTransferLogs := make([]string, 0, 4)
 	transactions := tarblock.GetTrsList()
 	for _, v := range transactions {
@@ -56,7 +56,7 @@ func (api *DeprecatedApiService) getAllTransferLogByBlockHeight(params map[strin
 			continue
 		}
 		for _, act := range v.GetActionList() {
-			if 1 == act.Kind() { // 类型为HAC普通转账
+			if 1 == act.Kind() { // HAC ordinary transfer
 				fromAddr := v.GetAddress()
 				act_k1 := act.(*actions.Action_1_SimpleToTransfer)
 				allTransferLogs = append(allTransferLogs,
@@ -64,7 +64,7 @@ func (api *DeprecatedApiService) getAllTransferLogByBlockHeight(params map[strin
 						act_k1.ToAddress.ToReadable()+"|"+
 						act_k1.Amount.ToFinString(),
 				)
-			} else if 13 == act.Kind() { // 类型为HAC普通转账
+			} else if 13 == act.Kind() { // HAC ordinary transfer
 				toAddr := v.GetAddress()
 				act_k13 := act.(*actions.Action_13_FromTransfer)
 				allTransferLogs = append(allTransferLogs,
@@ -72,7 +72,7 @@ func (api *DeprecatedApiService) getAllTransferLogByBlockHeight(params map[strin
 						toAddr.ToReadable()+"|"+
 						act_k13.Amount.ToFinString(),
 				)
-			} else if 14 == act.Kind() { // 类型为HAC普通转账
+			} else if 14 == act.Kind() { // HAC ordinary transfer
 				act_k14 := act.(*actions.Action_14_FromToTransfer)
 				allTransferLogs = append(allTransferLogs,
 					act_k14.FromAddress.ToReadable()+"|"+
@@ -80,11 +80,11 @@ func (api *DeprecatedApiService) getAllTransferLogByBlockHeight(params map[strin
 						act_k14.Amount.ToFinString(),
 				)
 			}
-			// 是否返回 btc 和 HACD 转账
+			// Whether to return BTC and hacd transfer
 			if !is_include_btc_hacd {
-				continue // 不包含
+				continue // Not included
 			}
-			if 8 == act.Kind() { // BTC 转账
+			if 8 == act.Kind() { // BTC transfer
 				fromAddr := v.GetAddress()
 				act_k1 := act.(*actions.Action_8_SimpleSatoshiTransfer)
 				allTransferLogs = append(allTransferLogs,
@@ -92,14 +92,14 @@ func (api *DeprecatedApiService) getAllTransferLogByBlockHeight(params map[strin
 						act_k1.ToAddress.ToReadable()+"|"+
 						act_k1.Amount.ToString()+" SAT",
 				)
-			} else if 11 == act.Kind() { // BTC 转账
+			} else if 11 == act.Kind() { // BTC transfer
 				act_k13 := act.(*actions.Action_11_FromToSatoshiTransfer)
 				allTransferLogs = append(allTransferLogs,
 					act_k13.FromAddress.ToReadable()+"|"+
 						act_k13.ToAddress.ToReadable()+"|"+
 						act_k13.Amount.ToString()+" SAT",
 				)
-			} else if 5 == act.Kind() { // HACD 转账
+			} else if 5 == act.Kind() { // Hacd transfer
 				fromAddr := v.GetAddress()
 				act_k14 := act.(*actions.Action_5_DiamondTransfer)
 				allTransferLogs = append(allTransferLogs,
@@ -107,7 +107,7 @@ func (api *DeprecatedApiService) getAllTransferLogByBlockHeight(params map[strin
 						act_k14.ToAddress.ToReadable()+"|"+
 						"1 HACD",
 				)
-			} else if 6 == act.Kind() { // HACD 批量转账
+			} else if 6 == act.Kind() { // Hacd batch transfer
 				act_k14 := act.(*actions.Action_6_OutfeeQuantityDiamondTransfer)
 				allTransferLogs = append(allTransferLogs,
 					act_k14.FromAddress.ToReadable()+"|"+
@@ -124,7 +124,7 @@ func (api *DeprecatedApiService) getAllTransferLogByBlockHeight(params map[strin
 		datasstr = "\"" + datasstr + "\""
 	}
 
-	// 返回
+	// return
 	result["jsondata"] = `{"timestamp":` + strconv.FormatUint(tarblock.GetTimestamp(), 10) + `,"datas":[` + datasstr + `]}`
 	return result
 }

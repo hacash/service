@@ -6,9 +6,9 @@ import (
 	"strings"
 )
 
-// 查看账户余额
+// View account balance
 func (api *RpcService) balances(r *http.Request, w http.ResponseWriter, bodybytes []byte) {
-	// 地址列表
+	// Address list
 	addresslistStr := strings.Trim(CheckParamString(r, "address_list", ""), " ")
 	if len(addresslistStr) == 0 {
 		ResponseErrorString(w, "param address_list must give")
@@ -56,7 +56,7 @@ func (api *RpcService) balances(r *http.Request, w http.ResponseWriter, bodybyte
 		}
 	}
 
-	// 是否以枚为单位
+	// Is it in pieces
 	isUnitMei := CheckParamBool(r, "unitmei", false)
 	emptyAmt := fields.NewAmountSmall(0, 0)
 

@@ -57,7 +57,7 @@ func (api *DeprecatedApiService) dexSellConfirm(params map[string]string) map[st
 		return result
 	}
 
-	// 检查卖方是否全部拥有钻石
+	// Check whether the seller owns all diamonds
 	var seller fields.Address = nil
 	for _, v := range diamonds.Diamonds {
 		dia, e := state.Diamond(v)
@@ -72,7 +72,7 @@ func (api *DeprecatedApiService) dexSellConfirm(params map[string]string) map[st
 		seller = dia.Address
 	}
 
-	// 检查签名权限验证
+	// Check signature authority verification
 	signok, addr, e := signck.VerifySign()
 	if e != nil {
 		result["err"] = "signature verify error."
@@ -87,7 +87,7 @@ func (api *DeprecatedApiService) dexSellConfirm(params map[string]string) map[st
 		return result
 	}
 
-	// 数据
+	// data
 	result["seller"] = seller.ToReadable()
 	result["start_price"] = start_price.ToMeiString()
 	result["diamond_count"] = strconv.Itoa(int(diamonds.Count))

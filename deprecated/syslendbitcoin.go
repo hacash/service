@@ -37,7 +37,7 @@ func (api *DeprecatedApiService) getSystemLendingBitcoin(params map[string]strin
 		return result
 	}
 
-	// 返回详情
+	// Return details
 	result["is_ransomed"] = strconv.Itoa(int(stoobj.IsRansomed.Value()))
 	result["create_block_height"] = strconv.FormatUint(uint64(stoobj.CreateBlockHeight), 10)
 	result["main_address"] = stoobj.MainAddress.ToReadable()
@@ -45,18 +45,18 @@ func (api *DeprecatedApiService) getSystemLendingBitcoin(params map[string]strin
 	result["loan_amount"] = stoobj.LoanTotalAmount.ToFinString()
 	result["burned_interest_amount"] = stoobj.PreBurningInterestAmount.ToFinString()
 	rtlper := float64(stoobj.RealtimeTotalMortgageRatio) / 100
-	result["realtime_total_mortgage_ratio"] = fmt.Sprintf("%0.2f%%", rtlper) // 实时抵押比例
+	result["realtime_total_mortgage_ratio"] = fmt.Sprintf("%0.2f%%", rtlper) // Real time mortgage ratio
 	loanbei, pbi := coinbase.CalculationOfInterestBitcoinMortgageLoanAmount(rtlper)
-	result["realtime_interest_ratio"] = fmt.Sprintf("%0.2f%%", pbi/loanbei) // 实时利率
-	result["realtime_loan_ratio"] = fmt.Sprintf("%0.2f%%", loanbei*100)     // 实时可借贷倍数
+	result["realtime_interest_ratio"] = fmt.Sprintf("%0.2f%%", pbi/loanbei) // Real time interest rate
+	result["realtime_loan_ratio"] = fmt.Sprintf("%0.2f%%", loanbei*100)     // Real time loanable multiple
 
-	// 显示归还状态
+	// Show return status
 	if stoobj.IsRansomed.Check() {
 		result["ransom_block_height"] = strconv.FormatUint(uint64(stoobj.RansomBlockHeight), 10)
 		result["ransom_amount"] = stoobj.RansomAmount.ToFinString()
-		result["ransom_address_if_public_operation"] = stoobj.RansomAddressIfPublicOperation.ShowReadableOrEmpty() // 如果存在则显示地址
+		result["ransom_address_if_public_operation"] = stoobj.RansomAddressIfPublicOperation.ShowReadableOrEmpty() // Show address if present
 	}
 
-	// 返回
+	// return
 	return result
 }

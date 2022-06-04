@@ -34,7 +34,7 @@ func (api *DeprecatedApiService) getUserLending(params map[string]string) map[st
 		return result
 	}
 
-	// 返回详情
+	// Return details
 	result["is_ransomed"] = strconv.Itoa(int(stoobj.IsRansomed.Value()))
 	result["is_redemption_overtime"] = strconv.Itoa(int(stoobj.IsRedemptionOvertime.Value()))
 	result["is_public_redeemable"] = strconv.Itoa(int(stoobj.IsPublicRedeemable.Value()))
@@ -44,18 +44,18 @@ func (api *DeprecatedApiService) getUserLending(params map[string]string) map[st
 	result["lender_address"] = stoobj.LenderAddress.ToReadable()
 
 	result["mortgage_satoshi"] = strconv.FormatUint(uint64(stoobj.MortgageBitcoin.ValueSAT), 10)
-	result["mortgage_diamonds"] = stoobj.MortgageDiamondList.SerializeHACDlistToCommaSplitString() // 钻石列表
+	result["mortgage_diamonds"] = stoobj.MortgageDiamondList.SerializeHACDlistToCommaSplitString() // Diamond list
 	result["loan_amount"] = stoobj.LoanTotalAmount.ToFinString()
 	result["repay_amount"] = stoobj.AgreedRedemptionAmount.ToFinString()
 	result["burned_interest_amount"] = stoobj.PreBurningInterestAmount.ToFinString()
 
-	// 显示归还状态
+	// Show return status
 	if stoobj.IsRansomed.Check() {
 		result["ransom_block_height"] = strconv.FormatUint(uint64(stoobj.RansomBlockHeight), 10)
 		result["ransom_amount"] = stoobj.RansomAmount.ToFinString()
-		result["ransom_address"] = stoobj.RansomAddress.ToReadable() // 显示地址
+		result["ransom_address"] = stoobj.RansomAddress.ToReadable() // display address
 	}
 
-	// 返回
+	// return
 	return result
 }

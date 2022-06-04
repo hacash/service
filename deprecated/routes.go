@@ -12,47 +12,47 @@ var (
 )
 
 func (api *DeprecatedApiService) initRoutes() {
-	queryRoutes["balance"] = api.getBalance                       // 查询余额
-	queryRoutes["diamond"] = api.getDiamond                       // 查询钻石
-	queryRoutes["diamondcreate"] = api.showDiamondCreateTxs       // 显示钻石创建交易
-	queryRoutes["transferdiamonds"] = api.transferDiamondMultiple // 钻石批量转账
+	queryRoutes["balance"] = api.getBalance                       // Check the balance
+	queryRoutes["diamond"] = api.getDiamond                       // Query diamond
+	queryRoutes["diamondcreate"] = api.showDiamondCreateTxs       // Show diamond creation transactions
+	queryRoutes["transferdiamonds"] = api.transferDiamondMultiple // Diamond batch transfer
 
-	queryRoutes["channel"] = api.getChannel              // 查询通道
-	queryRoutes["lockbls"] = api.getLockBlsInfo          // 查询线性锁仓
-	queryRoutes["dialend"] = api.getSystemLendingDiamond // 查询钻石系统借贷
-	queryRoutes["btclend"] = api.getSystemLendingBitcoin // 查询比特币系统借贷
-	queryRoutes["usrlend"] = api.getUserLending          // 查询比特币系统借贷
+	queryRoutes["channel"] = api.getChannel              // Query channel
+	queryRoutes["lockbls"] = api.getLockBlsInfo          // Query linear lock
+	queryRoutes["dialend"] = api.getSystemLendingDiamond // Query diamond system loan
+	queryRoutes["btclend"] = api.getSystemLendingBitcoin // Query debit and credit of bitcoin system
+	queryRoutes["usrlend"] = api.getUserLending          // Query debit and credit of bitcoin system
 
-	queryRoutes["passwd"] = newAccountByPassword // 通过密码创建账户
-	queryRoutes["newacc"] = newAccount           // 随机创建账户
-	queryRoutes["createtx"] = api.transferSimple // 创建普通转账交易
-	queryRoutes["quotefee"] = api.quoteFee       // 修改交易池内的交易手续费
-	queryRoutes["txconfirm"] = api.txStatus      // 查询交易确认状态
-	queryRoutes["powpower"] = api.powPower       // 实时算力大小
+	queryRoutes["passwd"] = newAccountByPassword // Create account with password
+	queryRoutes["newacc"] = newAccount           // Random account creation
+	queryRoutes["createtx"] = api.transferSimple // Create a general transfer transaction
+	queryRoutes["quotefee"] = api.quoteFee       // Modify the transaction service charge in the trading pool
+	queryRoutes["txconfirm"] = api.txStatus      // Query transaction confirmation status
+	queryRoutes["powpower"] = api.powPower       // Real time calculation force
 
-	queryRoutes["hashrate"] = api.hashRate                   // 当前哈希率
-	queryRoutes["hashrate_charts"] = api.hashRateCharts      // 哈希率波动表
-	queryRoutes["hashrate_charts_v3"] = api.hashRateChartsV3 // 哈希率波动表
+	queryRoutes["hashrate"] = api.hashRate                   // Current hash rate
+	queryRoutes["hashrate_charts"] = api.hashRateCharts      // Hash rate fluctuation table
+	queryRoutes["hashrate_charts_v3"] = api.hashRateChartsV3 // Hash rate fluctuation table
 
-	queryRoutes["blocks"] = api.getBlockAbstractList                   // 查询区块信息
-	queryRoutes["lastblock"] = api.getLastBlockHeight                  // 查询最新区块高度
-	queryRoutes["blockintro"] = api.getBlockIntro                      // 查询区块简介
-	queryRoutes["changeblockreferheight"] = api.changeBlockReferHeight // 改变区块高度指针
-	queryRoutes["trsintro"] = api.getTransactionIntro                  // 查询交易简介
+	queryRoutes["blocks"] = api.getBlockAbstractList                   // Query block information
+	queryRoutes["lastblock"] = api.getLastBlockHeight                  // Query the latest block height
+	queryRoutes["blockintro"] = api.getBlockIntro                      // Query block introduction
+	queryRoutes["changeblockreferheight"] = api.changeBlockReferHeight // Change block height pointer
+	queryRoutes["trsintro"] = api.getTransactionIntro                  // Query transaction introduction
 
-	queryRoutes["getalltransferlogbyblockheight"] = api.getAllTransferLogByBlockHeight           // 扫描区块 获取所有转账信息
-	queryRoutes["getalloperateactionlogbyblockheight"] = api.getAllOperateActionLogByBlockHeight // 扫描区块 获取除转账以外的操作日志
+	queryRoutes["getalltransferlogbyblockheight"] = api.getAllTransferLogByBlockHeight           // Scan the block to obtain all transfer information
+	queryRoutes["getalloperateactionlogbyblockheight"] = api.getAllOperateActionLogByBlockHeight // Scan the block to obtain operation logs other than transfer
 
-	queryRoutes["getdiamondvisualgenelist"] = api.getDiamondVisualGeneList // 获取钻石外观基因列表
+	queryRoutes["getdiamondvisualgenelist"] = api.getDiamondVisualGeneList // Get diamond appearance gene list
 
-	queryRoutes["btcmovelog"] = api.getBtcMoveLogPageData // 获取比特币转移日志页数据
+	queryRoutes["btcmovelog"] = api.getBtcMoveLogPageData // Get bitcoin transfer log page data
 
-	queryRoutes["totalsupply"] = api.totalSupply // 总供应量
+	queryRoutes["totalsupply"] = api.totalSupply // Total supply
 
 	// dex
-	queryRoutes["dexbuycreate"] = api.dexBuyCreate     // 创建买单
-	queryRoutes["dexbuyconfirm"] = api.dexBuyConfirm   // 确认买单
-	queryRoutes["dexsellconfirm"] = api.dexSellConfirm // 确认卖单
+	queryRoutes["dexbuycreate"] = api.dexBuyCreate     // Create a bill
+	queryRoutes["dexbuyconfirm"] = api.dexBuyConfirm   // Confirm the bill
+	queryRoutes["dexsellconfirm"] = api.dexSellConfirm // Confirm sales order
 }
 
 func routeQueryRequest(action string, params map[string]string, w http.ResponseWriter, r *http.Request) {
@@ -61,7 +61,7 @@ func routeQueryRequest(action string, params map[string]string, w http.ResponseW
 		w.Header().Set("Content-Type", "text/json;charset=utf-8")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		if jsondata, ok := resobj["jsondata"]; ok {
-			w.Write([]byte(jsondata)) // 自定义的 jsondata 数据
+			w.Write([]byte(jsondata)) // Customized jsondata data
 		} else {
 			restxt, e1 := json.Marshal(resobj)
 			if e1 != nil {

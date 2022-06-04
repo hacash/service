@@ -7,13 +7,13 @@ import (
 	"strings"
 )
 
-// 查询通道
+// Query channel
 func (api *RpcService) channel(r *http.Request, w http.ResponseWriter, bodybytes []byte) {
 
-	// 是否以枚为单位
+	// Is it in pieces
 	isUnitMei := CheckParamBool(r, "unitmei", false)
 
-	// 通道ID
+	// Channel ID
 	channelIdStr := strings.Trim(CheckParamString(r, "id", ""), " ")
 	channelId, e := hex.DecodeString(channelIdStr)
 	if e != nil || len(channelId) != stores.ChannelIdLength {

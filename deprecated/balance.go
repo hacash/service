@@ -26,7 +26,7 @@ func (api *DeprecatedApiService) getBalance(params map[string]string) map[string
 	diamondstrs := ""
 	for k, addr := range addrs {
 		if k > 20 {
-			break // 一次最多查询20个
+			break // Up to 20 queries at a time
 		}
 		addrhash, e := fields.CheckReadableAddress(addr)
 		if e != nil {

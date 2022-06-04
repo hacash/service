@@ -14,7 +14,7 @@ func (api *DeprecatedApiService) addTxToPool(w http.ResponseWriter, value []byte
 		return
 	}
 
-	// 尝试加入交易池
+	// Try to join the trading pool
 	e3 := api.txpool.AddTx(tx.(interfaces.Transaction))
 	if e3 != nil {
 		w.Write([]byte("Transaction Add to MemTxPool error: \n" + e3.Error()))

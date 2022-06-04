@@ -9,7 +9,7 @@ import (
 
 type BalanceRankingItem struct {
 	Address       fields.Address
-	BlsUseFloat64 fields.Bool // 标记是否是浮点数
+	BlsUseFloat64 fields.Bool // Whether the tag is a floating point number
 	Balance       fields.VarUint8
 }
 
@@ -49,7 +49,7 @@ func (b *BalanceRankingItem) SetBalanceByFloat64(v float64) {
 	b.Balance = fields.VarUint8(uv)
 }
 
-// 序列化
+// serialize
 func ParseBalanceRankingItems(buf []byte) []*BalanceRankingItem {
 	newtable := []*BalanceRankingItem{}
 	blen := len(buf)
@@ -71,7 +71,7 @@ func ParseBalanceRankingItems(buf []byte) []*BalanceRankingItem {
 	return newtable
 }
 
-// 反序列化
+// Deserialization
 func SerializeBalanceRankingItems(table []*BalanceRankingItem) []byte {
 	buf := bytes.NewBuffer(nil)
 	for _, v := range table {
@@ -86,7 +86,7 @@ func SerializeBalanceRankingItems(table []*BalanceRankingItem) []byte {
 	return buf.Bytes()
 }
 
-// 更新排名表
+// Update ranking table
 func UpdateBalanceRankingTable(table []*BalanceRankingItem, insert *BalanceRankingItem, maxsize int) []*BalanceRankingItem {
 	istvzore := insert.GetBalance() == 0
 	tlen := len(table)
@@ -94,16 +94,16 @@ func UpdateBalanceRankingTable(table []*BalanceRankingItem, insert *BalanceRanki
 		return []*BalanceRankingItem{insert}
 	}
 
-	// 去重
+	// duplicate removal
 	if len(table) == 1 && table[0].Address.Equal(insert.Address) {
-		return []*BalanceRankingItem{insert} // 替换
+		return []*BalanceRankingItem{insert} // replace
 	}
 
 	var newtable []*BalanceRankingItem = nil
 	for i := 0; i < tlen; i++ {
 		li := table[i]
 		if li.Address.Equal(insert.Address) {
-			// 去掉当前这一个重复的
+			// Remove the current duplicate
 			newtable = []*BalanceRankingItem{}
 			newtable = append(newtable, table[0:i]...)
 			newtable = append(newtable, table[i+1:]...)
@@ -115,12 +115,12 @@ func UpdateBalanceRankingTable(table []*BalanceRankingItem, insert *BalanceRanki
 		table = newtable
 	}
 
-	// 如果值为零则直接删掉
+	// If the value is zero, delete it directly
 	if istvzore {
 		return table
 	}
 
-	// 插入
+	// insert
 	tlen = len(table)
 	istidx := int(-1)
 	b1 := insert.GetBalance()
@@ -132,28 +132,28 @@ func UpdateBalanceRankingTable(table []*BalanceRankingItem, insert *BalanceRanki
 			break
 		}
 		if b1 > b2 {
-			continue // 继续向上
+			continue // Continue up
 		}
 	}
 
-	// 插入
+	// insert
 	newtable = []*BalanceRankingItem{}
 	if istidx == tlen-1 {
-		// 加到末尾
+		// Add to end
 		newtable = append(newtable, table...)
 		newtable = append(newtable, insert)
 	} else if istidx == -1 {
-		// 加到第一位
+		// Add to first
 		newtable = append(newtable, insert)
 		newtable = append(newtable, table...)
 	} else {
-		// 插入中间
+		// Insert middle
 		newtable = append(newtable, table[0:istidx+1]...)
 		newtable = append(newtable, insert)
 		newtable = append(newtable, table[istidx+1:]...)
 	}
 
-	// 判断大小
+	// Judge size
 	if len(newtable) > maxsize {
 		newtable = newtable[0:maxsize]
 	}
