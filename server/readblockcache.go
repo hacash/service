@@ -12,7 +12,7 @@ import (
  */
 
 const (
-	rpcReadBlockCacheMaxSize int = 4 // 缓存区块的数量
+	rpcReadBlockCacheMaxSize int = 4 // Number of cache blocks
 )
 
 var (
@@ -20,7 +20,7 @@ var (
 	rpcReadBlockCacheMux   sync.Mutex
 )
 
-// 加载区块
+// Load block
 func LoadBlockWithCache(kernel interfaces.ChainEngine, height uint64) (interfaces.Block, error) {
 	rpcReadBlockCacheMux.Lock()
 	defer rpcReadBlockCacheMux.Unlock()

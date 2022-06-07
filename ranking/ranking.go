@@ -18,25 +18,25 @@ const (
 type Ranking struct {
 	// config
 	ldb_dir                    string
-	http_api_listen_port       int    // api 接口监听
-	balance_ranking_range      int    // 余额排名范围
-	node_rpc_url               string // 节点rpc接口地址： http://127.0.0.1:8083
-	flush_state_timeout_minute int    // 刷新余额间隔时间(分钟)
+	http_api_listen_port       int    // API interface listening
+	balance_ranking_range      int    // Balance ranking range
+	node_rpc_url               string // Node RPC interface address: http://127.0.0.1:8083
+	flush_state_timeout_minute int    // Refresh balance interval (minutes)
 
 	// ptr
 	ldb                      *leveldb.DB
 	dataChangeLocker         sync.Mutex
-	flushStateToDiskNotifyCh chan bool // 保存数据通知
+	flushStateToDiskNotifyCh chan bool // Save data notification
 
 	// data
-	finish_scan_block_height    uint64                // 已经扫描完成的区块id
-	hacash_balance_ranking_100  []*BalanceRankingItem // HAC 持仓前100
-	diamond_balance_ranking_100 []*BalanceRankingItem // HACD 持仓前100
-	satoshi_balance_ranking_100 []*BalanceRankingItem // BTC 持仓前100
+	finish_scan_block_height    uint64                // Scanned block ID
+	hacash_balance_ranking_100  []*BalanceRankingItem // Top 100 HAC positions
+	diamond_balance_ranking_100 []*BalanceRankingItem // Top 100 hacd positions
+	satoshi_balance_ranking_100 []*BalanceRankingItem // Top 100 BTC positions
 
-	wait_update_address_num  int               // 等待更新的 100 个地址
-	wait_update_address_list map[string]bool   // 等待更新的 100 个地址
-	cache_update_diamonds    map[string][]byte // 等待更新的地址和钻石表
+	wait_update_address_num  int               // 100 addresses waiting to be updated
+	wait_update_address_list map[string]bool   // 100 addresses waiting to be updated
+	cache_update_diamonds    map[string][]byte // Address and diamond table waiting to be updated
 
 	// current_circulation
 	current_circulation float64
@@ -83,7 +83,7 @@ func (r *Ranking) Start() {
 		os.Exit(0)
 	}
 
-	// 检查rpc
+	// Check RPC
 	_, err := HttpGetBytes(r.node_rpc_url)
 	if err != nil {
 		fmt.Println("[ERROR] check node_rpc_url error: ", err)

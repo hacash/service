@@ -18,7 +18,7 @@ func (api *DeprecatedApiService) hashRate(params map[string]string) map[string]s
 	curheight := lastest.GetHeight()
 	targetHashWorth := difficulty.CalculateDifficultyWorth(lastest.GetDifficulty())
 
-	// 当前实时哈希率： 4小时48区块所耗费的时间
+	// Current real-time hash rate: time spent on 48 blocks in 4 hours
 	curCalcBlockNum := int64(48)
 	prevHeight := int64(curheight) - curCalcBlockNum
 	if prevHeight > 0 {
@@ -33,7 +33,7 @@ func (api *DeprecatedApiService) hashRate(params map[string]string) map[string]s
 			return result
 		}
 		realEachBlockCostTimeSec := (lastest.GetTimestamp() - blk.GetTimestamp()) / uint64(curCalcBlockNum)
-		// 实时哈希率
+		// Real time hash rate
 		//fmt.Println("realEachBlockCostTimeSec:  ", realEachBlockCostTimeSec)
 		currentHashRate := new(big.Int).Div(targetHashWorth, new(big.Int).SetUint64(realEachBlockCostTimeSec))
 		result["current_hashrate"] = currentHashRate.String()
@@ -43,11 +43,11 @@ func (api *DeprecatedApiService) hashRate(params map[string]string) map[string]s
 		result["target_show"] = "0H/s"
 	}
 
-	// 本周期目标哈希率
+	// Target hash rate of this cycle
 	targetHashRate := new(big.Int).Div(targetHashWorth, new(big.Int).SetUint64(uint64(mint.EachBlockRequiredTargetTime)))
 	result["target_hashrate"] = targetHashRate.String()
 	result["target_show"] = difficulty.ConvertPowPowerToShowFormat(targetHashRate)
 
-	// 返回
+	// return
 	return result
 }

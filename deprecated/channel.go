@@ -51,7 +51,7 @@ func (api *DeprecatedApiService) getChannel(params map[string]string) map[string
 		totalsat := store.LeftSatoshi.GetRealSatoshi() + store.RightSatoshi.GetRealSatoshi()
 
 		if len(idlist) == 1 {
-			// 只有一条数据则返回详情
+			// Return details if there is only one piece of data
 			iabtrs := map[uint8]string{
 				0: "normal",
 				1: "left",
@@ -80,7 +80,7 @@ func (api *DeprecatedApiService) getChannel(params map[string]string) map[string
 				result["assert_satoshi"] = strconv.FormatUint(uint64(store.AssertSatoshi.GetRealSatoshi()), 10)
 			}
 			if store.Status == 2 || store.Status == 3 {
-				// 计算各自分配
+				// Calculate respective allocations
 				l1 := store.LeftFinalDistributionAmount
 				r1, _ := totalamt.Sub(&l1)
 				l2 := uint64(store.LeftFinalDistributionSatoshi.GetRealSatoshi())
@@ -93,12 +93,12 @@ func (api *DeprecatedApiService) getChannel(params map[string]string) map[string
 			}
 			return result
 		} else {
-			// 否则返回加总统计
+			// Otherwise, return to the summary statistics
 			total_amount, _ = total_amount.Add(totalamt)
 		}
 	}
 
-	// 返回总计
+	// Return total
 	result["total"] = strconv.Itoa(len(idlist))
 	result["total_amount"] = total_amount.ToFinString()
 

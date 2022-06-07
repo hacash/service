@@ -29,24 +29,24 @@ func (api *RpcService) blockIntro(r *http.Request, w http.ResponseWriter, bodyby
 		}
 	}
 
-	// 是否以枚为单位
+	// Is it in pieces
 	isUnitMei := CheckParamBool(r, "unitmei", false)
 
-	// 区块储存
+	// Block Storage 
 	blkstore := api.backend.BlockChain().GetChainEngineKernel().StateRead().BlockStoreRead()
 
 	// get coinbase
 	coinbase_start_pos := uint32(blocks.BlockHeadSize + blocks.BlockMetaSizeV1)
 	//readlen := coinbase_start_pos + uint32(1+21+3+16+1) // coinbase len
 
-	// 读取数目
+	// Number of reads
 	if len(blkhash) == 32 {
 		blkbytes, errread = blkstore.ReadBlockBytesByHash(blkhash)
 	} else {
 		blkhash, blkbytes, errread = blkstore.ReadBlockBytesByHeight(height)
 	}
 
-	// 检查错误
+	// Check for errors
 	if errread != nil {
 		ResponseError(w, errread)
 		return
@@ -57,14 +57,14 @@ func (api *RpcService) blockIntro(r *http.Request, w http.ResponseWriter, bodyby
 		return
 	}
 
-	// 解析区块信息
+	// Parsing block information
 	block, _, e2 := blocks.ParseExcludeTransactions(blkbytes, 0)
 	if e2 != nil {
 		ResponseError(w, e2)
 		return
 	}
 
-	// 解析矿工信息
+	// Analyze miner information
 	cbtx, _, e3 := transactions.ParseTransaction(blkbytes, coinbase_start_pos)
 	if e3 != nil {
 		ResponseError(w, e3)

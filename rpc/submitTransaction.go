@@ -7,12 +7,12 @@ import (
 	"net/http"
 )
 
-// 提交一笔交易
+// Submit a transaction
 func (api *RpcService) submitTransaction(r *http.Request, w http.ResponseWriter, bodybytes []byte) {
 
 	isHexData := CheckParamBool(r, "hexbody", false)
 
-	// hex字符串方式
+	// Hex string mode
 	if isHexData {
 		realbodybts, e2 := hex.DecodeString(string(bodybytes))
 		if e2 != nil {
@@ -24,21 +24,21 @@ func (api *RpcService) submitTransaction(r *http.Request, w http.ResponseWriter,
 		bodybytes = realbodybts
 	}
 
-	// 解析交易
+	// Parsing transactions
 	trs, _, e3 := transactions.ParseTransaction(bodybytes, 0)
 	if e3 != nil {
 		ResponseError(w, e3)
 		return
 	}
 
-	// 尝试加入交易池
+	// Try to join the trading pool
 	e4 := api.txpool.AddTx(trs.(interfaces.Transaction))
 	if e4 != nil {
 		ResponseError(w, e4)
 		return
 	}
 
-	// 返回成功
+	// Return success
 	// return: status = success
 	ResponseData(w, ResponseCreateData("status", "success"))
 

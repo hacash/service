@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-// 批量创建账户
+// Batch create account
 func (api *RpcService) createAccounts(r *http.Request, w http.ResponseWriter, bodybytes []byte) {
 	number := int(CheckParamUint64(r, "number", 1))
 	if number < 1 {

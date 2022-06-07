@@ -11,7 +11,7 @@ import (
 func (api *Ranking) startHttpApiService() {
 	port := api.http_api_listen_port
 	if port == 0 {
-		// 不启动服务器
+		// Do not start the server
 		fmt.Println("config http_api_listen_port==0 do not start http api service.")
 		return
 	}
@@ -22,10 +22,10 @@ func (api *Ranking) startHttpApiService() {
 		ResponseData(w, ResponseCreateData("service", "hacash ranking service"))
 	})
 
-	// 路由
+	// route
 	mux.HandleFunc("/query", api.apiHandleFunc)
 
-	// 设置监听的端口
+	// Set listening port
 	portstr := strconv.Itoa(port)
 	server := &http.Server{
 		Addr:    ":" + portstr,
@@ -99,10 +99,10 @@ func (api *Ranking) apiHandleFunc(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// 查询账户的钻石列表
+		// Query the diamond list of the account
 		diatable, hav1 := api.cache_update_diamonds[addrstr]
 		if !hav1 {
-			// 从 磁盘加载
+			// Load from disk
 			v, e := api.ldb.Get([]byte("ds"+addrstr), nil)
 			//fmt.Println(string(v), e)
 			if e == nil {
@@ -110,7 +110,7 @@ func (api *Ranking) apiHandleFunc(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		// 列出所有钻石
+		// List all diamonds
 		data := ResponseCreateData("diamonds", string(diatable))
 		ResponseData(w, data) // ok
 	} else {

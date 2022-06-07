@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-// 缓存
+// cache
 var hashRateChartsV3_lock sync.Mutex
 var hashRateChartsV3_lastreqtime *time.Time = nil
 var hashRateChartsV3_cachedata map[string]string = nil
@@ -21,22 +21,22 @@ func (api *DeprecatedApiService) hashRateChartsV3(params map[string]string) map[
 	hashRateChartsV3_lock.Lock()
 	var tn = time.Now()
 
-	// 检查缓存
+	// Check cache
 	if hashRateChartsV3_cachedata != nil && hashRateChartsV3_lastreqtime != nil {
 		if tn.Sub(*hashRateChartsV3_lastreqtime) < time.Minute*time.Duration(5) {
-			hashRateChartsV3_lock.Unlock() // 解锁
+			hashRateChartsV3_lock.Unlock() // Unlock
 			//fmt.Println("hashRateChartsV3_cachedata // 返回缓存")
-			return hashRateChartsV3_cachedata // 返回缓存
+			return hashRateChartsV3_cachedata // Return cache
 		}
 	}
 
 	hashRateChartsV3_lock.Unlock()
 
-	// 锁定
+	// locking
 	hashRateChartsV3_lock.Lock()
 	defer hashRateChartsV3_lock.Unlock()
 
-	// 正式开始计算
+	// Officially start calculation
 	lastest, _, err1 := api.blockchain.GetChainEngineKernel().LatestBlock()
 	if err1 != nil {
 		result["err"] = err1.Error()
@@ -48,10 +48,10 @@ func (api *DeprecatedApiService) hashRateChartsV3(params map[string]string) map[
 	curheight := lastest.GetHeight()
 	blockstore := api.blockchain.GetChainEngineKernel().StateRead().BlockStoreRead()
 
-	// 当前
+	// current
 	var currentHashWorth *big.Int = nil
 	targetHashWorth := difficulty.CalculateDifficultyWorth(lastest.GetDifficulty())
-	// 当前实时哈希率： 300区块所耗费的时间
+	// Current real-time hash rate: time spent on 300 blocks
 	curCalcBlockNum := int64(300)
 	prevHeight := int64(curheight) - curCalcBlockNum
 	if prevHeight > 0 {
@@ -66,7 +66,7 @@ func (api *DeprecatedApiService) hashRateChartsV3(params map[string]string) map[
 			return result
 		}
 		realEachBlockCostTimeSec := (lastest.GetTimestamp() - blk.GetTimestamp()) / uint64(curCalcBlockNum)
-		// 实时哈希率
+		// Real time hash rate
 		//fmt.Println("realEachBlockCostTimeSec:  ", realEachBlockCostTimeSec)
 		currentHashRate := new(big.Int).Div(targetHashWorth, new(big.Int).SetUint64(realEachBlockCostTimeSec))
 		currentHashWorth = new(big.Int).Mul(currentHashRate, new(big.Int).SetUint64(mint.EachBlockRequiredTargetTime))
@@ -77,7 +77,7 @@ func (api *DeprecatedApiService) hashRateChartsV3(params map[string]string) map[
 		jsondatastring += `,"current_show":"0H/s"`
 	}
 
-	// 本周期目标哈希率
+	// Target hash rate of this cycle
 	targetHashRate := new(big.Int).Div(targetHashWorth, new(big.Int).SetUint64(uint64(mint.EachBlockRequiredTargetTime)))
 	jsondatastring += `,"target_hashrate":` + targetHashRate.String()
 	jsondatastring += `,"target_show":"` + difficulty.ConvertPowPowerToShowFormat(targetHashRate) + `"`
@@ -94,10 +94,10 @@ func (api *DeprecatedApiService) hashRateChartsV3(params map[string]string) map[
 	// ok
 	result["jsondata"] = jsondatastring
 
-	// 缓存
-	hashRateChartsV3_lastreqtime = &tn  // 缓存时间
-	hashRateChartsV3_cachedata = result // 缓存数据
+	// cache
+	hashRateChartsV3_lastreqtime = &tn  // Cache time
+	hashRateChartsV3_cachedata = result // Cache data
 
-	// 返回
+	// return
 	return result
 }

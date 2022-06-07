@@ -55,7 +55,7 @@ func (api *RpcService) raiseTxFee(r *http.Request, w http.ResponseWriter, bodyby
 		return
 	}
 
-	// 查询交易
+	// Query transaction
 	tx, ok := api.txpool.CheckTxExistByHash(txhash)
 	if !ok || tx == nil {
 		ResponseErrorString(w, "Not find transaction in txpool.")
@@ -72,7 +72,7 @@ func (api *RpcService) raiseTxFee(r *http.Request, w http.ResponseWriter, bodyby
 	tx = tx.Clone()
 	tx.SetFee(feeAmt)
 
-	// 私钥
+	// Private key
 	allPrivateKeyBytes := make(map[string][]byte, 1)
 	allPrivateKeyBytes[string(feeAccount.Address)] = feeAccount.PrivateKey
 

@@ -10,9 +10,9 @@ import (
 	"strings"
 )
 
-// 查询钻石
+// Query diamond
 func (api *RpcService) diamond(r *http.Request, w http.ResponseWriter, bodybytes []byte) {
-	// 是否以枚为单位
+	// Is it in pieces
 	isUnitMei := CheckParamBool(r, "unitmei", false)
 
 	// 钻石 name or number

@@ -14,7 +14,7 @@ func newAccountByPassword(params map[string]string) map[string]string {
 		return result
 	}
 
-	// 创建账户
+	// Create account
 	acc := account.CreateAccountByPassword(passstr)
 
 	result["address"] = string(acc.AddressReadable)
@@ -24,10 +24,10 @@ func newAccountByPassword(params map[string]string) map[string]string {
 	return result
 }
 
-// 随机创建
+// Random creation
 func newAccount(params map[string]string) map[string]string {
 	result := make(map[string]string)
-	// 创建账户
+	// Create account
 	acc := account.CreateNewRandomAccount()
 
 	result["address"] = string(acc.AddressReadable)

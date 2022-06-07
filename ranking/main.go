@@ -23,7 +23,7 @@ func main() {
 
 	target_ini_file = sys.AbsDir(target_ini_file)
 
-	// 启动
+	// start-up
 	hinicnf, err := sys.LoadInicnf(target_ini_file)
 	if err != nil {
 		fmt.Println(err.Error())

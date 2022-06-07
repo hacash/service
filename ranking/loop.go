@@ -9,11 +9,11 @@ func (r *Ranking) loop() {
 
 		select {
 		case <-r.flushStateToDiskNotifyCh:
-			go r.flushStateToDisk() // 通知更新储存
+			go r.flushStateToDisk() // Notification update storage
 		case <-tickerFlushStateToDisk.C:
-			go r.flushStateToDisk() // 定期更新储存
+			go r.flushStateToDisk() // Regular update storage
 		case <-tickerUploadTotalSupply.C:
-			go r.loadTotalSupply() // 定期更新最大供应量
+			go r.loadTotalSupply() // Update the maximum supply regularly
 		}
 	}
 }

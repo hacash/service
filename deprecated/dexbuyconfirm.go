@@ -14,7 +14,7 @@ func (api *DeprecatedApiService) dexBuyConfirm(params map[string]string) map[str
 
 	state := api.blockchain.GetChainEngineKernel().StateRead()
 
-	// 是否检查所有签名
+	// Check all signatures
 	ckallsg, _ := params["check_all_sign"]
 	ischeckallsign := len(ckallsg) > 0
 
@@ -44,10 +44,10 @@ func (api *DeprecatedApiService) dexBuyConfirm(params map[string]string) map[str
 		return result
 	}
 
-	// 检查余额
+	// Check balance
 	minbalance := tx.GetFee().Copy()
 
-	// 解析 tx
+	// Parse TX
 	var buyer = tx.GetAddress()
 	var seller1 fields.Address = nil
 	var seller2 fields.Address = nil
@@ -55,7 +55,7 @@ func (api *DeprecatedApiService) dexBuyConfirm(params map[string]string) map[str
 	var totalprice *fields.Amount = nil
 	for _, v := range actionlist {
 		if act, ok := v.(*actions.Action_1_SimpleToTransfer); ok {
-			// 价格和卖家
+			// Price and seller
 			if totalprice == nil || act.Amount.MoreThan(totalprice) {
 				totalprice = &act.Amount
 				seller1 = act.ToAddress
@@ -67,7 +67,7 @@ func (api *DeprecatedApiService) dexBuyConfirm(params map[string]string) map[str
 				return result
 			}
 			if act.ToAddress.NotEqual(buyer) {
-				// 买卖家不匹配
+				// Buyer seller mismatch
 				result["err"] = "buyer address error."
 				return result
 			}
@@ -79,7 +79,7 @@ func (api *DeprecatedApiService) dexBuyConfirm(params map[string]string) map[str
 		}
 	}
 
-	// 检查买卖方地址匹配
+	// Check vendor address match
 	if seller1 == nil || seller2 == nil || seller1.NotEqual(seller2) {
 		result["err"] = "seller address not match."
 		return result
@@ -92,7 +92,7 @@ func (api *DeprecatedApiService) dexBuyConfirm(params map[string]string) map[str
 		return result
 	}
 
-	// 是否检查所有签名
+	// Check all signatures
 	if ischeckallsign {
 		signok, _ := tx.VerifyAllNeedSigns()
 		if signok == false {
@@ -101,7 +101,7 @@ func (api *DeprecatedApiService) dexBuyConfirm(params map[string]string) map[str
 		}
 	}
 
-	// 检查买方余额
+	// Check buyer balance
 	realbls, e := state.Balance(buyer)
 	if e != nil || realbls == nil {
 		result["err"] = "buyer get balance error."
@@ -112,7 +112,7 @@ func (api *DeprecatedApiService) dexBuyConfirm(params map[string]string) map[str
 		return result
 	}
 
-	// 检查卖方是否全部拥有钻石
+	// Check whether the seller owns all diamonds
 	for _, v := range diamonds.Diamonds {
 		dia, e := state.Diamond(v)
 		if e != nil {
@@ -125,7 +125,7 @@ func (api *DeprecatedApiService) dexBuyConfirm(params map[string]string) map[str
 		}
 	}
 
-	// 数据
+	// data
 	result["tx_hash"] = tx.Hash().ToHex()
 	result["buyer"] = buyer.ToReadable()
 	result["seller"] = seller1.ToReadable()

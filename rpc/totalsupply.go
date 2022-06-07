@@ -18,7 +18,7 @@ func (api *RpcService) totalSupply(r *http.Request, w http.ResponseWriter, bodyb
 
 	var data = make(map[string]interface{})
 
-	// 读取流通量统计
+	// Read Circulation Statistics
 	data, _ = rpc.RenderTotalSupplyObject(ttspl, false)
 
 	// ok

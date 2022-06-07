@@ -6,13 +6,13 @@ import (
 )
 
 func (r *Ranking) init() error {
-	// 供应量
+	// Supply
 	e1 := r.loadTotalSupply()
 	if e1 != nil {
 		fmt.Println(e1)
 	}
 
-	// 完成扫描的区块高度
+	// Block height of completed scan
 	v, e := r.ldb.Get([]byte(DBKeyFinishScanBlockHeight), nil)
 	//fmt.Println(v, e)
 	if e == nil && len(v) == 5 {
@@ -23,7 +23,7 @@ func (r *Ranking) init() error {
 		}
 	}
 
-	// 三张余额表
+	// Three balance sheets
 	v1, e1 := r.ldb.Get([]byte(DBKeyHacashBalanceRanking100), nil)
 	if e1 == nil && len(v1) >= 21 {
 		list1 := ParseBalanceRankingItems(v1)

@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// 保存数据到磁盘
+// Save data to disk
 func (r *Ranking) flushStateToDisk() error {
 	r.dataChangeLocker.Lock()
 	defer r.dataChangeLocker.Unlock()
@@ -16,7 +16,7 @@ func (r *Ranking) flushStateToDisk() error {
 	tt1 := r.wait_update_address_num
 	tt2 := len(r.cache_update_diamonds)
 
-	// 查询余额，更新排名表
+	// Query balance and update ranking table
 	if r.wait_update_address_num > 0 {
 		alladdrstrs := make([]string, 0)
 		alladdrs := make([][]string, 0)
@@ -34,21 +34,21 @@ func (r *Ranking) flushStateToDisk() error {
 			alladdrs[ci] = append(alladdrs[ci], i)
 		}
 
-		// 每100个地址请求一次接口
+		// Interface request every 100 addresses
 		for k := 0; k < len(alladdrstrs); k++ {
 			addrstrs := strings.TrimLeft(alladdrstrs[k], ",")
 			addrs := alladdrs[k]
-			// 读取rpc
+			// Read RPC
 			blsUrl := fmt.Sprintf("/query?action=balances&unitmei=1&address_list=%s", addrstrs)
 			resbts1, e1 := HttpGetBytes(r.node_rpc_url + blsUrl)
 			if e1 != nil {
 				fmt.Println(e1)
 				//os.Exit(0)
-				// 接口未准备好
+				// Interface not ready
 				return fmt.Errorf("rpc not yet")
 			}
 
-			// 依次更新余额表
+			// Update balance table in sequence
 			k1 := 0
 			jsonparser.ArrayEach(resbts1, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 				d, _ := jsonparser.GetInt(value, "diamond")
@@ -62,14 +62,14 @@ func (r *Ranking) flushStateToDisk() error {
 				item2.SetBalanceByUint64(uint64(s))
 				item3 := NewBalanceRankingItem(addrs[k1], true)
 				item3.SetBalanceByFloat64(float64(h))
-				// 更新
+				// to update
 				r.diamond_balance_ranking_100 = UpdateBalanceRankingTable(r.diamond_balance_ranking_100, item1, r.balance_ranking_range)
 				r.satoshi_balance_ranking_100 = UpdateBalanceRankingTable(r.satoshi_balance_ranking_100, item2, r.balance_ranking_range)
 				r.hacash_balance_ranking_100 = UpdateBalanceRankingTable(r.hacash_balance_ranking_100, item3, r.balance_ranking_range)
 				k1++
 			}, "list")
 
-			// 保存余额表
+			// Save balance table
 			tb1 := SerializeBalanceRankingItems(r.hacash_balance_ranking_100)
 			r.ldb.Put([]byte(DBKeyHacashBalanceRanking100), tb1, nil)
 			tb2 := SerializeBalanceRankingItems(r.diamond_balance_ranking_100)
@@ -81,22 +81,22 @@ func (r *Ranking) flushStateToDisk() error {
 	r.wait_update_address_list = make(map[string]bool)
 	r.wait_update_address_num = 0
 
-	// 更新钻石表
+	// Update diamond table
 	for i, v := range r.cache_update_diamonds {
 		//fmt.Println("更新钻石表", i, string(v))
 		r.ldb.Put([]byte("ds"+i), v, nil)
 	}
-	r.cache_update_diamonds = make(map[string][]byte, 0) // 重设
+	r.cache_update_diamonds = make(map[string][]byte, 0) // rebuild
 
-	// 保存扫描区块记录
+	// Save scan block record
 	hei := fields.BlockHeight(r.finish_scan_block_height)
 	heibts, _ := hei.Serialize()
 	r.ldb.Put([]byte(DBKeyFinishScanBlockHeight), heibts, nil)
 
-	// 通知通道重设
+	// Notification channel reset
 	//r.flushStateToDiskNotifyCh
 
-	// 打印消息
+	// Print message
 	fmt.Printf("flush height %d state %d, %d addresses , top max:", r.finish_scan_block_height, tt1, tt2)
 	if len(r.hacash_balance_ranking_100) > 0 {
 		it := r.hacash_balance_ranking_100[0]
@@ -114,6 +114,6 @@ func (r *Ranking) flushStateToDisk() error {
 	}
 	fmt.Printf(".\n")
 
-	// 成功
+	// success
 	return nil
 }
