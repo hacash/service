@@ -60,6 +60,51 @@ func (api *DeprecatedApiService) changeBlockReferHeight(params map[string]string
 
 }
 
+func (api *DeprecatedApiService) getBlockDataOfHex(params map[string]string) map[string]string {
+	result := make(map[string]string)
+
+	blkid, ok1 := params["id"]
+	if !ok1 {
+		result["err"] = "param id must."
+		return result
+	}
+
+	store := api.blockchain.GetChainEngineKernel().StateRead().BlockStoreRead()
+
+	var blockhx = []byte{}
+	var blockbytes = []byte{}
+	if blkhei, err := strconv.ParseUint(blkid, 10, 0); err == nil {
+		blockhx, blockbytes, err = store.ReadBlockBytesByHeight(blkhei)
+		if err != nil {
+			result["err"] = err.Error()
+			return result
+		}
+	} else if bhx, e := hex.DecodeString(blkid); e == nil && len(bhx) == fields.HashSize {
+		blockhx = bhx
+		blockbytes, err = store.ReadBlockBytesByHash(bhx)
+		if err != nil {
+			result["err"] = err.Error()
+			return result
+		}
+	}
+	// if not find
+	if blockbytes == nil || len(blockbytes) == 0 {
+		result["err"] = "block id <" + blkid + "> not find."
+		result["ret"] = "1"
+		return result
+	}
+
+	// Block return data
+	result["jsondata"] = fmt.Sprintf(
+		`{"hash":"%s","data":"%s"}`,
+		hex.EncodeToString(blockhx),
+		hex.EncodeToString(blockbytes),
+	)
+
+	return result
+
+}
+
 // Obtain block profile by height or HX
 func (api *DeprecatedApiService) getBlockIntro(params map[string]string) map[string]string {
 	result := make(map[string]string)

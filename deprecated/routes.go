@@ -37,6 +37,7 @@ func (api *DeprecatedApiService) initRoutes() {
 	queryRoutes["blocks"] = api.getBlockAbstractList                   // Query block information
 	queryRoutes["lastblock"] = api.getLastBlockHeight                  // Query the latest block height
 	queryRoutes["blockintro"] = api.getBlockIntro                      // Query block introduction
+	queryRoutes["blockdatahex"] = api.getBlockDataOfHex                // Query block body data
 	queryRoutes["changeblockreferheight"] = api.changeBlockReferHeight // Change block height pointer
 	queryRoutes["trsintro"] = api.getTransactionIntro                  // Query transaction introduction
 
