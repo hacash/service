@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/hacash/core/actions"
+	"github.com/hacash/core/blocks"
 	"github.com/hacash/core/fields"
 	"github.com/hacash/core/stores"
 	"github.com/hacash/core/transactions"
@@ -17,10 +18,13 @@ import (
 func (api *DeprecatedApiService) showDiamondCreateTxs(params map[string]string) map[string]string {
 	result := make(map[string]string)
 
+	_, isunitmei := params["unitmei"]
 	txs := api.txpool.GetDiamondCreateTxs(-1)
 
+	var kernel = api.backend.BlockChain().GetChainEngineKernel()
+
 	var number int = 1
-	diamd, _ := api.backend.BlockChain().GetChainEngineKernel().StateRead().ReadLastestDiamond()
+	diamd, _ := kernel.StateRead().ReadLastestDiamond()
 	if diamd != nil {
 		number = int(diamd.Number) + 1
 	}
@@ -30,14 +34,14 @@ func (api *DeprecatedApiService) showDiamondCreateTxs(params map[string]string) 
 		for _, act := range tx.GetActionList() {
 			if dcact, ok := act.(*actions.Action_4_DiamondCreate); ok {
 				fee := tx.GetFee()
-				feeaddramt, _ := api.blockchain.GetChainEngineKernel().StateRead().Balance(tx.GetAddress())
+				feeaddramt, _ := kernel.StateRead().Balance(tx.GetAddress())
 				status_code := 0 // ok
 				if feeaddramt == nil || feeaddramt.Hacash.LessThan(fee) {
 					status_code = 1 // The balance is insufficient to pay the service charge
 				}
 				number = int(dcact.Number)
 				jsondata = append(jsondata, fmt.Sprintf(`%d,"%s","%s","%s","%s","%s",%d`, i+1, tx.Hash().ToHex(), tx.GetAddress().ToReadable(),
-					dcact.Diamond, dcact.Address.ToReadable(), fee.ToFinString(), status_code))
+					dcact.Diamond, dcact.Address.ToReadable(), fee.ToMeiOrFinString(isunitmei), status_code))
 				break
 			}
 			if i >= 100 {
@@ -47,22 +51,35 @@ func (api *DeprecatedApiService) showDiamondCreateTxs(params map[string]string) 
 	}
 
 	perhei := 0
-	lastest, _, _ := api.backend.BlockChain().GetChainEngineKernel().LatestBlock()
+	acution_start_time := uint64(0)
+	lastest, _, _ := kernel.LatestBlock()
 	if lastest != nil {
-		perhei = (int(lastest.GetHeight()) + 5) / 5 * 5
+		perhei = int(lastest.GetHeight()) / 5 * 5
+		// get acution time
+		if perhei > 0 {
+			_, bdbts, _ := kernel.StateRead().BlockStoreRead().ReadBlockBytesByHeight(uint64(perhei))
+			if bdbts != nil {
+				blk, _, _ := blocks.ParseBlockHead(bdbts, 0)
+				if blk != nil {
+					acution_start_time = blk.GetTimestamp()
+				}
+			}
+		}
+		perhei += 5
 	}
 
 	liststr := strings.Join(jsondata, "],[")
 	if len(liststr) > 0 {
 		liststr = "[" + liststr + "]"
 	}
-	result["jsondata"] = `{"period":` + strconv.Itoa(perhei) + `,"number":` + strconv.Itoa(number) + `,"datas":[` + liststr + `]}`
+	result["jsondata"] = `{"acution_start_time":` + strconv.FormatUint(acution_start_time, 10) + `,"period":` + strconv.Itoa(perhei) + `,"number":` + strconv.Itoa(number) + `,"datas":[` + liststr + `]}`
 
 	return result
 }
 
 func (api *DeprecatedApiService) getDiamond(params map[string]string) map[string]string {
 	result := make(map[string]string)
+	_, isunitmei := params["unitmei"]
 	dmstr, ok1 := params["name"]
 	if !ok1 {
 		result["err"] = "params name must."
@@ -132,8 +149,12 @@ func (api *DeprecatedApiService) getDiamond(params map[string]string) map[string
 	result["number"] = strconv.Itoa(int(store.Number))
 	result["miner_address"] = store.MinerAddress.ToReadable()
 	result["custom_message"] = store.CustomMessage.ToHex()
-	result["approx_fee_offer"] = store.GetApproxFeeOffer().ToFinString()
-	result["average_burn_price"] = "ㄜ" + strconv.FormatUint(uint64(store.AverageBidBurnPrice), 10) + ":248"
+	result["approx_fee_offer"] = store.GetApproxFeeOffer().ToMeiOrFinString(isunitmei)
+	if isunitmei {
+		result["average_burn_price"] = strconv.FormatUint(uint64(store.AverageBidBurnPrice), 10) + ".0"
+	} else {
+		result["average_burn_price"] = "ㄜ" + strconv.FormatUint(uint64(store.AverageBidBurnPrice), 10) + ":248"
+	}
 	result["visual_gene"] = store.VisualGene.ToHex()
 
 	return result

@@ -69,6 +69,8 @@ func (api *DeprecatedApiService) getBlockDataOfHex(params map[string]string) map
 		return result
 	}
 
+	isbody, _ := params["body"]
+
 	store := api.blockchain.GetChainEngineKernel().StateRead().BlockStoreRead()
 
 	var blockhx = []byte{}
@@ -95,11 +97,15 @@ func (api *DeprecatedApiService) getBlockDataOfHex(params map[string]string) map
 	}
 
 	// Block return data
-	result["jsondata"] = fmt.Sprintf(
-		`{"hash":"%s","data":"%s"}`,
-		hex.EncodeToString(blockhx),
-		hex.EncodeToString(blockbytes),
-	)
+	if len(isbody) > 0 {
+		result["jsondata"] = hex.EncodeToString(blockbytes)
+	} else {
+		result["jsondata"] = fmt.Sprintf(
+			`{"hash":"%s","data":"%s"}`,
+			hex.EncodeToString(blockhx),
+			hex.EncodeToString(blockbytes),
+		)
+	}
 
 	return result
 
