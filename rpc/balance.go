@@ -57,7 +57,11 @@ func (api *RpcService) balances(r *http.Request, w http.ResponseWriter, bodybyte
 	}
 
 	// Is it in pieces
-	isUnitMei := CheckParamBool(r, "unitmei", false)
+	unitName := CheckParamString(r, "unit", "") // mei、zhu、shuo、ai、miao
+	if CheckParamBool(r, "unitmei", false) {
+		unitName = "mei"
+	}
+
 	emptyAmt := fields.NewAmountSmall(0, 0)
 
 	// read
@@ -72,9 +76,9 @@ func (api *RpcService) balances(r *http.Request, w http.ResponseWriter, bodybyte
 
 		if actAllKinds || actKindHacash {
 			if bls != nil {
-				item["hacash"] = bls.Hacash.ToMeiOrFinString(isUnitMei)
+				item["hacash"] = bls.Hacash.ToUnitString(unitName)
 			} else {
-				item["hacash"] = emptyAmt.ToMeiOrFinString(isUnitMei)
+				item["hacash"] = emptyAmt.ToUnitString(unitName)
 			}
 		}
 

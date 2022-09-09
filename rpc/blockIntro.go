@@ -30,9 +30,12 @@ func (api *RpcService) blockIntro(r *http.Request, w http.ResponseWriter, bodyby
 	}
 
 	// Is it in pieces
-	isUnitMei := CheckParamBool(r, "unitmei", false)
+	unitName := CheckParamString(r, "unit", "") // mei、zhu、shuo、ai、miao
+	if CheckParamBool(r, "unitmei", false) {
+		unitName = "mei"
+	}
 
-	// Block Storage 
+	// Block Storage
 	blkstore := api.backend.BlockChain().GetChainEngineKernel().StateRead().BlockStoreRead()
 
 	// get coinbase
@@ -90,7 +93,7 @@ func (api *RpcService) blockIntro(r *http.Request, w http.ResponseWriter, bodyby
 	var coinbaseitem = map[string]interface{}{}
 	coinbaseitem["address"] = cbtx.GetAddress().ToReadable()
 	rewardAmt := coinbase.BlockCoinBaseReward(blockHeight)
-	coinbaseitem["reward"] = rewardAmt.ToMeiOrFinString(isUnitMei)
+	coinbaseitem["reward"] = rewardAmt.ToUnitString(unitName)
 	data["coinbase"] = coinbaseitem
 
 	// return

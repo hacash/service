@@ -11,7 +11,10 @@ import (
 func (api *RpcService) channel(r *http.Request, w http.ResponseWriter, bodybytes []byte) {
 
 	// Is it in pieces
-	isUnitMei := CheckParamBool(r, "unitmei", false)
+	unitName := CheckParamString(r, "unit", "") // mei、zhu、shuo、ai、miao
+	if CheckParamBool(r, "unitmei", false) {
+		unitName = "mei"
+	}
 
 	// Channel ID
 	channelIdStr := strings.Trim(CheckParamString(r, "id", ""), " ")
@@ -40,9 +43,9 @@ func (api *RpcService) channel(r *http.Request, w http.ResponseWriter, bodybytes
 	retdata := ResponseCreateData("id", channelIdStr)
 	retdata["status"] = channel.Status
 	retdata["left_address"] = channel.LeftAddress.ToReadable()
-	retdata["left_amount"] = channel.LeftAmount.ToMeiOrFinString(isUnitMei)
+	retdata["left_amount"] = channel.LeftAmount.ToUnitString(unitName)
 	retdata["right_address"] = channel.RightAddress.ToReadable()
-	retdata["right_amount"] = channel.RightAmount.ToMeiOrFinString(isUnitMei)
+	retdata["right_amount"] = channel.RightAmount.ToUnitString(unitName)
 	retdata["reuse_version"] = channel.ReuseVersion
 	retdata["lock_block"] = channel.ArbitrationLockBlock
 

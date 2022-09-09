@@ -13,7 +13,10 @@ import (
 // Query diamond
 func (api *RpcService) diamond(r *http.Request, w http.ResponseWriter, bodybytes []byte) {
 	// Is it in pieces
-	isUnitMei := CheckParamBool(r, "unitmei", false)
+	unitName := CheckParamString(r, "unit", "") // mei、zhu、shuo、ai、miao
+	if CheckParamBool(r, "unitmei", false) {
+		unitName = "mei"
+	}
 
 	// 钻石 name or number
 	diamondValue := strings.Trim(CheckParamString(r, "name", ""), " ")
@@ -62,7 +65,7 @@ func (api *RpcService) diamond(r *http.Request, w http.ResponseWriter, bodybytes
 	retdata := ResponseCreateData("number", diamondSto.Number)
 	retdata["name"] = diamondValue
 	retdata["miner_address"] = diamondSto.MinerAddress.ToReadable()
-	retdata["approx_fee_offer"] = bidfee.ToMeiOrFinString(isUnitMei)
+	retdata["approx_fee_offer"] = bidfee.ToUnitString(unitName)
 	retdata["nonce"] = hex.EncodeToString(diamondSto.Nonce)
 	retdata["custom_message"] = hex.EncodeToString(diamondSto.CustomMessage)
 	retdata["contain_block_height"] = diamondSto.ContainBlockHeight

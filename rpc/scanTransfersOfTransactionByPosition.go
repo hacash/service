@@ -31,7 +31,10 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 	}
 
 	// Is it in pieces
-	isUnitMei := CheckParamBool(r, "unitmei", false)
+	unitName := CheckParamString(r, "unit", "") // mei、zhu、shuo、ai、miao
+	if CheckParamBool(r, "unitmei", false) {
+		unitName = "mei"
+	}
 
 	// kind = hsd
 	kindStr := strings.ToLower(CheckParamString(r, "kind", ""))
@@ -119,8 +122,8 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 	txfeepay := tx.GetFee()
 	txfeegot := tx.GetFeeOfMinerRealReceived()
 	retdata["hash"] = hex.EncodeToString(txhash)
-	retdata["feepay"] = txfeepay.ToMeiOrFinString(isUnitMei)
-	retdata["feegot"] = txfeegot.ToMeiOrFinString(isUnitMei)
+	retdata["feepay"] = txfeepay.ToUnitString(unitName)
+	retdata["feegot"] = txfeegot.ToUnitString(unitName)
 	retdata["address"] = tx.GetAddress().ToReadable()
 	retdata["height"] = height // block height
 	retdata["timestamp"] = tx.GetTimestamp()
@@ -133,18 +136,18 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 		if tarAct, ok := act.(*actions.Action_1_SimpleToTransfer); ok && (actAllKinds || actKindHacash) {
 
 			item["to"] = tarAct.ToAddress.ToReadable()
-			item["hacash"] = tarAct.Amount.ToMeiOrFinString(isUnitMei)
+			item["hacash"] = tarAct.Amount.ToUnitString(unitName)
 
 		} else if tarAct, ok := act.(*actions.Action_13_FromTransfer); ok && (actAllKinds || actKindHacash) {
 
 			item["from"] = tarAct.FromAddress.ToReadable()
-			item["hacash"] = tarAct.Amount.ToMeiOrFinString(isUnitMei)
+			item["hacash"] = tarAct.Amount.ToUnitString(unitName)
 
 		} else if tarAct, ok := act.(*actions.Action_14_FromToTransfer); ok && (actAllKinds || actKindHacash) {
 
 			item["from"] = tarAct.FromAddress.ToReadable()
 			item["to"] = tarAct.ToAddress.ToReadable()
-			item["hacash"] = tarAct.Amount.ToMeiOrFinString(isUnitMei)
+			item["hacash"] = tarAct.Amount.ToUnitString(unitName)
 
 		} else if tarAct, ok := act.(*actions.Action_7_SatoshiGenesis); ok && (actAllKinds || actKindSatoshi) {
 
@@ -191,9 +194,9 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 				item["satoshi"] = tarAct.MortgageBitcoin.ValueSAT
 			}
 			if kindHacashLending {
-				item["lender"] = tarAct.LenderAddress.ToReadable()                           // creditor
-				item["charge"] = tarAct.PreBurningInterestAmount.ToMeiOrFinString(isUnitMei) // 1% interest on system destruction
-				item["hacash"] = tarAct.LoanTotalAmount.ToMeiOrFinString(isUnitMei)          // Lent HAC
+				item["lender"] = tarAct.LenderAddress.ToReadable()                      // creditor
+				item["charge"] = tarAct.PreBurningInterestAmount.ToUnitString(unitName) // 1% interest on system destruction
+				item["hacash"] = tarAct.LoanTotalAmount.ToUnitString(unitName)          // Lent HAC
 			}
 
 		} else if tarAct, ok := act.(*actions.Action_20_UsersLendingRansom); ok && (kindDiamondLending || kindSatoshiLending || kindHacashLending) {
@@ -213,8 +216,8 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 				item["satoshi"] = ldobj.MortgageBitcoin.ValueSAT
 			}
 			if kindHacashLending {
-				item["lender"] = ldobj.LenderAddress.ToReadable()                // creditor
-				item["hacash"] = tarAct.RansomAmount.ToMeiOrFinString(isUnitMei) // HAC returned (zero in case of self detention)
+				item["lender"] = ldobj.LenderAddress.ToReadable()           // creditor
+				item["hacash"] = tarAct.RansomAmount.ToUnitString(unitName) // HAC returned (zero in case of self detention)
 			}
 
 		} else if tarAct, ok := act.(*actions.Action_15_DiamondsSystemLendingCreate); ok && (kindDiamondLending || kindHacashLending) {
@@ -225,7 +228,7 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 				item["diamonds"] = tarAct.MortgageDiamondList.SerializeHACDlistToCommaSplitString()
 			}
 			if kindHacashLending { // HAC borrowed from the system
-				item["hacash"] = tarAct.LoanTotalAmount.ToMeiOrFinString(isUnitMei)
+				item["hacash"] = tarAct.LoanTotalAmount.ToUnitString(unitName)
 			}
 
 		} else if tarAct, ok := act.(*actions.Action_16_DiamondsSystemLendingRansom); ok && (kindDiamondLending || kindHacashLending) {
@@ -242,7 +245,7 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 				item["diamonds"] = ldobj.MortgageDiamondList.SerializeHACDlistToCommaSplitString()
 			}
 			if kindHacashLending { // HAC returned
-				item["hacash"] = tarAct.RansomAmount.ToMeiOrFinString(isUnitMei)
+				item["hacash"] = tarAct.RansomAmount.ToUnitString(unitName)
 			}
 
 		} else if tarAct, ok := act.(*actions.Action_17_BitcoinsSystemLendingCreate); ok && (kindSatoshiLending || kindHacashLending) {
@@ -253,8 +256,8 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 				item["satoshi"] = uint64(tarAct.MortgageBitcoinPortion) * 100 * 10000 // Unit: 0.01btc
 			}
 			if kindHacashLending { // HAC borrowed from the system
-				item["hacash"] = tarAct.LoanTotalAmount.ToMeiOrFinString(isUnitMei)
-				item["charge"] = tarAct.PreBurningInterestAmount.ToMeiOrFinString(isUnitMei) // Interest on system pre destruction
+				item["hacash"] = tarAct.LoanTotalAmount.ToUnitString(unitName)
+				item["charge"] = tarAct.PreBurningInterestAmount.ToUnitString(unitName) // Interest on system pre destruction
 			}
 
 		} else if tarAct, ok := act.(*actions.Action_18_BitcoinsSystemLendingRansom); ok && (kindSatoshiLending || kindHacashLending) {
@@ -271,7 +274,7 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 				item["satoshi"] = uint64(ldobj.MortgageBitcoinPortion) * 100 * 10000 // Unit: 0.01btc
 			}
 			if kindHacashLending { // HAC returned
-				item["hacash"] = tarAct.RansomAmount.ToMeiOrFinString(isUnitMei)
+				item["hacash"] = tarAct.RansomAmount.ToUnitString(unitName)
 			}
 
 		} else {
