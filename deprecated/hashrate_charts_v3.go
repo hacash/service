@@ -23,7 +23,7 @@ func (api *DeprecatedApiService) hashRateChartsV3(params map[string]string) map[
 
 	// Check cache
 	if hashRateChartsV3_cachedata != nil && hashRateChartsV3_lastreqtime != nil {
-		if tn.Sub(*hashRateChartsV3_lastreqtime) < time.Minute*time.Duration(5) {
+		if tn.Sub(*hashRateChartsV3_lastreqtime) < time.Minute*time.Duration(55) {
 			hashRateChartsV3_lock.Unlock() // Unlock
 			//fmt.Println("hashRateChartsV3_cachedata // 返回缓存")
 			return hashRateChartsV3_cachedata // Return cache
@@ -50,7 +50,7 @@ func (api *DeprecatedApiService) hashRateChartsV3(params map[string]string) map[
 
 	// current
 	var currentHashWorth *big.Int = nil
-	targetHashWorth := difficulty.CalculateDifficultyWorth(lastest.GetDifficulty())
+	targetHashWorth := difficulty.CalculateDifficultyWorthByHeight(lastest.GetHeight(), lastest.GetDifficulty())
 	// Current real-time hash rate: time spent on 300 blocks
 	curCalcBlockNum := int64(300)
 	prevHeight := int64(curheight) - curCalcBlockNum
@@ -82,12 +82,21 @@ func (api *DeprecatedApiService) hashRateChartsV3(params map[string]string) map[
 	jsondatastring += `,"target_hashrate":` + targetHashRate.String()
 	jsondatastring += `,"target_show":"` + difficulty.ConvertPowPowerToShowFormat(targetHashRate) + `"`
 
+	// day 120
 	days30, e2 := hashRateList(blockstore, curheight, false, currentHashWorth)
 	if e2 != nil {
 		result["err"] = e2.Error()
 		return result
 	}
 	jsondatastring += `,"days30":[` + strings.Join(days30, ",") + `]`
+
+	// alldays
+	daysall, e3 := hashRateList(blockstore, curheight, true, currentHashWorth)
+	if e3 != nil {
+		result["err"] = e3.Error()
+		return result
+	}
+	jsondatastring += `,"daysall":[` + strings.Join(daysall, ",") + `]`
 
 	jsondatastring += "}"
 

@@ -37,7 +37,7 @@ func (api *DeprecatedApiService) powPower(params map[string]string) map[string]s
 	}
 
 	// cost time
-	powbitsbig := difficulty.CalculateDifficultyWorth(lastest.GetDifficulty())
+	powbitsbig := difficulty.CalculateDifficultyWorthByHeight(lastest.GetHeight(), lastest.GetDifficulty())
 	powervalue := new(big.Int).Div(powbitsbig, big.NewInt(int64(cost288sec)))
 
 	// return

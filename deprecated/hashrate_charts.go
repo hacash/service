@@ -55,7 +55,7 @@ func hashRateList(blockstore interfaces.BlockStoreRead, curheight uint64, allHis
 			return nil, err3
 		}
 		//fmt.Println(tarhei, blk.GetDifficulty(), hex.EncodeToString(difficulty.DifficultyUint32ToHash(blk.GetDifficulty())))
-		targetHashWorth := difficulty.CalculateDifficultyWorth(blk.GetDifficulty())
+		targetHashWorth := difficulty.CalculateDifficultyWorthByHeight(blk.GetHeight(), blk.GetDifficulty())
 		if targetHashWorth.Cmp(allMaxRate) == 1 {
 			allMaxRate = targetHashWorth
 			allDivCut = new(big.Int).Div(targetHashWorth, big.NewInt(10000))
