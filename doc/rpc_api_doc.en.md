@@ -66,6 +66,7 @@ The parameters common to multiple interfaces are introduced as follows:
 | ---- | ---- | ---- | ---- | ---- |
 | action | string |-| balances, diamond, block_intro, accounts ... | The type of data to be queried and generated, and the function of the interface is defined |
 | unitmei | bool | false | true, false, 1, 0 | Whether to transfer or return the amount in units of "mei" of floating-point numbers, otherwise, use the Hacash standardized unit method. For example, use "mei" as the unit: "12.5086", and the standardized unit: "ㄜ125086:244" |
+| unit | string  | - | mei,zhu,shuo,ai,miao | return the HAC amount use unit: mei, zhu, shuo, zi, miao |
 | kind | menu |-| h, s, d, hs, hd, hsd | Filter the returned account and transaction information type. h: hacash, s: satoshi, d: diamond. Purpose: For example, when scanning a block, you only need to return the HAC transfer content and ignore the other two, just pass `kind=h`. |
 | hexbody | bool | false | true, false, 1, 0 | `/submit` Whether to use the hex string form of Http Body when submitting data. The default format is native bytes. |
 
