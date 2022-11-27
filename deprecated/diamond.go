@@ -145,7 +145,6 @@ func (api *DeprecatedApiService) getDiamond(params map[string]string) map[string
 	//result["source_hash"] = hex.EncodeToString(source_hash)
 	result["nonce"] = hex.EncodeToString(store.Nonce)
 	result["block_height"] = strconv.FormatUint(uint64(store.ContainBlockHeight), 10)
-	result["block_height"] = strconv.FormatUint(uint64(store.ContainBlockHeight), 10)
 	result["number"] = strconv.Itoa(int(store.Number))
 	result["miner_address"] = store.MinerAddress.ToReadable()
 	result["custom_message"] = store.CustomMessage.ToHex()
@@ -155,7 +154,8 @@ func (api *DeprecatedApiService) getDiamond(params map[string]string) map[string
 	} else {
 		result["average_burn_price"] = "ㄜ" + strconv.FormatUint(uint64(store.AverageBidBurnPrice), 10) + ":248"
 	}
-	result["visual_gene"] = store.VisualGene.ToHex()
+	result["life_gene"] = store.LifeGene.ToHex()
+	result["visual_gene"] = store.GetVisualGene().ToHex()
 
 	return result
 }
@@ -190,17 +190,19 @@ func (api *DeprecatedApiService) getDiamondVisualGeneList(params map[string]stri
 	var appendOne = func(store *stores.DiamondSmelt) {
 		if isonly_gene_number {
 			dtlist = append(dtlist, fmt.Sprintf(
-				`"%d,%s"`,
+				`"%d,%s,%s"`,
 				store.Number,
-				store.VisualGene.ToHex(),
+				store.GetVisualGene().ToHex(),
+				store.LifeGene.ToHex(),
 			))
 			return
 		}
 		dtlist = append(dtlist, fmt.Sprintf(
-			`{"name":"%s","number":%d,"visual_gene":"%s","bid_fee":"%s"}`,
+			`{"name":"%s","number":%d,"life_gene":"%s","visual_gene":"%s","bid_fee":"%s"}`,
 			string(store.Diamond),
 			store.Number,
-			store.VisualGene.ToHex(),
+			store.LifeGene.ToHex(),
+			store.GetVisualGene().ToHex(),
 			store.ApproxFeeOffer.ToFinString()),
 		)
 	}
