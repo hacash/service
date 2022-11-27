@@ -66,6 +66,7 @@ rpc_listen_port = 8083
 | ----  | ----  | ----  | ----  | ----  |
 | action | string | -    | balances, diamond, block_intro, accounts ... | 要查询、生成的数据类型，定义接口的功能 |
 | unitmei | bool  | false | true, false, 1, 0 | 是否采用浮点数的“枚”为单位传递或返回数额，否则采用Hacash标准化单位方式。 例如使用“枚”为单位："12.5086"，而标准化单位："ㄜ125086:244" |
+| unit | string  | - | mei,zhu,shuo,ai,miao | 返回的 HAC 使用单位 枚、铢、烁、埃、渺 |
 | kind | menu  | - | h, s, d, hs, hd, hsd | 筛选返回的账户、交易信息类型。h: hacash, s: satoshi, d: diamond。用途：比如在扫描区块时只需要返回 HAC 转账内容而忽略其他两者，则传递 `kind=h` 即可。 |
 | hexbody | bool  | false | true, false, 1, 0 | `/submit` 在提交数据时，是否使用 hex 字符串的形式为 Http Body。默认为原生 bytes 形式。 |
 
