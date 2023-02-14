@@ -5,7 +5,93 @@ import (
 	"encoding/binary"
 	"github.com/hacash/core/fields"
 	"math"
+	"time"
 )
+
+type TransferTurnoverStatistic struct {
+	WeekNum           fields.VarUint4
+	trsCountHAC_float float64
+	TrsCountHAC       fields.Bytes8
+	TrsCountSAT       fields.VarUint8
+	TrsCountHACD      fields.VarUint4
+	UpdateTime        time.Time
+	SaveedTime        time.Time
+}
+
+func NewTransferTurnoverStatistic() *TransferTurnoverStatistic {
+	return &TransferTurnoverStatistic{
+		WeekNum:           0,
+		trsCountHAC_float: 0,
+		TrsCountHAC:       make([]byte, 8),
+		TrsCountSAT:       0,
+		TrsCountHACD:      0,
+		UpdateTime:        time.Now(),
+		SaveedTime:        time.Now(),
+	}
+}
+
+func (t *TransferTurnoverStatistic) AppendHAC(mei float64) {
+	//fmt.Printf("********mei %f", mei)
+	t.trsCountHAC_float += mei
+}
+func (t *TransferTurnoverStatistic) AppendSAT(sat uint64) {
+	t.TrsCountSAT = fields.VarUint8(uint64(t.TrsCountSAT) + sat)
+}
+func (t *TransferTurnoverStatistic) AppendHACD(sat uint32) {
+	t.TrsCountHACD = fields.VarUint4(uint32(t.TrsCountHACD) + sat)
+}
+
+func (t TransferTurnoverStatistic) GetHAC() float64 {
+	return t.trsCountHAC_float
+}
+func (t TransferTurnoverStatistic) GetBTC() float64 {
+	return float64(t.TrsCountSAT) / float64(10000_0000)
+}
+func (t TransferTurnoverStatistic) GetHACD() float64 {
+	return float64(t.TrsCountHACD)
+}
+
+func (t *TransferTurnoverStatistic) Parse(buf []byte, seek uint32) (uint32, error) {
+	var e error = nil
+	seek, e = t.WeekNum.Parse(buf, seek)
+	if e != nil {
+		return 0, e
+	}
+	seek, e = t.TrsCountHAC.Parse(buf, seek)
+	if e != nil {
+		return 0, e
+	}
+	var hacnum = math.Float64frombits(binary.BigEndian.Uint64(t.TrsCountHAC))
+	t.trsCountHAC_float = hacnum
+	seek, e = t.TrsCountSAT.Parse(buf, seek)
+	if e != nil {
+		return 0, e
+	}
+	seek, e = t.TrsCountHACD.Parse(buf, seek)
+	if e != nil {
+		return 0, e
+	}
+	return seek, nil
+}
+
+func (t *TransferTurnoverStatistic) Serialize() []byte {
+	var bits = math.Float64bits(t.trsCountHAC_float)
+	binary.BigEndian.PutUint64(t.TrsCountHAC, bits)
+	//
+	var buf = bytes.NewBuffer(nil)
+	v1, _ := t.WeekNum.Serialize()
+	v2, _ := t.TrsCountHAC.Serialize()
+	v3, _ := t.TrsCountSAT.Serialize()
+	v4, _ := t.TrsCountHACD.Serialize()
+	buf.Write(v1)
+	buf.Write(v2)
+	buf.Write(v3)
+	buf.Write(v4)
+	// ok
+	return buf.Bytes()
+}
+
+/******************************/
 
 type BalanceRankingItem struct {
 	Address       fields.Address

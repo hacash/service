@@ -38,6 +38,8 @@ type Ranking struct {
 	wait_update_address_list map[string]bool   // 100 addresses waiting to be updated
 	cache_update_diamonds    map[string][]byte // Address and diamond table waiting to be updated
 
+	cache_turnover_curobj *TransferTurnoverStatistic
+
 	// current_circulation
 	current_circulation float64
 	minted_diamond      int64
@@ -68,6 +70,7 @@ func NewRanking(cnffile *sys.Inicnf) *Ranking {
 		wait_update_address_num:     0,
 		wait_update_address_list:    make(map[string]bool),
 		cache_update_diamonds:       make(map[string][]byte),
+		cache_turnover_curobj:       NewTransferTurnoverStatistic(),
 	}
 
 	return rank

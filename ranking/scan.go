@@ -3,6 +3,9 @@ package main
 import (
 	"fmt"
 	"github.com/buger/jsonparser"
+	"github.com/hacash/core/fields"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -68,6 +71,9 @@ func (r *Ranking) scanOneBlock() error {
 		r.addWaitUpdateAddressUnsafe(mainAddrStr) // Address to be updated
 		// actions
 		jsonparser.ArrayEach(resbts, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+			//*
+			r.scanTurnoverFromEffectiveAction(scanHeight, value)
+			//*
 			a1, _ := jsonparser.GetString(value, "from")
 			r.addWaitUpdateAddressUnsafe(a1)
 			a2, _ := jsonparser.GetString(value, "to")
@@ -110,9 +116,52 @@ func (r *Ranking) scanOneBlock() error {
 		}, "effective_actions")
 	}
 
+	// mark data update
+	r.cache_turnover_curobj.UpdateTime = time.Now()
+
 	// Mark that this block has been scanned
 	r.finish_scan_block_height = scanHeight
 
 	// Successful return
 	return nil
+}
+
+func (r *Ranking) scanTurnoverFromEffectiveAction(blkhei uint64, actionvalue []byte) {
+	var keyWeek = uint32(blkhei / 2000)
+	var prevWeek = uint32(r.cache_turnover_curobj.WeekNum)
+	if keyWeek != prevWeek {
+		var newtts = NewTransferTurnoverStatistic()
+		if prevWeek == 0 {
+			newtts = r.loadTransferTurnoverFromDisk(keyWeek)
+		}
+		// save prev turnover
+		//fmt.Printf("++++++++ %d\n", r.cache_turnover_curobj.WeekNum)
+		go r.flushTransferTurnover(r.cache_turnover_curobj)
+		newtts.WeekNum = fields.VarUint4(keyWeek)
+		r.cache_turnover_curobj = newtts
+	}
+	// scan action
+	hacash_str, _ := jsonparser.GetString(actionvalue, "hacash")
+	var hacash, _ = strconv.ParseFloat(hacash_str, 64)
+	if hacash > 0 {
+		r.cache_turnover_curobj.AppendHAC(hacash)
+	}
+	satoshi, _ := jsonparser.GetInt(actionvalue, "satoshi")
+	if satoshi > 0 {
+		r.cache_turnover_curobj.AppendSAT(uint64(satoshi))
+	}
+	from, _ := jsonparser.GetString(actionvalue, "from")
+	to, _ := jsonparser.GetString(actionvalue, "to")
+	var isdia_trs = len(from) > 0 || len(to) > 0
+	diamond, _ := jsonparser.GetString(actionvalue, "diamond")
+	diamonds, _ := jsonparser.GetString(actionvalue, "diamonds")
+	if len(diamond) == 6 {
+		diamonds = diamond
+	}
+	if isdia_trs && len(diamonds) >= 6 {
+		dianum := len(strings.Split(diamonds, ","))
+		r.cache_turnover_curobj.AppendHACD(uint32(dianum))
+	}
+	// save settimeout
+
 }

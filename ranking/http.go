@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hacash/core/fields"
 	"log"
+	"math"
 	"net/http"
 	"strconv"
 )
@@ -90,6 +91,7 @@ func (api *Ranking) apiHandleFunc(w http.ResponseWriter, r *http.Request) {
 		} else {
 			ResponseError(w, fmt.Errorf("cannot find kind <%s>", kind))
 		}
+
 	} else if action == "account_diamonds" {
 
 		addrstr := CheckParamString(r, "address", "")
@@ -113,6 +115,62 @@ func (api *Ranking) apiHandleFunc(w http.ResponseWriter, r *http.Request) {
 		// List all diamonds
 		data := ResponseCreateData("diamonds", string(diatable))
 		ResponseData(w, data) // ok
+
+	} else if action == "transfer_turnover" {
+
+		week_num := CheckParamUint64(r, "week_num", 0)
+		start_num := CheckParamUint64(r, "start_week_num", 0)
+		end_num := CheckParamUint64(r, "end_week_num", 0)
+		limit := CheckParamUint64(r, "limit", 0)
+
+		// start
+		if end_num > 0 && end_num > limit {
+			start_num = end_num - limit
+		}
+
+		if week_num > 0 {
+			turnobj := api.loadTransferTurnoverFromDisk(uint32(week_num))
+
+			data := ResponseCreateData("week_num", turnobj.WeekNum)
+			data["hac"] = turnobj.GetHAC()
+			data["btc"] = turnobj.GetBTC()
+			data["hacd"] = turnobj.GetHACD()
+			ResponseData(w, data) // ok
+
+		} else if start_num > 0 && limit > 0 {
+
+			if limit > 200 {
+				limit = 200
+			}
+			var hacs = make([]float64, 0)
+			var btcs = make([]float64, 0)
+			var hacds = make([]float64, 0)
+			if end_num > 0 {
+				for i := end_num; i > start_num; i-- {
+					turnobj := api.loadTransferTurnoverFromDisk(uint32(i))
+					hacs = append(hacs, math.Round(turnobj.GetHAC()))
+					btcs = append(btcs, turnobj.GetBTC())
+					hacds = append(hacds, turnobj.GetHACD())
+				}
+			} else {
+				for i := start_num; i < start_num+limit; i++ {
+					turnobj := api.loadTransferTurnoverFromDisk(uint32(i))
+					hacs = append(hacs, turnobj.GetHAC())
+					btcs = append(btcs, turnobj.GetBTC())
+					hacds = append(hacds, turnobj.GetHACD())
+				}
+			}
+			data := ResponseCreateData("hac", hacs)
+			data["btc"] = btcs
+			data["hacd"] = hacds
+			ResponseData(w, data) // ok
+
+		} else {
+
+			data := ResponseCreateData("param error", "true")
+			ResponseData(w, data) // ok
+		}
+
 	} else {
 		ResponseError(w, fmt.Errorf("cannot find action <%s>", action))
 	}

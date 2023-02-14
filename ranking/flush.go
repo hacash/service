@@ -117,3 +117,21 @@ func (r *Ranking) flushStateToDisk() error {
 	// success
 	return nil
 }
+
+func (r *Ranking) flushTransferTurnover(count *TransferTurnoverStatistic) {
+	var svkey = fmt.Sprintf("ttswk%d", count.WeekNum)
+	var svdts = count.Serialize()
+	r.ldb.Put([]byte(svkey), svdts, nil)
+}
+
+func (r *Ranking) loadTransferTurnoverFromDisk(weeknum uint32) *TransferTurnoverStatistic {
+	var newturn = NewTransferTurnoverStatistic()
+	if weeknum == 0 {
+		return newturn
+	}
+	var svkey = fmt.Sprintf("ttswk%d", weeknum)
+	valdts, _ := r.ldb.Get([]byte(svkey), nil)
+	newturn.Parse(valdts, 0)
+	return newturn
+
+}
