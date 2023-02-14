@@ -49,6 +49,7 @@ func (api *DeprecatedApiService) initRoutes() {
 	queryRoutes["btcmovelog"] = api.getBtcMoveLogPageData // Get bitcoin transfer log page data
 
 	queryRoutes["totalsupply"] = api.totalSupply // Total supply
+	queryRoutes["totalnonemptyaccount"] = api.getTotalNonEmptyAccount
 
 	// dex
 	queryRoutes["dexbuycreate"] = api.dexBuyCreate     // Create a bill
