@@ -127,6 +127,10 @@ func (r *Ranking) scanOneBlock() error {
 }
 
 func (r *Ranking) scanTurnoverFromEffectiveAction(blkhei uint64, actionvalue []byte) {
+	if blkhei <= r.turnover_finish_block_height {
+		return // repeat
+	}
+	r.turnover_finish_block_height = blkhei
 	var keyWeek = uint32(blkhei / 2000)
 	var prevWeek = uint32(r.cache_turnover_curobj.WeekNum)
 	if keyWeek != prevWeek {
@@ -141,18 +145,19 @@ func (r *Ranking) scanTurnoverFromEffectiveAction(blkhei uint64, actionvalue []b
 		r.cache_turnover_curobj = newtts
 	}
 	// scan action
-	hacash_str, _ := jsonparser.GetString(actionvalue, "hacash")
-	var hacash, _ = strconv.ParseFloat(hacash_str, 64)
-	if hacash > 0 {
-		r.cache_turnover_curobj.AppendHAC(hacash)
-	}
-	satoshi, _ := jsonparser.GetInt(actionvalue, "satoshi")
-	if satoshi > 0 {
-		r.cache_turnover_curobj.AppendSAT(uint64(satoshi))
-	}
 	from, _ := jsonparser.GetString(actionvalue, "from")
 	to, _ := jsonparser.GetString(actionvalue, "to")
 	var isdia_trs = len(from) > 0 || len(to) > 0
+
+	hacash_str, _ := jsonparser.GetString(actionvalue, "hacash")
+	var hacash, _ = strconv.ParseFloat(hacash_str, 64)
+	if isdia_trs && hacash > 0 {
+		r.cache_turnover_curobj.AppendHAC(hacash)
+	}
+	satoshi, _ := jsonparser.GetInt(actionvalue, "satoshi")
+	if isdia_trs && satoshi > 0 {
+		r.cache_turnover_curobj.AppendSAT(uint64(satoshi))
+	}
 	diamond, _ := jsonparser.GetString(actionvalue, "diamond")
 	diamonds, _ := jsonparser.GetString(actionvalue, "diamonds")
 	if len(diamond) == 6 {

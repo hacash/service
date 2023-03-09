@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/binary"
 	"fmt"
 	"github.com/buger/jsonparser"
 	"github.com/hacash/core/fields"
@@ -122,6 +123,10 @@ func (r *Ranking) flushTransferTurnover(count *TransferTurnoverStatistic) {
 	var svkey = fmt.Sprintf("ttswk%d", count.WeekNum)
 	var svdts = count.Serialize()
 	r.ldb.Put([]byte(svkey), svdts, nil)
+	// turnover_finish_block_height
+	var svhei = make([]byte, 8)
+	binary.BigEndian.PutUint64(svhei, r.turnover_finish_block_height)
+	r.ldb.Put([]byte("tfbhei"), svhei, nil)
 }
 
 func (r *Ranking) loadTransferTurnoverFromDisk(weeknum uint32) *TransferTurnoverStatistic {
@@ -132,6 +137,14 @@ func (r *Ranking) loadTransferTurnoverFromDisk(weeknum uint32) *TransferTurnover
 	var svkey = fmt.Sprintf("ttswk%d", weeknum)
 	valdts, _ := r.ldb.Get([]byte(svkey), nil)
 	newturn.Parse(valdts, 0)
+	// turnover_finish_block_height
+	if r.turnover_finish_block_height <= 0 {
+		var numdts, _ = r.ldb.Get([]byte("tfbhei"), nil)
+		if numdts != nil {
+			r.turnover_finish_block_height = binary.BigEndian.Uint64(numdts)
+		}
+	}
+	// ok
 	return newturn
 
 }

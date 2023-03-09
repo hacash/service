@@ -38,7 +38,8 @@ type Ranking struct {
 	wait_update_address_list map[string]bool   // 100 addresses waiting to be updated
 	cache_update_diamonds    map[string][]byte // Address and diamond table waiting to be updated
 
-	cache_turnover_curobj *TransferTurnoverStatistic
+	cache_turnover_curobj        *TransferTurnoverStatistic
+	turnover_finish_block_height uint64
 
 	// current_circulation
 	current_circulation float64
@@ -60,17 +61,18 @@ func NewRanking(cnffile *sys.Inicnf) *Ranking {
 		ldb_dir:              ldb_dir,
 		node_rpc_url:         rpc_api,
 
-		flush_state_timeout_minute:  flush_time,
-		balance_ranking_range:       100, // 持仓排名100
-		finish_scan_block_height:    0,
-		flushStateToDiskNotifyCh:    make(chan bool, 10), // 通知管道
-		hacash_balance_ranking_100:  make([]*BalanceRankingItem, 0),
-		diamond_balance_ranking_100: make([]*BalanceRankingItem, 0),
-		satoshi_balance_ranking_100: make([]*BalanceRankingItem, 0),
-		wait_update_address_num:     0,
-		wait_update_address_list:    make(map[string]bool),
-		cache_update_diamonds:       make(map[string][]byte),
-		cache_turnover_curobj:       NewTransferTurnoverStatistic(),
+		flush_state_timeout_minute:   flush_time,
+		balance_ranking_range:        100, // 持仓排名100
+		finish_scan_block_height:     0,
+		flushStateToDiskNotifyCh:     make(chan bool, 10), // 通知管道
+		hacash_balance_ranking_100:   make([]*BalanceRankingItem, 0),
+		diamond_balance_ranking_100:  make([]*BalanceRankingItem, 0),
+		satoshi_balance_ranking_100:  make([]*BalanceRankingItem, 0),
+		wait_update_address_num:      0,
+		wait_update_address_list:     make(map[string]bool),
+		cache_update_diamonds:        make(map[string][]byte),
+		cache_turnover_curobj:        NewTransferTurnoverStatistic(),
+		turnover_finish_block_height: 0,
 	}
 
 	return rank
