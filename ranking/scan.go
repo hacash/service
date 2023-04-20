@@ -32,7 +32,7 @@ func (r *Ranking) scanOneBlock() error {
 		fmt.Printf("scan block %d.\n", scanHeight)
 	}
 
-	blkUrl := fmt.Sprintf("/query?action=block_intro&unitmei=1&height=%d", scanHeight)
+	blkUrl := fmt.Sprintf("/query?action=block_intro&unitmei=1&height=%d&must_confirm=4", scanHeight)
 	resbts1, e1 := HttpGetBytes(r.node_rpc_url + blkUrl)
 	if e1 != nil {
 		// Interface not ready

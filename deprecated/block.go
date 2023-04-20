@@ -124,8 +124,22 @@ func (api *DeprecatedApiService) getBlockIntro(params map[string]string) map[str
 		return result
 	}
 
-	store := api.blockchain.GetChainEngineKernel().StateRead().BlockStoreRead()
+	state := api.blockchain.GetChainEngineKernel().StateRead()
+	store := state.BlockStoreRead()
 	var err error
+
+	must_confirm, _ := params["must_confirm"]
+	if len(must_confirm) > 0 {
+		var okey_block_hei = state.GetPendingBlockHeight()
+		//fmt.Println("okey_block_hei: ", okey_block_hei)
+		must_confirm_block_hei, _ := strconv.ParseUint(must_confirm, 10, 0)
+		get_blk_id, _ := strconv.ParseUint(blkid, 10, 0)
+		if get_blk_id > 0 && must_confirm_block_hei > 0 && get_blk_id+must_confirm_block_hei > okey_block_hei {
+			//fmt.Println("must_confirm_block_hei: ", must_confirm_block_hei)
+			result["err"] = fmt.Sprintf("block %d not be confirm", get_blk_id)
+			return result
+		}
+	}
 
 	var blockhx = []byte{}
 	var blockbytes = []byte{}

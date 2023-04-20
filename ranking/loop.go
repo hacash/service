@@ -5,11 +5,12 @@ import (
 )
 
 func (r *Ranking) loop() {
-	for {
-		tickerFlushStateToDisk := time.NewTicker(time.Minute * time.Duration(r.flush_state_timeout_minute))
-		tickerUploadTotalSupply := time.NewTicker(time.Minute * 23)
-		tickerFlushTransferTurnoverToDisk := time.NewTicker(time.Second * 5)
 
+	var tickerFlushStateToDisk = time.NewTicker(time.Minute * time.Duration(r.flush_state_timeout_minute))
+	var tickerUploadTotalSupply = time.NewTicker(time.Minute * 23)
+	var tickerFlushTransferTurnoverToDisk = time.NewTicker(time.Second * 5)
+
+	for {
 		select {
 		case <-tickerFlushTransferTurnoverToDisk.C:
 			var turn = r.cache_turnover_curobj

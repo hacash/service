@@ -52,6 +52,18 @@ func (api *DeprecatedApiService) getAllOperateActionLogByBlockHeight(params map[
 		return result
 	}
 
+	must_confirm, _ := params["must_confirm"]
+	if len(must_confirm) > 0 {
+		var okey_block_hei = lastest.GetHeight()
+		// fmt.Println("okey_block_hei: ", okey_block_hei)
+		must_confirm_block_hei, _ := strconv.ParseUint(must_confirm, 10, 0)
+		if block_height > 0 && must_confirm_block_hei > 0 && block_height+must_confirm_block_hei > okey_block_hei {
+			// fmt.Println("must_confirm_block_hei: ", must_confirm_block_hei)
+			result["err"] = fmt.Sprintf("block %d not be confirm", block_height)
+			return result
+		}
+	}
+
 	// Query block
 	tarblock, e := rpc.LoadBlockWithCache(api.backend.BlockChain().GetChainEngineKernel(), block_height)
 	if e != nil {

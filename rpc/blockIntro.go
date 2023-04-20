@@ -36,7 +36,20 @@ func (api *RpcService) blockIntro(r *http.Request, w http.ResponseWriter, bodyby
 	}
 
 	// Block Storage
-	blkstore := api.backend.BlockChain().GetChainEngineKernel().StateRead().BlockStoreRead()
+	blkstate := api.backend.BlockChain().GetChainEngineKernel().StateRead()
+	blkstore := blkstate.BlockStoreRead()
+
+	// confirm number
+	must_confirm := CheckParamUint64(r, "must_confirm", 0)
+	if height > 0 && must_confirm > 0 {
+		var okey_block_hei = blkstate.GetPendingBlockHeight()
+		// fmt.Println("okey_block_hei: ", okey_block_hei)
+		if height+must_confirm > okey_block_hei {
+			// fmt.Println("must_confirm: ", must_confirm)
+			ResponseError(w, fmt.Errorf("block %d not be confirmed", height))
+			return
+		}
+	}
 
 	// get coinbase
 	coinbase_start_pos := uint32(blocks.BlockHeadSize + blocks.BlockMetaSizeV1)
