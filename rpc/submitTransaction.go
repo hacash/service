@@ -11,6 +11,7 @@ import (
 func (api *RpcService) submitTransaction(r *http.Request, w http.ResponseWriter, bodybytes []byte) {
 
 	isHexData := CheckParamBool(r, "hexbody", false)
+	isOnlyTry := CheckParamBool(r, "onlytry", false)
 
 	// Hex string mode
 	if isHexData {
@@ -28,6 +29,17 @@ func (api *RpcService) submitTransaction(r *http.Request, w http.ResponseWriter,
 	trs, _, e3 := transactions.ParseTransaction(bodybytes, 0)
 	if e3 != nil {
 		ResponseError(w, e3)
+		return
+	}
+
+	// only try
+	if isOnlyTry {
+		var err = api.backend.BlockChain().ValidateTransactionForTxPool(trs)
+		if err != nil {
+			ResponseData(w, ResponseCreateData("ValidateTransactionForTxPool Error", err.Error()))
+		} else {
+			ResponseData(w, ResponseCreateData("ValidateTransactionForTxPool Status", "success"))
+		}
 		return
 	}
 

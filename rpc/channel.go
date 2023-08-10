@@ -44,8 +44,10 @@ func (api *RpcService) channel(r *http.Request, w http.ResponseWriter, bodybytes
 	retdata["status"] = channel.Status
 	retdata["left_address"] = channel.LeftAddress.ToReadable()
 	retdata["left_amount"] = channel.LeftAmount.ToUnitString(unitName)
+	retdata["left_satoshi"] = channel.LeftSatoshi.GetRealSatoshi()
 	retdata["right_address"] = channel.RightAddress.ToReadable()
 	retdata["right_amount"] = channel.RightAmount.ToUnitString(unitName)
+	retdata["right_satoshi"] = channel.RightSatoshi.GetRealSatoshi()
 	retdata["reuse_version"] = channel.ReuseVersion
 	retdata["lock_block"] = channel.ArbitrationLockBlock
 
