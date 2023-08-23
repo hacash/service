@@ -8,8 +8,9 @@ import (
 )
 
 /*
-export GOPATH=/media/yangjie/500GB/hacash/go
+
 go build -o test/ranking1 github.com/hacash/service/ranking && ./test/ranking1 rankingt1.config.ini
+
 */
 
 func main() {
