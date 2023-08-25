@@ -49,7 +49,7 @@ func (api *DeprecatedApiService) getAllTransferLogByBlockHeight(params map[strin
 	}
 
 	must_confirm, _ := params["must_confirm"]
-	fmt.Println(must_confirm)
+	//fmt.Println(must_confirm)
 	if len(must_confirm) > 0 {
 		var okey_block_hei = lastest.GetHeight()
 		// fmt.Println("okey_block_hei: ", okey_block_hei)
