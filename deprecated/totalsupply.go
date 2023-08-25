@@ -15,7 +15,7 @@ func (api *DeprecatedApiService) totalSupply(params map[string]string) map[strin
 		return result
 	}
 
-	_, result = rpc.RenderTotalSupplyObject(ttspl, true)
+	_, result = rpc.RenderTotalSupplyObject(state, ttspl, true)
 
 	// ok
 	return result

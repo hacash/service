@@ -2,18 +2,20 @@ package rpc
 
 import (
 	"fmt"
+	"github.com/hacash/core/interfaces"
 	"github.com/hacash/core/stores"
 	"strconv"
 	"strings"
 )
 
 // Output total supply interface object
-func RenderTotalSupplyObject(totalsupply *stores.TotalSupply, isformatstring bool) (map[string]interface{}, map[string]string) {
+func RenderTotalSupplyObject(state interfaces.ChainStateOperationRead, totalsupply *stores.TotalSupply, isformatstring bool) (map[string]interface{}, map[string]string) {
 	var ifs = isformatstring
 	var object = make(map[string]interface{})
 	var objstr = make(map[string]string)
 
 	// Status statistics
+	appendToUint64(object, objstr, "lastest_block_height", state.GetPendingBlockHeight()-1, ifs)
 	appendToUint64(object, objstr, "minted_diamond", uint64(totalsupply.Get(stores.TotalSupplyStoreTypeOfDiamond)), ifs)
 	appendToUint64(object, objstr, "transferred_bitcoin", uint64(totalsupply.Get(stores.TotalSupplyStoreTypeOfTransferBitcoin)), ifs)
 	// Diamond system loan, real-time mortgage of diamond quantity
