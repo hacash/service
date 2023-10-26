@@ -385,7 +385,7 @@ params:
 - unitmei [bool] Optional, whether to return floating-point string in units of "Mei"
 - kind [menu] Query the type of return; `kind=h` returns only HAC transfer, `kind=hs` returns HAC and BTC transfer, and returns all types of transfer without transferring or passing `kind=hsd`
  
-Examples 1: [http://rpcapi.hacash.org/query?action=scan_value_transfers&unitmei=1&height=180115&txposi=0&kind=hsd](http://rpcapi.hacash.org/query?action=scan_value_transfers&unitmei=1&height=180115&txposi=0&kind=hsd)
+Examples 1: [http://rpcapi.hacash.org/query?action=scan_value_transfers&unitmei=1&height=180115&txposi=1&kind=hsd](http://rpcapi.hacash.org/query?action=scan_value_transfers&unitmei=1&height=180115&txposi=1&kind=hsd)
  
 Examples 2: [http://rpcapi.hacash.org/query?action=scan_value_transfers&txhash=6d678040e5d3d8104de1ea627fde1973ab9d0e036a5fe20913dfdd6192dec266](http://rpcapi.hacash.org/query?action=scan_value_transfers&txhash=6d678040e5d3d8104de1ea627fde1973ab9d0e036a5fe20913dfdd6192dec266)
  
@@ -513,7 +513,7 @@ Pass parameters:
 - from [string] The from address to filter will only display the incoming address after passing, ignoring other from addresses
 - to [string] The to address to filter will only display the incoming address after passing, ignoring other to addresses
 
-Example API 1：[http://rpcapi.hacash.org/query?action=scan_coin_transfers&unitmei=1&height=180115&txposi=0&kind=hsd](http://rpcapi.hacash.org/query?action=scan_coin_transfers&unitmei=1&height=180115&txposi=0&kind=hsd)
+Example API 1：[http://rpcapi.hacash.org/query?action=scan_coin_transfers&unitmei=1&height=180115&txposi=1&kind=hsd](http://rpcapi.hacash.org/query?action=scan_coin_transfers&unitmei=1&height=180115&txposi=1&kind=hsd)
 
 Example API 2：[http://rpcapi.hacash.org/query?action=scan_coin_transfers&txhash=6d678040e5d3d8104de1ea627fde1973ab9d0e036a5fe20913dfdd6192dec266](http://rpcapi.hacash.org/query?action=scan_coin_transfers&txhash=6d678040e5d3d8104de1ea627fde1973ab9d0e036a5fe20913dfdd6192dec266)
 
@@ -539,13 +539,13 @@ Example Return：
         },
         {
             from: "13RnDii79ypWayV8XkrBFFci29cHtzmq3Z",
-            to": "1EcrtFAUmVeLnGeaEcMDoPZH7ZPysks1H2",
+            to: "1EcrtFAUmVeLnGeaEcMDoPZH7ZPysks1H2",
             diamond: "WUZXYM"
         },
         {
             from: "13RnDii79ypWayV8XkrBFFci29cHtzmq3Z",
-            to": "1EcrtFAUmVeLnGeaEcMDoPZH7ZPysks1H2",
-            diamond: "WUZXYM,IZHTEW,IIUMWH"," // Batch transfer of diamonds
+            to: "1EcrtFAUmVeLnGeaEcMDoPZH7ZPysks1H2",
+            diamond: "WUZXYM,IZHTEW,IIUMWH" // Batch transfer of diamonds
         }
     ],
     type: 2

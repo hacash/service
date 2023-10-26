@@ -364,7 +364,7 @@ curl "http://rpcapi.hacash.org/submit?action=transaction&hexbody=1" -X POST -d "
  - unitmei [bool] 选传，是否以“枚”为单位返回浮点字符串
  - kind [menu] 查询返回的种类；`kind=h`只返回HAC转账， `kind=hs`返回HAC、BTC转账，不传或传递`hsd`则返回全部类型转账
  
- 示例调用接口一：[http://rpcapi.hacash.org/query?action=scan_value_transfers&unitmei=1&height=180115&txposi=0&kind=hsd](http://rpcapi.hacash.org/query?action=scan_value_transfers&unitmei=1&height=180115&txposi=0&kind=hsd)
+ 示例调用接口一：[http://rpcapi.hacash.org/query?action=scan_value_transfers&unitmei=1&height=180115&txposi=1&kind=hsd](http://rpcapi.hacash.org/query?action=scan_value_transfers&unitmei=1&height=180115&txposi=1&kind=hsd)
  
  示例调用接口二：[http://rpcapi.hacash.org/query?action=scan_value_transfers&txhash=6d678040e5d3d8104de1ea627fde1973ab9d0e036a5fe20913dfdd6192dec266](http://rpcapi.hacash.org/query?action=scan_value_transfers&txhash=6d678040e5d3d8104de1ea627fde1973ab9d0e036a5fe20913dfdd6192dec266)
  
@@ -490,7 +490,7 @@ curl "http://rpcapi.hacash.org/submit?action=transaction&hexbody=1" -X POST -d "
 - from [string] 要筛选的 from 地址，传递后仅仅会展示传入的地址，而忽略其他 from 地址
 - to [string] 要筛选的 to 地址，传递后仅仅会展示传入的地址，而忽略其他 to 地址
 
-示例调用接口一：[http://rpcapi.hacash.org/query?action=scan_coin_transfers&unitmei=1&height=180115&txposi=0&kind=hsd](http://rpcapi.hacash.org/query?action=scan_coin_transfers&unitmei=1&height=180115&txposi=0&kind=hsd)
+示例调用接口一：[http://rpcapi.hacash.org/query?action=scan_coin_transfers&unitmei=1&height=180115&txposi=1&kind=hsd](http://rpcapi.hacash.org/query?action=scan_coin_transfers&unitmei=1&height=180115&txposi=1&kind=hsd)
 
 示例调用接口二：[http://rpcapi.hacash.org/query?action=scan_coin_transfers&txhash=6d678040e5d3d8104de1ea627fde1973ab9d0e036a5fe20913dfdd6192dec266](http://rpcapi.hacash.org/query?action=scan_coin_transfers&txhash=6d678040e5d3d8104de1ea627fde1973ab9d0e036a5fe20913dfdd6192dec266)
 
@@ -516,13 +516,13 @@ curl "http://rpcapi.hacash.org/submit?action=transaction&hexbody=1" -X POST -d "
         },
         {
             from: "13RnDii79ypWayV8XkrBFFci29cHtzmq3Z",
-            to": "1EcrtFAUmVeLnGeaEcMDoPZH7ZPysks1H2",
+            to: "1EcrtFAUmVeLnGeaEcMDoPZH7ZPysks1H2",
             diamond: "WUZXYM"
         },
         {
             from: "13RnDii79ypWayV8XkrBFFci29cHtzmq3Z",
-            to": "1EcrtFAUmVeLnGeaEcMDoPZH7ZPysks1H2",
-            diamond: "WUZXYM,IZHTEW,IIUMWH"," // 多枚钻石
+            to: "1EcrtFAUmVeLnGeaEcMDoPZH7ZPysks1H2",
+            diamond: "WUZXYM,IZHTEW,IIUMWH" // 多枚钻石
         }
     ],
     type: 2
