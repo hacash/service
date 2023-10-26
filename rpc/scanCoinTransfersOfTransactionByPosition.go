@@ -200,7 +200,7 @@ func (api *RpcService) scanCoinTransfersOfTransactionByPosition(r *http.Request,
 		if len(f_form) > 0 && f_form != from {
 			continue
 		}
-		if len(f_to) > 0 && f_to != from {
+		if len(f_to) > 0 && f_to != to {
 			continue
 		}
 

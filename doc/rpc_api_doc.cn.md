@@ -370,7 +370,7 @@ curl "http://rpcapi.hacash.org/submit?action=transaction&hexbody=1" -X POST -d "
  
  返回值示例：
  
- ```js
+```js
 {
     ret: 0,
     type: 2, // 交易类型
@@ -475,9 +475,62 @@ curl "http://rpcapi.hacash.org/submit?action=transaction&hexbody=1" -X POST -d "
  - Hacash 系统在转账时，支持付款方、收款方或任意不相关第三方来支付交易确认手续费
  - 一笔交易可包含多种类型、多种数额、多比款项的转账，一笔交易就是一份综合性的支付合约
  - 在将来有可能增加其他种类的的转账类型
- 
- 
-#### 3.6 查询总供应量 `GET: /query ? action=total_supply`
+
+
+#### 3.6 扫描每一笔交易获取简要转账操作 `GET: /query ? action=scan_coin_transfers`
+
+`scan_value_transfers` 接口返回的是更加丰富且结构化的内容， 如果仅仅需要获取HAC、HACD和BTC的转账动作，用于交易所充值等简单需求，可以使用 `scan_coin_transfers` 接口，内容更加简洁。
+传递参数：
+
+- height [int] 要扫描的区块高度
+- txposi [int] 要扫描的交易位于区块中的数组索引位置，从0开始索引
+- txhash [string] 选传，交易哈希，如果传递了交易哈希则不用传 height、txposi 值即可直接查询交易，可用于交易是否确认的判断
+- unitmei [bool] 选传，是否以“枚”为单位返回浮点字符串
+- kind [menu] 查询返回的种类；`kind=h`只返回HAC转账， `kind=hs`返回HAC、BTC转账，不传或传递`hsd`则返回全部类型转账
+- from [string] 要筛选的 from 地址，传递后仅仅会展示传入的地址，而忽略其他 from 地址
+- to [string] 要筛选的 to 地址，传递后仅仅会展示传入的地址，而忽略其他 to 地址
+
+示例调用接口一：[http://rpcapi.hacash.org/query?action=scan_coin_transfers&unitmei=1&height=180115&txposi=0&kind=hsd](http://rpcapi.hacash.org/query?action=scan_coin_transfers&unitmei=1&height=180115&txposi=0&kind=hsd)
+
+示例调用接口二：[http://rpcapi.hacash.org/query?action=scan_coin_transfers&txhash=6d678040e5d3d8104de1ea627fde1973ab9d0e036a5fe20913dfdd6192dec266](http://rpcapi.hacash.org/query?action=scan_coin_transfers&txhash=6d678040e5d3d8104de1ea627fde1973ab9d0e036a5fe20913dfdd6192dec266)
+
+返回值示例：
+
+```js
+{
+    hash: "43e98177bc426a2f15c15fe3e8968ece1b2e0829eab7cacb8715c89082f48aef",
+    height: 490194,
+    ret: 0,
+    timestamp: 1698278005,
+    transfers: [
+        {
+            // 默认都会显示 from 和 to 地址，更加方便查询
+            from: "13RnDii79ypWayV8XkrBFFci29cHtzmq3Z",
+            to: "1EcrtFAUmVeLnGeaEcMDoPZH7ZPysks1H2",
+            hacash: "0.9370996"
+        },
+        {
+            from: "13RnDii79ypWayV8XkrBFFci29cHtzmq3Z",
+            to: "1EcrtFAUmVeLnGeaEcMDoPZH7ZPysks1H2",
+            sotoshi: "5000000"
+        },
+        {
+            from: "13RnDii79ypWayV8XkrBFFci29cHtzmq3Z",
+            to": "1EcrtFAUmVeLnGeaEcMDoPZH7ZPysks1H2",
+            diamond: "WUZXYM"
+        },
+        {
+            from: "13RnDii79ypWayV8XkrBFFci29cHtzmq3Z",
+            to": "1EcrtFAUmVeLnGeaEcMDoPZH7ZPysks1H2",
+            diamond: "WUZXYM,IZHTEW,IIUMWH"," // 多枚钻石
+        }
+    ],
+    type: 2
+}
+
+```
+
+#### 3.7 查询总供应量 `GET: /query ? action=total_supply`
 
  示例接口：[http://rpcapi.hacash.org/query?action=total_supply](http://rpcapi.hacash.org/query?action=total_supply)
  

@@ -392,7 +392,7 @@ Examples 2: [http://rpcapi.hacash.org/query?action=scan_value_transfers&txhash=6
 Examples return：
 
 
- ```js
+```js
 {
     ret: 0,
     type: 2, // Transaction type
@@ -498,13 +498,69 @@ Use the `scan_value_transfers` interface note:
 - A transaction can include transfers of multiple types, amounts, and multi-payments. A transaction is a comprehensive payment contract
 - It is possible to add other types of transfer types in the future
 
-#### 3.6 Query total supply `GET: /query ? action=total_supply`
+
+#### 3.6 Scan each transaction to obtain a brief transfer operation `GET: /query ? action=scan_coin_transfers`
+
+The `scan_value_transfers` interface returns richer and more structured content. If you only need to obtain transfer actions for HAC, HACD, and BTC for simple needs such as exchange recharge, you can use `scan_coin_transfers` interface makes the content more concise.
+
+Pass parameters:
+
+- height [int] Block height to scan
+- txposi [int] The transaction to be scanned is at the array index position in the block, starting from 0
+- txhash [string] Optional, transaction hash. If the transaction hash is passed, you can directly query the transaction without passing the height and txposi values, which can be used to judge whether the transaction is confirmed or not
+- unitmei [bool] Optional, whether to return floating-point string in units of "Mei"
+- kind [menu] Query the type of return; `kind=h` returns only HAC transfer, `kind=hs` returns HAC and BTC transfer, and returns all types of transfer without transferring or passing `kind=hsd`
+- from [string] The from address to filter will only display the incoming address after passing, ignoring other from addresses
+- to [string] The to address to filter will only display the incoming address after passing, ignoring other to addresses
+
+Example API 1：[http://rpcapi.hacash.org/query?action=scan_coin_transfers&unitmei=1&height=180115&txposi=0&kind=hsd](http://rpcapi.hacash.org/query?action=scan_coin_transfers&unitmei=1&height=180115&txposi=0&kind=hsd)
+
+Example API 2：[http://rpcapi.hacash.org/query?action=scan_coin_transfers&txhash=6d678040e5d3d8104de1ea627fde1973ab9d0e036a5fe20913dfdd6192dec266](http://rpcapi.hacash.org/query?action=scan_coin_transfers&txhash=6d678040e5d3d8104de1ea627fde1973ab9d0e036a5fe20913dfdd6192dec266)
+
+Example Return：
+
+```js
+{
+    hash: "43e98177bc426a2f15c15fe3e8968ece1b2e0829eab7cacb8715c89082f48aef",
+    height: 490194,
+    ret: 0,
+    timestamp: 1698278005,
+    transfers: [
+        {
+            // By default, both from and to addresses will be displayed, making it easier to query
+            from: "13RnDii79ypWayV8XkrBFFci29cHtzmq3Z",
+            to: "1EcrtFAUmVeLnGeaEcMDoPZH7ZPysks1H2",
+            hacash: "0.9370996"
+        },
+        {
+            from: "13RnDii79ypWayV8XkrBFFci29cHtzmq3Z",
+            to: "1EcrtFAUmVeLnGeaEcMDoPZH7ZPysks1H2",
+            sotoshi: "5000000"
+        },
+        {
+            from: "13RnDii79ypWayV8XkrBFFci29cHtzmq3Z",
+            to": "1EcrtFAUmVeLnGeaEcMDoPZH7ZPysks1H2",
+            diamond: "WUZXYM"
+        },
+        {
+            from: "13RnDii79ypWayV8XkrBFFci29cHtzmq3Z",
+            to": "1EcrtFAUmVeLnGeaEcMDoPZH7ZPysks1H2",
+            diamond: "WUZXYM,IZHTEW,IIUMWH"," // Batch transfer of diamonds
+        }
+    ],
+    type: 2
+}
+
+```
+
+
+#### 3.7 Query total supply `GET: /query ? action=total_supply`
 
  examples link：[http://rpcapi.hacash.org/query?action=total_supply](http://rpcapi.hacash.org/query?action=total_supply)
  
  examples return data：
  
- ```js
+```js
 {
     ret: 0,
     minted_diamond: 27538, // The number of diamonds that have been minted successfully
