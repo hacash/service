@@ -160,6 +160,11 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 			item["to"] = tarAct.ToAddress.ToReadable()
 			item["satoshi"] = tarAct.Amount
 
+		} else if tarAct, ok := act.(*actions.Action_28_FromSatoshiTransfer); ok && (actAllKinds || actKindSatoshi) {
+
+			item["from"] = tarAct.FromAddress.ToReadable()
+			item["satoshi"] = tarAct.Amount.ToString()
+
 		} else if tarAct, ok := act.(*actions.Action_4_DiamondCreate); ok && (actAllKinds || actKindDiamond) {
 
 			item["number"] = tarAct.Number
