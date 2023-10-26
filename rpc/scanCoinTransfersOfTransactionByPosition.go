@@ -1,0 +1,222 @@
+package rpc
+
+import (
+	"encoding/hex"
+	"fmt"
+	"github.com/hacash/core/actions"
+	"github.com/hacash/core/fields"
+	"github.com/hacash/core/interfaces"
+	"github.com/hacash/core/transactions"
+	rpc "github.com/hacash/service/server"
+	"net/http"
+	"strings"
+)
+
+/**
+ * 按位置扫描一笔交易，并且找出里面的“HAC HACD BTC转账操作”
+ */
+func (api *RpcService) scanCoinTransfersOfTransactionByPosition(r *http.Request, w http.ResponseWriter, bodybytes []byte) {
+	kernel := api.backend.BlockChain().GetChainEngineKernel()
+	state := kernel.StateRead()
+
+	height := CheckParamUint64(r, "height", 0) // 区块高度
+	txposi := CheckParamUint64(r, "txposi", 0) // 交易索引位置
+
+	txhash := CheckParamHex(r, "txhash", nil) // 交易索引位置
+	if txhash != nil {
+		if len(txhash) != 32 {
+			ResponseErrorString(w, "param 'txhash' error")
+			return
+		}
+	}
+
+	// Is it in pieces
+	unitName := CheckParamString(r, "unit", "") // mei、zhu、shuo、ai、miao
+	if CheckParamBool(r, "unitmei", false) {
+		unitName = "mei"
+	}
+
+	// fiter
+	p_from := CheckParamString(r, "from", "")
+	p_to := CheckParamString(r, "to", "")
+	f_form := ""
+	f_to := ""
+	if addr, e := fields.CheckReadableAddress(p_from); e == nil {
+		f_form = addr.ToReadable()
+	}
+	if addr, e := fields.CheckReadableAddress(p_to); e == nil {
+		f_to = addr.ToReadable()
+	}
+
+	// kind = hsd
+	kindStr := strings.ToLower(CheckParamString(r, "kind", ""))
+	actAllKinds := false // 支持全部种类
+	actKindHacash := false
+	actKindSatoshi := false
+	actKindDiamond := false
+	if len(kindStr) == 0 {
+		actAllKinds = true
+	} else {
+		if strings.Contains(kindStr, "h") {
+			actKindHacash = true
+		}
+		if strings.Contains(kindStr, "s") {
+			actKindSatoshi = true
+		}
+		if strings.Contains(kindStr, "d") {
+			actKindDiamond = true
+		}
+	}
+
+	// read tx
+	var tx interfaces.Transaction = nil
+	if height > 0 {
+		blockObj, e := rpc.LoadBlockWithCache(kernel, height)
+		if e != nil {
+			ResponseError(w, e)
+			return
+		}
+
+		blktxnum := blockObj.GetTransactionCount()
+		txPosMargin := blktxnum - blockObj.GetCustomerTransactionCount()
+		blktrs := blockObj.GetTrsList()
+		realtxpos := uint32(txposi) + txPosMargin
+		if realtxpos >= blktxnum || realtxpos >= uint32(len(blktrs)) {
+			ResponseError(w, fmt.Errorf(" txposi <%d> overflow", txposi))
+			return
+		}
+
+		// tx ok
+		tx = blktrs[realtxpos]
+		txhash = tx.Hash()
+	} else if txhash != nil {
+		// read tx body from disk
+		blockheight, txbody, e := state.ReadTransactionBytesByHash(txhash)
+		if e != nil {
+			ResponseError(w, e)
+			return
+		}
+
+		if txbody == nil || len(txbody) == 0 {
+			ResponseErrorString(w, "tx not find")
+			return
+		}
+
+		txObj, _, e2 := transactions.ParseTransaction(txbody, 0)
+		if e2 != nil {
+			ResponseError(w, e2)
+			return
+		}
+
+		tx = txObj
+		height = uint64(blockheight)
+	} else {
+		ResponseErrorString(w, "params error: height, txposi or txhash must give")
+		return
+	}
+
+	// ret data
+	var retdata = ResponseCreateData("type", tx.Type())
+	trsActions := tx.GetActionList()
+	//txfeepay := tx.GetFee()
+	//txfeegot := tx.GetFeeOfMinerRealReceived()
+	mainAddress := tx.GetAddress().ToReadable()
+	retdata["hash"] = hex.EncodeToString(txhash)
+	//retdata["feepay"] = txfeepay.ToUnitString(unitName)
+	//retdata["feegot"] = txfeegot.ToUnitString(unitName)
+	//retdata["feeaddress"] = tx.GetAddress().ToReadable()
+	retdata["height"] = height // block height
+	retdata["timestamp"] = tx.GetTimestamp()
+
+	effectiveActions := make([]interface{}, 0)
+	// scan tx
+	for _, act := range trsActions {
+		var item = make(map[string]interface{})
+
+		var from = ""
+		var to = ""
+		var coin = ""
+		var value = ""
+
+		if tarAct, ok := act.(*actions.Action_1_SimpleToTransfer); ok && (actAllKinds || actKindHacash) {
+
+			from = mainAddress
+			to = tarAct.ToAddress.ToReadable()
+			coin = "hacash"
+			value = tarAct.Amount.ToUnitString(unitName)
+
+		} else if tarAct, ok := act.(*actions.Action_13_FromTransfer); ok && (actAllKinds || actKindHacash) {
+
+			from = tarAct.FromAddress.ToReadable()
+			to = mainAddress
+			coin = "hacash"
+			value = tarAct.Amount.ToUnitString(unitName)
+
+		} else if tarAct, ok := act.(*actions.Action_14_FromToTransfer); ok && (actAllKinds || actKindHacash) {
+
+			from = tarAct.FromAddress.ToReadable()
+			to = tarAct.ToAddress.ToReadable()
+			coin = "hacash"
+			value = tarAct.Amount.ToUnitString(unitName)
+
+		} else if tarAct, ok := act.(*actions.Action_8_SimpleSatoshiTransfer); ok && (actAllKinds || actKindSatoshi) {
+
+			from = mainAddress
+			to = tarAct.ToAddress.ToReadable()
+			coin = "satoshi"
+			value = tarAct.Amount.ToString()
+
+		} else if tarAct, ok := act.(*actions.Action_28_FromSatoshiTransfer); ok && (actAllKinds || actKindSatoshi) {
+
+			from = tarAct.FromAddress.ToReadable()
+			to = mainAddress
+			coin = "satoshi"
+			value = tarAct.Amount.ToString()
+
+		} else if tarAct, ok := act.(*actions.Action_5_DiamondTransfer); ok && (actAllKinds || actKindDiamond) {
+
+			from = mainAddress
+			to = tarAct.ToAddress.ToReadable()
+			coin = "diamond"
+			value = string(tarAct.Diamond)
+
+		} else if tarAct, ok := act.(*actions.Action_6_OutfeeQuantityDiamondTransfer); ok && (actAllKinds || actKindDiamond) {
+
+			from = tarAct.FromAddress.ToReadable()
+			to = tarAct.ToAddress.ToReadable()
+			coin = "diamond"
+			value = tarAct.DiamondList.SerializeHACDlistToCommaSplitString()
+
+		} else {
+			continue
+		}
+
+		// nothing
+		if len(coin) == 0 {
+			continue
+		}
+
+		// check from or to
+		if len(f_form) > 0 && f_form != from {
+			continue
+		}
+		if len(f_to) > 0 && f_to != from {
+			continue
+		}
+
+		// set value
+		item["from"] = from
+		item["to"] = to
+		item[coin] = value
+
+		// ok
+		//item["ai"] = i
+		effectiveActions = append(effectiveActions, item)
+	}
+
+	retdata["transfers"] = effectiveActions
+
+	// return
+	ResponseData(w, retdata)
+	return
+}
