@@ -193,7 +193,6 @@ func (api *DeprecatedApiService) getTransactionIntro(params map[string]string) m
 		} else if kind == 5 {
 			acc := act.(*actions.Action_5_DiamondTransfer)
 			actstr += fmt.Sprintf(`,"count":1,"names":"%s","from":"%s","to":"%s"`,
-				acc.ToAddress.ToReadable(),
 				acc.Diamond,
 				trsres.GetAddress().ToReadable(),
 				acc.ToAddress.ToReadable(),
