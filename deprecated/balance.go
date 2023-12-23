@@ -6,13 +6,18 @@ import (
 	"strings"
 )
 
-//////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////
 func (api *DeprecatedApiService) getBalance(params map[string]string) map[string]string {
 	result := make(map[string]string)
 	addrstr, ok1 := params["address"]
 	if !ok1 {
 		result["err"] = "address must"
 		return result
+	}
+	_, ok2 := params["unitmei"]
+	unitmei := false
+	if ok2 {
+		unitmei = true
 	}
 
 	state := api.blockchain.GetChainEngineKernel().StateRead()
@@ -46,7 +51,7 @@ func (api *DeprecatedApiService) getBalance(params map[string]string) map[string
 			continue
 		}
 		// hacash
-		amtstrings += finditem.Hacash.ToFinString() + "|"
+		amtstrings += finditem.Hacash.ToMeiOrFinString(unitmei) + "|"
 		totalamt, _ = totalamt.Add(&finditem.Hacash)
 		// satoshi
 		satoshi += uint64(finditem.Satoshi)
@@ -56,9 +61,10 @@ func (api *DeprecatedApiService) getBalance(params map[string]string) map[string
 		diamondstrs += strconv.FormatUint(uint64(finditem.Diamond), 10) + "|"
 	}
 
+	//fmt.Println(unitmei, totalamt.ToMeiOrFinString(unitmei))
 	// 0
 	result["amounts"] = strings.TrimRight(amtstrings, "|")
-	result["total"] = totalamt.ToFinString()
+	result["total"] = totalamt.ToMeiOrFinString(unitmei)
 	result["satoshis"] = strings.TrimRight(satoshistrs, "|")
 	result["satoshi"] = strconv.FormatUint(satoshi, 10)
 	result["diamonds"] = strings.TrimRight(diamondstrs, "|")
