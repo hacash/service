@@ -16,16 +16,16 @@ func RenderTotalSupplyObject(state interfaces.ChainStateOperationRead, totalsupp
 
 	// Status statistics
 	appendToUint64(object, objstr, "lastest_block_height", state.GetPendingBlockHeight()-1, ifs)
-	appendToUint64(object, objstr, "minted_diamond", uint64(totalsupply.Get(stores.TotalSupplyStoreTypeOfDiamond)), ifs)
-	appendToUint64(object, objstr, "transferred_bitcoin", uint64(totalsupply.Get(stores.TotalSupplyStoreTypeOfTransferBitcoin)), ifs)
+	appendToUint64(object, objstr, "minted_diamond", totalsupply.GetUint(stores.TotalSupplyStoreTypeOfDiamond), ifs)
+	appendToUint64(object, objstr, "transferred_bitcoin", totalsupply.GetUint(stores.TotalSupplyStoreTypeOfTransferBitcoin), ifs)
 	// Diamond system loan, real-time mortgage of diamond quantity
-	appendToUint64(object, objstr, "syslend_diamond_in_pledge", uint64(totalsupply.Get(stores.TotalSupplyStoreTypeOfSystemLendingDiamondCurrentMortgageCount)), ifs)
+	appendToUint64(object, objstr, "syslend_diamond_in_pledge", totalsupply.GetUint(stores.TotalSupplyStoreTypeOfSystemLendingDiamondCurrentMortgageCount), ifs)
 	// Bitcoin system lending, the number of bitcoins in real-time mortgage (the statistical data is the number of copies, one copy = 0.01btc), converted into the number of bitcoins
-	appendToFloat64(object, objstr, "syslend_bitcoin_in_pledge", totalsupply.Get(stores.TotalSupplyStoreTypeOfSystemLendingBitcoinPortionCurrentMortgageCount)/100, ifs)
+	appendToFloat64(object, objstr, "syslend_bitcoin_in_pledge", float64(totalsupply.GetUint(stores.TotalSupplyStoreTypeOfSystemLendingBitcoinPortionCurrentMortgageCount))/100.0, ifs)
 	// Daily accumulation of inter user loan mortgage diamond quantity
-	appendToUint64(object, objstr, "usrlend_mortgage_diamond_count", uint64(totalsupply.Get(stores.TotalSupplyStoreTypeOfUsersLendingCumulationDiamond)), ifs)
+	appendToUint64(object, objstr, "usrlend_mortgage_diamond_count", totalsupply.GetUint(stores.TotalSupplyStoreTypeOfUsersLendingCumulationDiamond), ifs)
 	// Daily accumulation of inter user loan mortgage bitcoin quantity
-	appendToUint64(object, objstr, "usrlend_mortgage_bitcoin_count", uint64(totalsupply.Get(stores.TotalSupplyStoreTypeOfUsersLendingCumulationBitcoin)), ifs)
+	appendToUint64(object, objstr, "usrlend_mortgage_bitcoin_count", totalsupply.GetUint(stores.TotalSupplyStoreTypeOfUsersLendingCumulationBitcoin), ifs)
 	// HAC flow accumulation of inter user loan and borrowing
 	appendToFloat64(object, objstr, "usrlend_loan_hac_count", totalsupply.Get(stores.TotalSupplyStoreTypeOfUsersLendingCumulationHacAmount), ifs)
 
@@ -51,9 +51,11 @@ func RenderTotalSupplyObject(state interfaces.ChainStateOperationRead, totalsupp
 
 	// Statistical HAC destruction
 	burned_fee,
+		burned_hacd_bid,
 		syslend_bitcoin_burning_interest,
 		usrlend_burning_interest :=
-		totalsupply.Get(stores.TotalSupplyStoreTypeOfBurningFee),
+		totalsupply.Get(stores.TotalSupplyStoreTypeOfBurningFeeTotal),
+		totalsupply.GetUint(stores.TotalSupplyStoreTypeOfDiamondBidBurningZhu)/100000000,
 		totalsupply.Get(stores.TotalSupplyStoreTypeOfSystemLendingBitcoinPortionBurningInterestHacAmount), // Bitcoin system loan destruction interest
 		totalsupply.Get(stores.TotalSupplyStoreTypeOfUsersLendingBurningOnePercentInterestHacAmount) // User loan destroyed 1% interest
 
@@ -68,6 +70,7 @@ func RenderTotalSupplyObject(state interfaces.ChainStateOperationRead, totalsupp
 
 	// Destruction
 	appendToFloat64(object, objstr, "burned_fee", burned_fee, ifs)
+	appendToUint64(object, objstr, "burned_hacd_bid", burned_hacd_bid, ifs)
 	appendToFloat64(object, objstr, "syslend_bitcoin_burning_interest", syslend_bitcoin_burning_interest, ifs)
 	appendToFloat64(object, objstr, "usrlend_burning_interest", usrlend_burning_interest, ifs)
 
@@ -86,7 +89,7 @@ func RenderTotalSupplyObject(state interfaces.ChainStateOperationRead, totalsupp
 	// Statistics
 	// HAC in channel chain
 	located_in_channel := totalsupply.Get(stores.TotalSupplyStoreTypeOfLocatedHACInChannel)
-	channel_of_opening := totalsupply.Get(stores.TotalSupplyStoreTypeOfChannelOfOpening)
+	channel_of_opening := totalsupply.GetUint(stores.TotalSupplyStoreTypeOfChannelOfOpening)
 	if located_in_channel < 0.00000001 {
 		located_in_channel = 0
 	}
