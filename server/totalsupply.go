@@ -54,7 +54,7 @@ func RenderTotalSupplyObject(state interfaces.ChainStateOperationRead, totalsupp
 		burned_hacd_bid,
 		syslend_bitcoin_burning_interest,
 		usrlend_burning_interest :=
-		totalsupply.Get(stores.TotalSupplyStoreTypeOfBurningFeeTotal),
+		totalsupply.Get(stores.TotalSupplyStoreTypeOfBurningTotal),
 		totalsupply.GetUint(stores.TotalSupplyStoreTypeOfDiamondBidBurningZhu)/100000000,
 		totalsupply.Get(stores.TotalSupplyStoreTypeOfSystemLendingBitcoinPortionBurningInterestHacAmount), // Bitcoin system loan destruction interest
 		totalsupply.Get(stores.TotalSupplyStoreTypeOfUsersLendingBurningOnePercentInterestHacAmount) // User loan destroyed 1% interest
