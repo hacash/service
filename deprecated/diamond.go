@@ -130,9 +130,9 @@ func (api *DeprecatedApiService) getDiamond(params map[string]string) map[string
 
 	dmstr = string(store.Diamond)
 	// get current belong
-	sto2, _ := state.Diamond(fields.DiamondName(dmstr))
-	if sto2 != nil {
-		result["address"] = sto2.Address.ToReadable()
+	diaobj, _ := state.Diamond(fields.DiamondName(dmstr))
+	if diaobj != nil {
+		result["address"] = diaobj.Address.ToReadable()
 	} else {
 		result["address"] = store.MinerAddress.ToReadable()
 	}
@@ -156,7 +156,19 @@ func (api *DeprecatedApiService) getDiamond(params map[string]string) map[string
 	}
 	result["life_gene"] = store.LifeGene.ToHex()
 	result["visual_gene"] = store.GetVisualGene().ToHex()
+	var englist = diaobj.EngravedContents.Lists
+	var engary = make([]string, len(englist))
+	for i := 0; i < len(englist); i++ {
+		str := englist[i].Str
+		if fields.IsValidVisibleString(str) {
+			engary[i] = str
+		} else {
+			engary[i] = "0x" + hex.EncodeToString([]byte(str))
+		}
+	}
+	result["inscriptions"] = strings.Join(engary, "@#$")
 
+	// ok
 	return result
 }
 
