@@ -50,7 +50,7 @@ func RenderTotalSupplyObject(state interfaces.ChainStateOperationRead, totalsupp
 		totalsupply.Get(stores.TotalSupplyStoreTypeOfSystemLendingBitcoinPortionCumulationRansomHacAmount) // Cumulative redemption of debit and credit in bitcoin system
 
 	// Statistical HAC destruction
-	burned_fee,
+	burned_total,
 		burned_hacd_bid,
 		syslend_bitcoin_burning_interest,
 		usrlend_burning_interest :=
@@ -69,15 +69,15 @@ func RenderTotalSupplyObject(state interfaces.ChainStateOperationRead, totalsupp
 	appendToFloat64(object, objstr, "syslend_bitcoin_repay_hac_count", syslend_bitcoin_repay_hac_count, ifs) // HAC accumulation of debit and credit redemption in bitcoin system
 
 	// Destruction
-	appendToFloat64(object, objstr, "burned_fee", burned_fee, ifs)
+	appendToFloat64(object, objstr, "burned_total", burned_total, ifs)
 	appendToUint64(object, objstr, "burned_hacd_bid", burned_hacd_bid, ifs)
 	appendToUint64(object, objstr, "hacd_inscription", totalsupply.GetUint(stores.TotalSupplyStoreTypeOfDiamondEngravedOperateCount), ifs)
 	appendToFloat64(object, objstr, "syslend_bitcoin_burning_interest", syslend_bitcoin_burning_interest, ifs)
 	appendToFloat64(object, objstr, "usrlend_burning_interest", usrlend_burning_interest, ifs)
 
 	// Calculate real-time circulation
-	totalAddAmountNum := block_reward + channel_interest + btcmove_subsidy                        // 总增发
-	totalSubAmountNum := burned_fee + syslend_bitcoin_burning_interest + usrlend_burning_interest // 总销毁
+	totalAddAmountNum := block_reward + channel_interest + btcmove_subsidy                          // 总增发
+	totalSubAmountNum := burned_total + syslend_bitcoin_burning_interest + usrlend_burning_interest // 总销毁
 
 	// Loan related real-time Circulation Statistics
 	totalAddAmountNum += syslend_diamond_loan_hac_count + syslend_bitcoin_loan_hac_count
