@@ -71,6 +71,7 @@ func RenderTotalSupplyObject(state interfaces.ChainStateOperationRead, totalsupp
 	// Destruction
 	appendToFloat64(object, objstr, "burned_fee", burned_fee, ifs)
 	appendToUint64(object, objstr, "burned_hacd_bid", burned_hacd_bid, ifs)
+	appendToUint64(object, objstr, "hacd_inscription", totalsupply.GetUint(stores.TotalSupplyStoreTypeOfDiamondEngravedOperateCount), ifs)
 	appendToFloat64(object, objstr, "syslend_bitcoin_burning_interest", syslend_bitcoin_burning_interest, ifs)
 	appendToFloat64(object, objstr, "usrlend_burning_interest", usrlend_burning_interest, ifs)
 
