@@ -183,12 +183,16 @@ func (api *DeprecatedApiService) getDiamondVisualGeneList(params map[string]stri
 	if len(limit) == 0 {
 		limit = "10"
 	}
+	cprs, is_compress := params["compress"]
+	if len(cprs) > 0 {
+		is_compress = true
+	}
 	var limit_num uint64 = 10
 	if lmt, err := strconv.ParseUint(limit, 10, 0); err == nil {
 		limit_num = lmt
 	}
-	if limit_num > 50 {
-		limit_num = 50 // Up to 50
+	if limit_num > 200 {
+		limit_num = 200 // Up to 200
 	}
 
 	jsondata := `{"list":[`
@@ -207,6 +211,16 @@ func (api *DeprecatedApiService) getDiamondVisualGeneList(params map[string]stri
 				store.GetVisualGene().ToHex(),
 				store.LifeGene.ToHex(),
 			))
+			return
+		}
+		if is_compress {
+			dtlist = append(dtlist, fmt.Sprintf(
+				`"%s,%d,%s,%s"`,
+				string(store.Diamond),
+				store.Number,
+				store.LifeGene.ToHex(),
+				store.ApproxFeeOffer.ToFinString()),
+			)
 			return
 		}
 		dtlist = append(dtlist, fmt.Sprintf(
