@@ -37,8 +37,8 @@ func (t *TransferTurnoverStatistic) AppendHAC(mei float64) {
 func (t *TransferTurnoverStatistic) AppendSAT(sat uint64) {
 	t.TrsCountSAT = fields.VarUint8(uint64(t.TrsCountSAT) + sat)
 }
-func (t *TransferTurnoverStatistic) AppendHACD(sat uint32) {
-	t.TrsCountHACD = fields.VarUint4(uint32(t.TrsCountHACD) + sat)
+func (t *TransferTurnoverStatistic) AppendHACD(hacd uint32) {
+	t.TrsCountHACD = fields.VarUint4(uint32(t.TrsCountHACD) + hacd)
 }
 
 func (t TransferTurnoverStatistic) GetHAC() float64 {

@@ -215,7 +215,7 @@ func (api *DeprecatedApiService) getDiamondVisualGeneList(params map[string]stri
 		}
 		if is_compress {
 			dtlist = append(dtlist, fmt.Sprintf(
-				`"%s,%d,%s,%s"`,
+				`"%s|%d|%s|%s"`,
 				string(store.Diamond),
 				store.Number,
 				store.LifeGene.ToHex(),
