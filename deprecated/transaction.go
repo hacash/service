@@ -279,6 +279,15 @@ func (api *DeprecatedApiService) getTransactionIntro(params map[string]string) m
 			actstr += fmt.Sprintf(`,"channel_id":"%s","assert_address":"any","bill_number"":"closed"`,
 				hex.EncodeToString(acc.ChannelId),
 			)
+		} else if kind == 32 {
+			acc := act.(*actions.Action_32_DiamondsEngraved)
+			actstr += fmt.Sprintf(`,"inscription":"%s","names":"%s"`,
+				acc.EngravedContent.ShowString(), acc.DiamondList.SerializeHACDlistToCommaSplitString(),
+			)
+		} else if kind == 33 {
+			acc := act.(*actions.Action_33_DiamondsEngravedRecovery)
+			actstr += fmt.Sprintf(`,"names":"%s"`,
+				acc.DiamondList.SerializeHACDlistToCommaSplitString())
 		}
 		actstr += "}"
 		actions_ary = append(actions_ary, actstr)
