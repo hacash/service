@@ -279,15 +279,23 @@ func (api *DeprecatedApiService) getTransactionIntro(params map[string]string) m
 			actstr += fmt.Sprintf(`,"channel_id":"%s","assert_address":"any","bill_number"":"closed"`,
 				hex.EncodeToString(acc.ChannelId),
 			)
+		} else if kind == 30 {
+			acc := act.(*actions.Action_30_SupportDistinguishForkChainID)
+			actstr += fmt.Sprintf(`,"chain_id":%d`,
+				uint64(acc.CheckChainID),
+			)
 		} else if kind == 32 {
 			acc := act.(*actions.Action_32_DiamondsEngraved)
-			actstr += fmt.Sprintf(`,"inscription":"%s","names":"%s"`,
+			actstr += fmt.Sprintf(`,"inscription":"%s","names":"%s","fee":"%s"`,
 				acc.EngravedContent.ShowString(), acc.DiamondList.SerializeHACDlistToCommaSplitString(),
+				acc.ProtocolCost.ToFinString(),
 			)
 		} else if kind == 33 {
 			acc := act.(*actions.Action_33_DiamondsEngravedRecovery)
-			actstr += fmt.Sprintf(`,"names":"%s"`,
-				acc.DiamondList.SerializeHACDlistToCommaSplitString())
+			actstr += fmt.Sprintf(`,"names":"%s","fee":"%s"`,
+				acc.DiamondList.SerializeHACDlistToCommaSplitString(),
+				acc.ProtocolCost.ToFinString(),
+			)
 		}
 		actstr += "}"
 		actions_ary = append(actions_ary, actstr)
