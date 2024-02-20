@@ -48,6 +48,7 @@ func (api *DeprecatedApiService) dealOperateHex(response http.ResponseWriter, re
 
 func (api *DeprecatedApiService) dealOperate(response http.ResponseWriter, request *http.Request) {
 	bodybytes, e1 := ioutil.ReadAll(request.Body)
+	//fmt.Println(bodybytes, e1)
 	if e1 != nil {
 		response.Write([]byte("body error"))
 		return

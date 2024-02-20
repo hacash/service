@@ -51,6 +51,7 @@ func (api *DeprecatedApiService) initRoutes() {
 
 	queryRoutes["totalsupply"] = api.totalSupply // Total supply
 	queryRoutes["totalnonemptyaccount"] = api.getTotalNonEmptyAccount
+	queryRoutes["execfee"] = api.getLatestAverageFeePurity
 
 	// dex
 	queryRoutes["dexbuycreate"] = api.dexBuyCreate     // Create a bill
@@ -84,6 +85,8 @@ func (api *DeprecatedApiService) routeOperateRequest(w http.ResponseWriter, opco
 	/////////////////////////////
 	case 1:
 		api.addTxToPool(w, value)
+	case 2:
+		api.createTxAndCheckOrCommit(w, value)
 	/////////////////////////////
 	default:
 		w.Write([]byte(fmt.Sprint("not find opcode %d", opcode)))
