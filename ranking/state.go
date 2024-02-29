@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/buger/jsonparser"
+	"../util/jsonparser"
 	"strings"
 )
 

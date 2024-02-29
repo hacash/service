@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/buger/jsonparser"
+	"../util/jsonparser"
 	"github.com/hacash/core/fields"
 	"strconv"
 	"strings"
