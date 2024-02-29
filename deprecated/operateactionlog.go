@@ -108,8 +108,8 @@ func (api *DeprecatedApiService) getAllOperateActionLogByBlockHeight(params map[
 					desstr)
 			}
 			// Bitcoin transfer and lock up
-			if 7 == kid { // Bitcoin transfer
-				act := act.(*actions.Action_7_SatoshiGenesis)
+			if 34 == kid { // Bitcoin transfer
+				act := act.(*actions.Action_34_SatoshiGenesis)
 				dataID := actions.GainLockblsIdByBtcMove(uint32(act.TransferNo))
 				desstr := fmt.Sprintf("move: %d BTC, reward: ㄜ%d:248",
 					act.BitcoinQuantity,

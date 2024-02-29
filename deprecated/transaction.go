@@ -210,7 +210,18 @@ func (api *DeprecatedApiService) getTransactionIntro(params map[string]string) m
 				acc.ToAddress.ToReadable(),
 			)
 		} else if kind == 7 {
-			acc := act.(*actions.Action_7_SatoshiGenesis)
+			acc := act.(*actions.Action_7_MultipleDiamondTransfer)
+			dmds := make([]string, len(acc.DiamondList.Diamonds))
+			for i, v := range acc.DiamondList.Diamonds {
+				dmds[i] = string(v)
+			}
+			actstr += fmt.Sprintf(`,"count":%d,"names":"%s","to":"%s"`,
+				acc.DiamondList.Count,
+				strings.Join(dmds, ","),
+				acc.ToAddress.ToReadable(),
+			)
+		} else if kind == 34 {
+			acc := act.(*actions.Action_34_SatoshiGenesis)
 			actstr += fmt.Sprintf(`,"trs_no":%d,"btc_num":%d,"hac_subsidy":%d,"address":"%s","lockbls_id":"%s"`,
 				acc.TransferNo,
 				acc.BitcoinQuantity,

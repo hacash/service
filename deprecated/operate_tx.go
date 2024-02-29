@@ -223,10 +223,46 @@ func createTransactionFromJson(kernel interfaces.ChainEngine, jsonvalue []byte) 
 			}
 			// tx append
 			act := actions.NewAction_1_SimpleToTransfer(*toadr, amt)
-			txobj.AppendAction(act)
+			txobj.AddAction(act)
 			// readability
 			appendReadability("Transfer %sHAC to %s", amt.ToMeiString(), toadr.ToReadable())
 			// ok
+		} else if kind == 6 {
+			// HACD transfer
+			var hacdstr, e = jsonparser.GetString(action, "diamonds")
+			var diamonds = fields.NewEmptyDiamondListMaxLen200()
+			e = diamonds.ParseHACDlistBySplitCommaFromString(hacdstr)
+			if e != nil {
+				parse_act_err = fmt.Errorf("Action HACD name list parse error: %s", e.Error())
+				return
+			}
+			if diamonds.Count == 0 {
+				parse_act_err = fmt.Errorf("Action HACD name empty")
+				return
+			}
+			toadr, e := jsonGetAddr(action, "to")
+			if e != nil {
+				parse_act_err = fmt.Errorf("Action address parse error: %s", e.Error())
+				return
+			}
+			var actobj interfaces.Action
+			if diamonds.Count == 1 {
+				actobj = &actions.Action_5_DiamondTransfer{
+					Diamond:   diamonds.Diamonds[0],
+					ToAddress: *toadr,
+				}
+			} else {
+				actobj = &actions.Action_6_OutfeeQuantityDiamondTransfer{
+					FromAddress: *madr,
+					ToAddress:   *toadr,
+					DiamondList: *diamonds,
+				}
+			}
+			txobj.AddAction(actobj)
+			// readability
+			appendReadability("Transfer %dHACD (%s) to %s",
+				diamonds.Count, diamonds.SerializeHACDlistToCommaSplitString(), toadr.ToReadable())
+
 		} else if kind == 32 {
 			// HACD inscription
 			var hacdstr, e = jsonparser.GetString(action, "diamonds")
@@ -236,7 +272,12 @@ func createTransactionFromJson(kernel interfaces.ChainEngine, jsonvalue []byte) 
 				parse_act_err = fmt.Errorf("Action HACD name list parse error: %s", e.Error())
 				return
 			}
+			if diamonds.Count == 0 {
+				parse_act_err = fmt.Errorf("Action HACD name empty")
+				return
+			}
 			// cost
+			//fmt.Println(state, diamonds, madr)///
 			costamt, e := actions.RequestProtocolCostForDiamondList(state, diamonds, madr)
 			if e != nil {
 				parse_act_err = fmt.Errorf("Action check HACD belong or request protocol cost error: %s", e.Error())
@@ -257,7 +298,7 @@ func createTransactionFromJson(kernel interfaces.ChainEngine, jsonvalue []byte) 
 				return
 			}
 			//
-			txobj.AppendAction(insact)
+			txobj.AddAction(insact)
 			// readability
 			readtip := fmt.Sprintf("Write HACD inscription '%s' for %s",
 				insstr, diamonds.SerializeHACDlistToCommaSplitString())

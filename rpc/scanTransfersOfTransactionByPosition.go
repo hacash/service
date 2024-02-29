@@ -149,7 +149,7 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 			item["to"] = tarAct.ToAddress.ToReadable()
 			item["hacash"] = tarAct.Amount.ToUnitString(unitName)
 
-		} else if tarAct, ok := act.(*actions.Action_7_SatoshiGenesis); ok && (actAllKinds || actKindSatoshi) {
+		} else if tarAct, ok := act.(*actions.Action_34_SatoshiGenesis); ok && (actAllKinds || actKindSatoshi) {
 
 			item["btctrsno"] = tarAct.TransferNo
 			item["owner"] = tarAct.OriginAddress.ToReadable()
@@ -179,6 +179,11 @@ func (api *RpcService) scanTransfersOfTransactionByPosition(r *http.Request, w h
 		} else if tarAct, ok := act.(*actions.Action_6_OutfeeQuantityDiamondTransfer); ok && (actAllKinds || actKindDiamond) {
 
 			item["from"] = tarAct.FromAddress.ToReadable()
+			item["to"] = tarAct.ToAddress.ToReadable()
+			item["diamonds"] = tarAct.DiamondList.SerializeHACDlistToCommaSplitString()
+
+		} else if tarAct, ok := act.(*actions.Action_7_MultipleDiamondTransfer); ok && (actAllKinds || actKindDiamond) {
+
 			item["to"] = tarAct.ToAddress.ToReadable()
 			item["diamonds"] = tarAct.DiamondList.SerializeHACDlistToCommaSplitString()
 

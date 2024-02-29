@@ -127,6 +127,14 @@ func (api *DeprecatedApiService) getAllTransferLogByBlockHeight(params map[strin
 						act_k14.ToAddress.ToReadable()+"|"+
 						fmt.Sprintf("%d HACD", act_k14.DiamondList.Count),
 				)
+			} else if 7 == act.Kind() { // Hacd batch transfer
+				fromAddr := v.GetAddress()
+				act_k7 := act.(*actions.Action_7_MultipleDiamondTransfer)
+				allTransferLogs = append(allTransferLogs,
+					fromAddr.ToReadable()+"|"+
+						act_k7.ToAddress.ToReadable()+"|"+
+						fmt.Sprintf("%d HACD", act_k7.DiamondList.Count),
+				)
 			}
 
 		}

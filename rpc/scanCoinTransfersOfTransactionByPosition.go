@@ -187,6 +187,13 @@ func (api *RpcService) scanCoinTransfersOfTransactionByPosition(r *http.Request,
 			coin = "diamond"
 			value = tarAct.DiamondList.SerializeHACDlistToCommaSplitString()
 
+		} else if tarAct, ok := act.(*actions.Action_7_MultipleDiamondTransfer); ok && (actAllKinds || actKindDiamond) {
+
+			from = mainAddress
+			to = tarAct.ToAddress.ToReadable()
+			coin = "diamond"
+			value = tarAct.DiamondList.SerializeHACDlistToCommaSplitString()
+
 		} else {
 			continue
 		}
