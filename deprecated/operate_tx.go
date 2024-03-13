@@ -229,7 +229,7 @@ func createTransactionFromJson(kernel interfaces.ChainEngine, jsonvalue []byte) 
 			// ok
 		} else if kind == 6 {
 			// HACD transfer
-			var hacdstr, e = jsonparser.GetString(action, "diamonds")
+			var hacdstr, e = jsonparser.GetString(action, "diamond")
 			var diamonds = fields.NewEmptyDiamondListMaxLen200()
 			e = diamonds.ParseHACDlistBySplitCommaFromString(hacdstr)
 			if e != nil {
@@ -265,7 +265,7 @@ func createTransactionFromJson(kernel interfaces.ChainEngine, jsonvalue []byte) 
 
 		} else if kind == 32 {
 			// HACD inscription
-			var hacdstr, e = jsonparser.GetString(action, "diamonds")
+			var hacdstr, e = jsonparser.GetString(action, "diamond")
 			var diamonds = fields.NewEmptyDiamondListMaxLen200()
 			e = diamonds.ParseHACDlistBySplitCommaFromString(hacdstr)
 			if e != nil {
