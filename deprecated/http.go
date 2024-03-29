@@ -43,7 +43,7 @@ func (api *DeprecatedApiService) dealOperateHex(response http.ResponseWriter, re
 		return
 	}
 
-	api.routeOperateRequest(response, binary.BigEndian.Uint32(bodybytes[0:4]), bodybytes[4:])
+	api.routeOperateRequest(request, response, binary.BigEndian.Uint32(bodybytes[0:4]), bodybytes[4:])
 }
 
 func (api *DeprecatedApiService) dealOperate(response http.ResponseWriter, request *http.Request) {
@@ -59,7 +59,7 @@ func (api *DeprecatedApiService) dealOperate(response http.ResponseWriter, reque
 		return
 	}
 
-	api.routeOperateRequest(response, binary.BigEndian.Uint32(bodybytes[0:4]), bodybytes[4:])
+	api.routeOperateRequest(request, response, binary.BigEndian.Uint32(bodybytes[0:4]), bodybytes[4:])
 }
 
 func parseRequestQuery(request *http.Request) map[string]string {
@@ -80,10 +80,10 @@ func (api *DeprecatedApiService) RunHttpRpcService(port int) {
 
 	mux.Handle("/websocket", websocket.Handler(api.webSocketHandler))
 
-	mux.HandleFunc("/", api.dealHome)                 //设置访问的路由
-	mux.HandleFunc("/query", api.dealQuery)           //设置访问的路由
-	mux.HandleFunc("/operate", api.dealOperate)       //设置访问的路由
-	mux.HandleFunc("/operatehex", api.dealOperateHex) //设置访问的路由
+	mux.HandleFunc("/", api.dealHome)
+	mux.HandleFunc("/query", api.dealQuery)
+	mux.HandleFunc("/operate", api.dealOperate)
+	mux.HandleFunc("/operatehex", api.dealOperateHex)
 	portstr := strconv.Itoa(port)
 
 	// Set listening port

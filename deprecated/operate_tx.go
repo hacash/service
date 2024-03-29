@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"bytes"
 	"encoding/hex"
 	"fmt"
 	"github.com/hacash/core/actions"
@@ -31,6 +32,115 @@ func (api *DeprecatedApiService) addTxToPool(w http.ResponseWriter, value []byte
 	hashnofee := tx.Hash()
 	hashnofeestr := hex.EncodeToString(hashnofee)
 	w.Write([]byte("{\"success\":\"Transaction add to MemTxPool successfully !\",\"txhash\":\"" + hashnofeestr + "\"}"))
+}
+
+/**
+ * Create a transaction by JSON and attempt to validate it and commit to blockchain if give signature
+ */
+func (api *DeprecatedApiService) checkTx(req *http.Request, w http.ResponseWriter, value []byte) {
+
+	//fmt.Println(string(value))
+	var params = parseRequestQuery(req)
+
+	sgadr, _ := params["sign_addr"]
+	var sgaddr, _ = fields.CheckReadableAddress(sgadr)
+
+	sgpubkey, _ := params["sign_pubkey"] // 33byte
+	sgdata, _ := params["sign_data"]     // 64byte
+	var sgpubkeyhex, _ = hex.DecodeString(sgpubkey)
+	var sgdatahex, _ = hex.DecodeString(sgdata)
+
+	// block chain
+	var e error
+	//var kernel = api.backend.BlockChain().GetChainEngineKernel()
+	var tx interfaces.Transaction
+	var readability []string
+
+	// get from txbody
+	tx, _, e = transactions.ParseTransaction(value, 0)
+
+	// append sign
+	if len(sgpubkeyhex) == 33 && len(sgdatahex) == 64 {
+		sgs := tx.GetSigns()
+		newsg := fields.Sign{
+			PublicKey: sgpubkeyhex,
+			Signature: sgdatahex,
+		}
+		var havesg = false
+		for i := 0; i < len(sgs); i++ {
+			if bytes.Equal(sgs[i].PublicKey, sgpubkeyhex) {
+				sgs[i] = newsg // replase
+				havesg = true
+				break
+			}
+		}
+		if !havesg {
+			sgs = append(sgs, newsg) // append
+		}
+		tx.SetSigns(sgs) // reset
+	}
+
+	// parse from hex
+	if e != nil {
+		w.Write([]byte(fmt.Sprintf(`{"err":"Check transaction error: %s"}`, e.Error())))
+		return
+	}
+
+	mainaddr := tx.GetAddress()
+	acts := tx.GetActionList()
+	for i := 0; i < len(acts); i++ {
+		var act = acts[i]
+		if a, ok := act.(*actions.Action_1_SimpleToTransfer); ok {
+			readability = append(readability, fmt.Sprintf("Transfer %sHAC from %s to %s",
+				a.Amount.ToMeiString(), mainaddr.ToReadable(), a.ToAddress.ToReadable()))
+		} else if a, ok := act.(*actions.Action_13_FromTransfer); ok {
+			readability = append(readability, fmt.Sprintf("Transfer %sHAC from %s to %s",
+				a.Amount.ToMeiString(), a.FromAddress.ToReadable(), mainaddr.ToReadable()))
+		} else if a, ok := act.(*actions.Action_14_FromToTransfer); ok {
+			readability = append(readability, fmt.Sprintf("Transfer %sHAC from %s to %s",
+				a.Amount.ToMeiString(), a.FromAddress.ToReadable(), a.ToAddress.ToReadable()))
+		} else if a, ok := act.(*actions.Action_5_DiamondTransfer); ok {
+			readability = append(readability, fmt.Sprintf("Transfer 1 HACD (%s) from %s to %s",
+				a.Diamond.Name(), mainaddr.ToReadable(), a.ToAddress.ToReadable()))
+		} else if a, ok := act.(*actions.Action_6_OutfeeQuantityDiamondTransfer); ok {
+			readability = append(readability, fmt.Sprintf("Transfer %d HACD (%s) from %s to %s",
+				a.DiamondList.Count, a.DiamondList.SerializeHACDlistToCommaSplitString(), a.FromAddress.ToReadable(), a.ToAddress.ToReadable()))
+		} else if a, ok := act.(*actions.Action_7_MultipleDiamondTransfer); ok {
+			readability = append(readability, fmt.Sprintf("Transfer %d HACD (%s) from %s to %s",
+				a.DiamondList.Count, a.DiamondList.SerializeHACDlistToCommaSplitString(), mainaddr.ToReadable(), a.ToAddress.ToReadable()))
+		} else if a, ok := act.(*actions.Action_32_DiamondsEngraved); ok {
+			readability = append(readability, fmt.Sprintf("Inscription '%s' to %d HACD (%s) by %s",
+				a.EngravedContent.ShowString(), a.DiamondList.Count, a.DiamondList.SerializeHACDlistToCommaSplitString(), mainaddr.ToReadable()))
+		} else {
+			w.Write([]byte(fmt.Sprintf(`{"err":"Unsupported action kind: %d"}`, act.Kind())))
+			return
+		}
+
+	}
+
+	txbody, _ := tx.Serialize()
+	needsigns, _ := tx.RequestSignAddresses(nil, false)
+	sgaddrs := []string{}
+	for i := 0; i < len(needsigns); i++ {
+		sgaddrs = append(sgaddrs, needsigns[i].ToReadable())
+	}
+
+	var sghx = ""
+	if sgaddr != nil {
+		if sgaddr.Equal(mainaddr) {
+			sghx = tx.HashWithFee().ToHex()
+		} else if strings.Contains(strings.Join(sgaddrs, "-"), sgadr) {
+			sghx = tx.Hash().ToHex()
+		}
+	}
+
+	// ok
+	w.Write([]byte(fmt.Sprintf(`{"sign_hash":"%s",hash":"%s","hash_with_fee":"%s","body":"%s","fee":"%s","address":"%s","need_sign_address":"["%s"]",description":["%s"]}`,
+		sghx, tx.Hash().ToHex(), tx.HashWithFee().ToHex(), hex.EncodeToString(txbody),
+		tx.GetFee().ToMeiString(), mainaddr.ToReadable(),
+		strings.Join(sgaddrs, `","`), strings.Join(readability, `","`),
+	)))
+
 }
 
 /**

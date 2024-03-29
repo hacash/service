@@ -79,7 +79,7 @@ func routeQueryRequest(action string, params map[string]string, w http.ResponseW
 	}
 }
 
-func (api *DeprecatedApiService) routeOperateRequest(w http.ResponseWriter, opcode uint32, value []byte) {
+func (api *DeprecatedApiService) routeOperateRequest(r *http.Request, w http.ResponseWriter, opcode uint32, value []byte) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	switch opcode {
 	/////////////////////////////
@@ -87,6 +87,8 @@ func (api *DeprecatedApiService) routeOperateRequest(w http.ResponseWriter, opco
 		api.addTxToPool(w, value)
 	case 2:
 		api.createTxAndCheckOrCommit(w, value)
+	case 3:
+		api.checkTx(r, w, value)
 	/////////////////////////////
 	default:
 		w.Write([]byte(fmt.Sprint("not find opcode %d", opcode)))
