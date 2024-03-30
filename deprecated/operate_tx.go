@@ -87,6 +87,9 @@ func (api *DeprecatedApiService) checkTx(req *http.Request, w http.ResponseWrite
 	}
 
 	mainaddr := tx.GetAddress()
+	readability = append(readability, fmt.Sprintf("Pay %sHAC tx fee by %s",
+		tx.GetFee().ToMeiString(), mainaddr.ToReadable()))
+
 	acts := tx.GetActionList()
 	for i := 0; i < len(acts); i++ {
 		var act = acts[i]
@@ -119,26 +122,33 @@ func (api *DeprecatedApiService) checkTx(req *http.Request, w http.ResponseWrite
 	}
 
 	txbody, _ := tx.Serialize()
+	// sign check
 	needsigns, _ := tx.RequestSignAddresses(nil, false)
-	sgaddrs := []string{}
+	sgaddrcks := []string{}
 	for i := 0; i < len(needsigns); i++ {
-		sgaddrs = append(sgaddrs, needsigns[i].ToReadable())
+		var addr = needsigns[i].ToReadable()
+		var sgck = "false"
+		if yes, _ := tx.VerifyTargetSigns([]fields.Address{needsigns[i]}); yes {
+			sgck = "true"
+		}
+		sgaddrcks = append(sgaddrcks, fmt.Sprintf(`"%s":%s`, addr, sgck))
 	}
+	var sdadrckstr = strings.Join(sgaddrcks, ",")
 
 	var sghx = ""
 	if sgaddr != nil {
 		if sgaddr.Equal(mainaddr) {
 			sghx = tx.HashWithFee().ToHex()
-		} else if strings.Contains(strings.Join(sgaddrs, "-"), sgadr) {
+		} else if strings.Contains(sdadrckstr, sgadr) {
 			sghx = tx.Hash().ToHex()
 		}
 	}
 
 	// ok
-	w.Write([]byte(fmt.Sprintf(`{"sign_hash":"%s",hash":"%s","hash_with_fee":"%s","body":"%s","fee":"%s","address":"%s","need_sign_address":"["%s"]",description":["%s"]}`,
+	w.Write([]byte(fmt.Sprintf(`{"sign_hash":"%s","hash":"%s","hash_with_fee":"%s","body":"%s","fee":"%s","address":"%s","timestamp":"%d",need_sign_address":{%s},"description":["%s"]}`,
 		sghx, tx.Hash().ToHex(), tx.HashWithFee().ToHex(), hex.EncodeToString(txbody),
-		tx.GetFee().ToMeiString(), mainaddr.ToReadable(),
-		strings.Join(sgaddrs, `","`), strings.Join(readability, `","`),
+		tx.GetFee().ToMeiString(), mainaddr.ToReadable(), tx.GetTimestamp(),
+		sdadrckstr, strings.Join(readability, `","`),
 	)))
 
 }

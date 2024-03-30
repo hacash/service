@@ -56,26 +56,38 @@ func (api *DeprecatedApiService) dexBuyCreate(params map[string]string) map[stri
 		return result
 	}
 
-	feeratiostr, ok := params["fee_ratio"]
-	if !ok {
-		result["err"] = "params fee_ratio must."
-		return result
-	}
-	feeratio, e := strconv.ParseFloat(feeratiostr, 64)
-	if e != nil {
-		result["err"] = fmt.Sprintf("fee ratio <%s> is error.", feeratiostr)
-		return result
-	}
+	var fee = fields.NewEmptyAmount()
+	feechargestr, ok := params["fee_charge"]
+	if len(feechargestr) > 0 {
+		// dex fee by set
+		fee, e = fields.NewAmountFromString(feechargestr)
+		if e != nil {
+			result["err"] = fmt.Sprintf("fee charge amount <%s> is error.", feechargestr)
+			return result
+		}
+	} else {
+		// dex fee by ratio
+		feeratiostr, ok := params["fee_ratio"]
+		if !ok {
+			result["err"] = "params fee_ratio must."
+			return result
+		}
+		feeratio, e := strconv.ParseFloat(feeratiostr, 64)
+		if e != nil {
+			result["err"] = fmt.Sprintf("fee ratio <%s> is error.", feeratiostr)
+			return result
+		}
 
-	if feeratio < 0 || feeratio >= 1 {
-		result["err"] = fmt.Sprintf("fee ratio <%s> is error.", feeratiostr)
-		return result
-	}
+		if feeratio < 0 || feeratio >= 1 {
+			result["err"] = fmt.Sprintf("fee ratio <%s> is error.", feeratiostr)
+			return result
+		}
 
-	fee, e := fields.NewAmountFromMeiUnsafe(offer.ToMei() * feeratio)
-	if e != nil {
-		result["err"] = fmt.Sprintf("fee ratio <%s> is error.", feeratiostr)
-		return result
+		fee, e = fields.NewAmountFromMeiUnsafe(offer.ToMei() * feeratio)
+		if e != nil {
+			result["err"] = fmt.Sprintf("fee ratio <%s> is error.", feeratiostr)
+			return result
+		}
 	}
 
 	txfeestr, ok := params["tx_fee"]
