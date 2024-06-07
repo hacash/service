@@ -145,7 +145,7 @@ func (api *DeprecatedApiService) checkTx(req *http.Request, w http.ResponseWrite
 	}
 
 	// ok
-	w.Write([]byte(fmt.Sprintf(`{"sign_hash":"%s","hash":"%s","hash_with_fee":"%s","body":"%s","fee":"%s","address":"%s","timestamp":"%d",need_sign_address":{%s},"description":["%s"]}`,
+	w.Write([]byte(fmt.Sprintf(`{"sign_hash":"%s","hash":"%s","hash_with_fee":"%s","body":"%s","fee":"%s","address":"%s","timestamp":%d,"need_sign_address":{%s},"description":["%s"]}`,
 		sghx, tx.Hash().ToHex(), tx.HashWithFee().ToHex(), hex.EncodeToString(txbody),
 		tx.GetFee().ToMeiString(), mainaddr.ToReadable(), tx.GetTimestamp(),
 		sdadrckstr, strings.Join(readability, `","`),

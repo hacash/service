@@ -1,8 +1,13 @@
 package rpc
 
 import (
+	"bytes"
+	"encoding/hex"
 	"fmt"
+	"github.com/hacash/core/fields"
 	"github.com/hacash/core/interfaces"
+	"github.com/hacash/core/transactions"
+	"github.com/hacashcom/core/account"
 	"strconv"
 	"strings"
 )
@@ -82,4 +87,106 @@ func getLatestAverageFeePurityData(kernel interfaces.ChainEngine, isunitmei bool
 	} else {
 		return float64(feepb)
 	}
+}
+
+///////////////////////////////
+
+// var aaaaaaaaaaaa = 0;
+func (api *DeprecatedApiService) raiseTxFee(params map[string]string) map[string]string {
+	result := make(map[string]string)
+	_, isunitmei := params["unitmei"]
+	/* // test
+	if aaaaaaaaaaaa == 0 {
+		aaaaaaaaaaaa++;
+		txbts, _ := hex.DecodeString("0200666266ef00e63c33a796b3032ce6b856f68fccf06608d9ed18f401010001000100674e11e34c472ebfba2d34528fccd8aba826f2c4f8010100010231745adae24044ff09c3541537160abb8d5d720275bbaeed0b3d035b1e8b263cff1e092d81ac2df2c82ae50909d0222af6fc9695d9e2aabf68084cc8b6fb0ea77f3a2abc83ae77dde8cad006e287bfb30b8c5cf2eb98dea80bb478cfbb8aa1610000")
+		tx1, _, _ := transactions.ParseTransaction(txbts, 0)
+		fmt.Println( api.txpool.AddTx(tx1) )
+		sg1 := tx1.GetSigns()[0]
+		fmt.Println( hex.EncodeToString(sg1.PublicKey), hex.EncodeToString(sg1.Signature),  )
+	} */
+	// txhash
+	txhashstr, _ := params["hash"]
+	if len(txhashstr) != 64 {
+		result["err"] = "params txhash format error."
+		return result
+	}
+	txhash, _ := hex.DecodeString(txhashstr)
+	if len(txhash) != 32 {
+		result["err"] = "params txhash format error."
+		return result
+	}
+
+	// load from txpool
+	//fmt.Println(hex.EncodeToString(txhash))
+	txpr, ok := api.txpool.CheckTxExistByHash(txhash)
+	//fmt.Println(txpr, ok)
+	if !ok || txpr == nil {
+		result["err"] = "tx not find."
+		return result
+	}
+	tx := txpr.Clone()
+
+	feestr, _ := params["fee"]
+	fee, _ := fields.NewAmountFromString(feestr)
+	if fee == nil {
+		result["err"] = "fee format error."
+		return result
+	}
+	if !fee.MoreThan(tx.GetFee()) {
+		result["err"] = fmt.Sprintf("reset fee must more than %s.",
+			tx.GetFee().ToMeiOrFinString(isunitmei))
+		return result
+	}
+
+	// ok change the fee
+	tx.SetFee(fee)
+	tx.ClearHash()
+	hxwf := tx.HashWithFee()
+
+	// if set sign
+	isaddtxpool := false
+	publickey, _ := hex.DecodeString(params["publickey"])
+	signature, _ := hex.DecodeString(params["signature"])
+	if len(publickey) == 33 && len(signature) == 64 {
+		addr := account.NewAddressFromPublicKeyV0(publickey)
+		if tx.GetAddress().NotEqual(addr) {
+			result["err"] = fmt.Sprintf("tx main addr %s not match", tx.GetAddress().ToReadable())
+			return result
+		}
+		signs := tx.GetSigns()
+		for i := 0; i < len(signs); i++ {
+			var li = signs[i]
+			pubk, _ := li.PublicKey.Serialize()
+			if bytes.Equal(pubk, publickey) {
+				isaddtxpool = true
+				signs[i] = fields.Sign{
+					PublicKey: publickey,
+					Signature: signature,
+				}
+				tx.SetSigns(signs) // update
+				break
+			}
+		}
+	}
+	// add to the tx pool
+	if isaddtxpool {
+		ok, e := tx.VerifyAllNeedSigns()
+		if !ok || e != nil {
+			result["err"] = fmt.Sprintf("verify sign error: %s", e.Error())
+			return result
+		}
+		e = api.txpool.AddTx(tx)
+		//fmt.Println("-----------------",e)
+		if e != nil {
+			result["err"] = fmt.Sprintf("add tx to txpool error: %s", e.Error())
+			return result
+		}
+	}
+
+	// ok
+	result["fee"] = tx.GetFee().ToMeiOrFinString(isunitmei)
+	result["hash_with_fee"] = hex.EncodeToString(hxwf)
+	result["hash"] = hex.EncodeToString(txhash)
+	result["main_addr"] = tx.GetAddress().ToReadable()
+	return result
 }

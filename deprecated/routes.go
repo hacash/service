@@ -52,6 +52,7 @@ func (api *DeprecatedApiService) initRoutes() {
 	queryRoutes["totalsupply"] = api.totalSupply // Total supply
 	queryRoutes["totalnonemptyaccount"] = api.getTotalNonEmptyAccount
 	queryRoutes["execfee"] = api.getLatestAverageFeePurity
+	queryRoutes["raisetxfee"] = api.raiseTxFee
 
 	// dex
 	queryRoutes["dexbuycreate"] = api.dexBuyCreate     // Create a bill
