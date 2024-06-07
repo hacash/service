@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/hacash/core/fields"
 	"github.com/hacash/core/interfaces"
-	"github.com/hacash/core/transactions"
 	"github.com/hacashcom/core/account"
 	"strconv"
 	"strings"
