@@ -1,6 +1,8 @@
 package rpc
 
 import (
+	"encoding/hex"
+	"fmt"
 	"github.com/hacash/core/blocks"
 	"github.com/hacash/mint"
 	"github.com/hacash/mint/difficulty"
@@ -16,7 +18,9 @@ func (api *DeprecatedApiService) hashRate(params map[string]string) map[string]s
 	}
 
 	curheight := lastest.GetHeight()
-	targetHashWorth := difficulty.CalculateDifficultyWorthByHeight(curheight, lastest.GetDifficulty())
+	targetDiffNum := lastest.GetDifficulty()
+	targetHash := difficulty.Uint32ToHash(curheight, targetDiffNum)
+	targetHashWorth := difficulty.CalculateHashWorthByHeight(curheight, targetHash)
 
 	// Current real-time hash rate: time spent on 48 blocks in 4 hours
 	curCalcBlockNum := int64(48)
@@ -47,6 +51,8 @@ func (api *DeprecatedApiService) hashRate(params map[string]string) map[string]s
 	targetHashRate := new(big.Int).Div(targetHashWorth, new(big.Int).SetUint64(uint64(mint.EachBlockRequiredTargetTime)))
 	result["target_hashrate"] = targetHashRate.String()
 	result["target_show"] = difficulty.ConvertPowPowerToShowFormat(targetHashRate)
+	result["target_difficulty"] = fmt.Sprintf("%d", targetDiffNum)
+	result["target_hash"] = hex.EncodeToString(targetHash)
 
 	// return
 	return result
