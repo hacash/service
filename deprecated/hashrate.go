@@ -19,7 +19,7 @@ func (api *DeprecatedApiService) hashRate(params map[string]string) map[string]s
 
 	curheight := lastest.GetHeight()
 	targetDiffNum := lastest.GetDifficulty()
-	targetHash := difficulty.Uint32ToHash(curheight, targetDiffNum)
+	targetHash := difficulty.DifficultyUint32ToHashForAntimatter(targetDiffNum)
 	targetHashWorth := difficulty.CalculateHashWorthByHeight(curheight, targetHash)
 
 	// Current real-time hash rate: time spent on 48 blocks in 4 hours

@@ -41,6 +41,7 @@ func (api *DeprecatedApiService) initRoutes() {
 	queryRoutes["changeblockreferheight"] = api.changeBlockReferHeight // Change block height pointer
 	queryRoutes["trsintro"] = api.getTransactionIntro                  // Query transaction introduction
 	queryRoutes["recentblocks"] = api.getRecentArrivedBlockList        // Query recent arrived blocks
+	queryRoutes["minermsgstats"] = api.getBlockMinerMsgStatistics
 
 	queryRoutes["getalltransferlogbyblockheight"] = api.getAllTransferLogByBlockHeight           // Scan the block to obtain all transfer information
 	queryRoutes["getalloperateactionlogbyblockheight"] = api.getAllOperateActionLogByBlockHeight // Scan the block to obtain operation logs other than transfer

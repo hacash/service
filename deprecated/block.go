@@ -307,3 +307,71 @@ func (api *DeprecatedApiService) getBlockAbstractList(params map[string]string) 
 	result["jsondata"] = `{"datas":[` + strings.Join(jsondata, ",") + `]}`
 	return result
 }
+
+// get miner message
+func (api *DeprecatedApiService) getBlockMinerMsgStatistics(params map[string]string) map[string]string {
+	result := make(map[string]string)
+
+	last, _ := params["last_height"]
+	step, _ := params["step_num"]
+	limit, _ := params["limit"]
+	last_hei, _ := strconv.ParseUint(last, 10, 0)
+	if last_hei == 0 {
+		result["err"] = "last_height param error"
+		return result
+	}
+	step_num, _ := strconv.ParseUint(step, 10, 0)
+	if step_num == 0 {
+		step_num = 1
+	}
+	limit_num, _ := strconv.ParseUint(limit, 10, 0)
+	if limit_num == 0 {
+		limit_num = 1
+	}
+
+	store := api.blockchain.GetChainEngineKernel().StateRead().BlockStoreRead()
+
+	coinbase_start_pos := uint32(blocks.BlockHeadSize + blocks.BlockMetaSizeV1)
+	coinbase_head_len := uint32(1 + 21 + 3 + 16 + 1)
+
+	var minermsgary = []string{}
+
+	var chei = last_hei
+	for i := uint64(0); i < limit_num; i++ {
+
+		blkhash, blkbytes, e := store.ReadBlockBytesByHeight(chei)
+		if e != nil {
+			result["err"] = e.Error()
+			return result
+		}
+		if blkhash == nil || blkbytes == nil {
+			result["err"] = "block height not find. " + fmt.Sprintf("", coinbase_head_len)
+			return result
+		}
+		/*
+			blkhead, _, e2 := blocks.ParseExcludeTransactions(blkbytes, 0)
+			if e2 != nil {
+				result["err"] = e2.Error()
+				return result
+			}
+		*/
+		// Analyze miner information
+		cbtx, _, e := transactions.ParseTransaction(blkbytes, coinbase_start_pos)
+		if e != nil {
+			result["err"] = e.Error()
+			return result
+		}
+		// return
+		msg := cbtx.GetMessage().ValueShow()
+		minermsgary = append(minermsgary, fmt.Sprintf(
+			`{"hei":%d,"msg":"%s","adr":"%s"}`,
+			chei, msg, cbtx.GetAddress().ToReadable(),
+		))
+
+		chei -= step_num
+	}
+
+	result["jsondata"] = `{"datas":[` + strings.Join(minermsgary, ",") + `]}`
+	return result
+
+}
